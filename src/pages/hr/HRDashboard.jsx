@@ -24,35 +24,50 @@ import {
   CalendarCheck
 } from 'lucide-react';
 import { cn } from '../../utils/cn';
+import { useHR } from '../../context/HRContext';
+import { useNavigate } from 'react-router-dom';
 
 const HRDashboard = () => {
+  const { jobs, candidates, interviews, showToast } = useHR();
+  const navigate = useNavigate();
+  const [searchTerm, setSearchTerm] = React.useState('');
+  // Dynamic Calculation
+  const openJobsCount = jobs.filter(j => j.status === 'Published').length;
+  const newApplicants = candidates.filter(c => new Date(c.date).getTime() > Date.now() - 7 * 24 * 60 * 60 * 1000).length;
+  const todayInterviewsCount = interviews.filter(i => i.status === 'Scheduled').length;
+
   const stats = [
-    { label: 'Open Jobs', value: '18', trend: '+4 new this week', icon: Briefcase, color: 'blue', bg: 'bg-blue-50', iconColor: 'text-blue-600', trendColor: 'text-blue-500' },
-    { label: 'New Applicants', value: '126', trend: '+22 since yesterday', icon: Users, color: 'purple', bg: 'bg-purple-50', iconColor: 'text-purple-600', trendColor: 'text-purple-500' },
-    { label: 'Interviews Today', value: '9', trend: '3 starting in 1 hour', icon: CalendarCheck, color: 'green', bg: 'bg-emerald-50', iconColor: 'text-emerald-600', trendColor: 'text-emerald-500' },
-    { label: 'Hires This Month', value: '7', trend: '+2 vs last month', icon: BadgeCheck, color: 'orange', bg: 'bg-orange-50', iconColor: 'text-orange-600', trendColor: 'text-orange-500' },
+    { label: 'Open Jobs', value: openJobsCount, trend: `+${jobs.reduce((a,b)=>a+(b.new||0),0)} new this week`, icon: Briefcase, color: 'blue', bg: 'bg-blue-50', iconColor: 'text-blue-600', trendColor: 'text-blue-500' },
+    { label: 'New Applicants', value: candidates.length, trend: `+${newApplicants} since last week`, icon: Users, color: 'purple', bg: 'bg-purple-50', iconColor: 'text-purple-600', trendColor: 'text-purple-500' },
+    { label: 'Interviews Today', value: todayInterviewsCount, trend: '2 starting soon', icon: CalendarCheck, color: 'green', bg: 'bg-emerald-50', iconColor: 'text-emerald-600', trendColor: 'text-emerald-500' },
+    { label: 'Hires This Month', value: candidates.filter(c=>c.stage==='Hired').length, trend: '+2 vs last month', icon: BadgeCheck, color: 'orange', bg: 'bg-orange-50', iconColor: 'text-orange-600', trendColor: 'text-orange-500' },
   ];
 
   const funnelSteps = [
-    { label: 'Applied', count: 420 },
-    { label: 'Screening', count: 184 },
-    { label: 'Shortlisted', count: 86 },
-    { label: 'Interview', count: 32 },
-    { label: 'Offer', count: 12 },
-    { label: 'Hired', count: 7 },
+    { label: 'Applied', count: candidates.filter(c => c.stage === 'Applied').length },
+    { label: 'Screening', count: candidates.filter(c => c.stage === 'Screening').length },
+    { label: 'Shortlisted', count: candidates.filter(c => c.stage === 'Shortlisted').length },
+    { label: 'Interview', count: candidates.filter(c => c.stage === 'Interview').length },
+    { label: 'Offer', count: candidates.filter(c => c.stage === 'Offer').length },
+    { label: 'Hired', count: candidates.filter(c => c.stage === 'Hired').length },
   ];
 
-  const recentApplicants = [
-    { name: 'Alice Cooper', role: 'Product Designer', exp: '4 Years', match: 94, status: 'Interview', img: 'https://i.pravatar.cc/150?u=alice' },
-    { name: 'Bob Marley', role: 'Software Engineer', exp: '6 Years', match: 88, status: 'Screening', img: 'https://i.pravatar.cc/150?u=bob' },
-    { name: 'Charlie Put', role: 'DevOps Lead', exp: '8 Years', match: 91, status: 'Shortlisted', img: 'https://i.pravatar.cc/150?u=charlie' },
-    { name: 'Diana Ross', role: 'Marketing Mgr', exp: '5 Years', match: 82, status: 'Applied', img: 'https://i.pravatar.cc/150?u=diana' },
-  ];
+  const recentApplicants = candidates
+    .filter(c => c.name.toLowerCase().includes(searchTerm.toLowerCase()) || c.role.toLowerCase().includes(searchTerm.toLowerCase()))
+    .slice(0, 4)
+    .map(c => ({
+      ...c,
+      exp: '5 Years', // mock
+      img: `https://ui-avatars.com/api/?name=${encodeURIComponent(c.name)}&background=random`
+    }));
 
-  const todaysInterviews = [
-    { name: 'John Wick', role: 'Security Analyst', time: '10:30 AM', interviewer: 'Sarah Connor', img: 'https://i.pravatar.cc/150?u=john' },
-    { name: 'Lara Croft', role: 'Archaeology Lead', time: '02:00 PM', interviewer: 'Indy Jones', img: 'https://i.pravatar.cc/150?u=lara' },
-  ];
+  const todaysInterviews = interviews
+    .filter(i => i.status === 'Scheduled')
+    .slice(0, 2)
+    .map(i => ({
+      ...i,
+      img: `https://ui-avatars.com/api/?name=${encodeURIComponent(i.candidate)}&background=random`
+    }));
 
   return (
     <div className="space-y-8 pb-12 animate-fade-in flex flex-col min-h-screen lg:min-h-0 lg:h-auto overflow-hidden">
@@ -63,11 +78,11 @@ const HRDashboard = () => {
           <p className="text-slate-500 font-medium">Monitor recruitment pipeline and hiring performance</p>
         </div>
         <div className="flex items-center gap-3">
-          <button className="btn-secondary px-5 py-2.5 font-bold flex items-center gap-2">
+          <button onClick={() => showToast('Report Exported as CSV')} className="btn-secondary px-5 py-2.5 font-bold flex items-center gap-2">
             <Download size={18} />
             <span>Export Report</span>
           </button>
-          <button className="btn-primary px-6 py-2.5 font-bold flex items-center gap-2 shadow-lg shadow-primary-200">
+          <button onClick={() => navigate('/hr/jobs', { state: { openCreate: true } })} className="btn-primary px-6 py-2.5 font-bold flex items-center gap-2 shadow-lg shadow-primary-200">
              <Plus size={18} />
              <span>Create Job Post</span>
           </button>
@@ -112,7 +127,7 @@ const HRDashboard = () => {
                     <Filter className="text-primary-600" size={20} />
                     Hiring Pipeline
                  </h3>
-                 <button className="text-xs font-bold text-primary-600 hover:underline flex items-center gap-1">
+                 <button onClick={() => navigate('/hr/pipeline')} className="text-xs font-bold text-primary-600 hover:underline flex items-center gap-1">
                     <span>Full Funnel</span>
                     <ChevronRight size={14} />
                  </button>
@@ -141,7 +156,7 @@ const HRDashboard = () => {
                  <h3 className="text-lg font-bold text-slate-900">Recent Applicants</h3>
                  <div className="relative">
                     <Search className="absolute left-3 top-2.5 text-slate-400" size={16} />
-                    <input type="text" placeholder="Search..." className="bg-slate-50 border-none rounded-xl pl-10 pr-4 py-2 text-sm font-medium w-48 focus:ring-2 focus:ring-primary-100 transition-all" />
+                    <input type="text" placeholder="Search..." value={searchTerm} onChange={e => setSearchTerm(e.target.value)} className="bg-slate-50 border-none rounded-xl pl-10 pr-4 py-2 text-sm font-medium w-48 focus:ring-2 focus:ring-primary-100 transition-all" />
                  </div>
               </div>
               <div className="overflow-x-auto">
@@ -202,7 +217,7 @@ const HRDashboard = () => {
                  </table>
               </div>
               <div className="p-4 bg-slate-50/50 border-t border-slate-50 text-center">
-                 <button className="text-xs font-bold text-primary-600 hover:underline">View All Candidates</button>
+                 <button onClick={() => navigate('/hr/candidates')} className="text-xs font-bold text-primary-600 hover:underline">View All Candidates</button>
               </div>
            </div>
         </div>
@@ -218,12 +233,12 @@ const HRDashboard = () => {
               <h3 className="text-xs font-bold uppercase tracking-[0.2em] text-primary-300 mb-6">Quick Actions</h3>
               <div className="grid grid-cols-2 gap-4">
                  {[
-                    { label: 'Create Job', icon: Plus, bg: 'bg-primary-600' },
-                    { label: 'Add Person', icon: UserPlus, bg: 'bg-white/10' },
-                    { label: 'Schedule', icon: Calendar, bg: 'bg-white/10' },
-                    { label: 'Send Offer', icon: Send, bg: 'bg-white/10' },
+                    { label: 'Create Job', icon: Plus, bg: 'bg-primary-600', action: () => navigate('/hr/jobs', { state: { openCreate: true } }) },
+                    { label: 'Add Person', icon: UserPlus, bg: 'bg-white/10', action: () => navigate('/hr/candidates', { state: { openCreate: true } }) },
+                    { label: 'Schedule', icon: Calendar, bg: 'bg-white/10', action: () => navigate('/hr/interviews', { state: { openCreate: true } }) },
+                    { label: 'Send Offer', icon: Send, bg: 'bg-white/10', action: () => navigate('/hr/offers', { state: { openCreate: true } }) },
                  ].map((act, i) => (
-                    <button key={i} className={cn("p-4 rounded-2xl flex flex-col items-center gap-3 transition-all hover:scale-105 active:scale-95", act.bg)}>
+                    <button key={i} onClick={act.action} className={cn("p-4 rounded-2xl flex flex-col items-center gap-3 transition-all hover:scale-105 active:scale-95", act.bg)}>
                        <act.icon size={20} />
                        <span className="text-[10px] font-bold uppercase tracking-widest">{act.label}</span>
                     </button>
@@ -256,7 +271,7 @@ const HRDashboard = () => {
                              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Interviewer</p>
                              <p className="text-xs font-bold text-slate-700">{int.interviewer}</p>
                           </div>
-                          <button className="px-4 py-2 bg-white border border-slate-200 text-primary-600 rounded-xl text-[10px] font-bold hover:bg-primary-50 hover:border-primary-200 transition-all flex items-center gap-2">
+                          <button onClick={() => showToast('Opening meeting interface...')} className="px-4 py-2 bg-white border border-slate-200 text-primary-600 rounded-xl text-[10px] font-bold hover:bg-primary-50 hover:border-primary-200 transition-all flex items-center gap-2">
                              <Video size={14} />
                              <span>Join Link</span>
                           </button>
@@ -264,7 +279,7 @@ const HRDashboard = () => {
                     </div>
                  ))}
               </div>
-              <button className="w-full mt-6 py-3 bg-slate-50 text-slate-500 text-xs font-bold rounded-xl hover:bg-slate-100 transition-colors">View All Schedule</button>
+              <button onClick={() => navigate('/hr/interviews')} className="w-full mt-6 py-3 bg-slate-50 text-slate-500 text-xs font-bold rounded-xl hover:bg-slate-100 transition-colors">View All Schedule</button>
            </div>
 
            {/* Analytics Preview Card */}

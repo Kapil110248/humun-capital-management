@@ -3,6 +3,7 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import { ThemeProvider } from './hooks/ThemeContext';
 import { AuthProvider } from './hooks/useAuth';
 import { AdminProvider } from './context/AdminContext';
+import { HRProvider } from './context/HRContext';
 
 // Layout & Auth
 import LoginPage from './pages/auth/LoginPage';
@@ -94,7 +95,11 @@ function App() {
             </Route>
 
             {/* HR Routes */}
-            <Route path="/hr" element={<AppLayout />}>
+            <Route path="/hr" element={
+              <HRProvider>
+                <AppLayout />
+              </HRProvider>
+            }>
               <Route index element={<Navigate to="/hr/dashboard" replace />} />
               <Route path="dashboard" element={<HRDashboard />} />
               <Route path="jobs" element={<JobPosts />} />
