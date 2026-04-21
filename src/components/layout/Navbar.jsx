@@ -15,7 +15,6 @@ import {
 import { useAuth } from '../../hooks/useAuth';
 import { cn } from '../../utils/cn';
 import { motion, AnimatePresence } from 'framer-motion';
-import ThemeToggle from '../common/ThemeToggle';
 import { useNavigate } from 'react-router-dom';
 
 const Navbar = ({ toggleMobileSidebar }) => {

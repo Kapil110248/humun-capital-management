@@ -33,7 +33,6 @@ import {
 } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { cn } from '../utils/cn';
-import ThemeToggle from '../components/common/ThemeToggle';
 
 const LandingPage = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -83,7 +82,6 @@ const LandingPage = () => {
                 {item}
               </a>
             ))}
-            <ThemeToggle className="w-10 h-10 p-0 bg-transparent" />
           </div>
 
           <div className="hidden lg:flex items-center gap-4">
@@ -92,7 +90,6 @@ const LandingPage = () => {
           </div>
 
           <div className="flex items-center gap-2 lg:hidden">
-            <ThemeToggle className="w-10 h-10 p-0 bg-transparent" />
             <button onClick={() => setIsMenuOpen(!isMenuOpen)} className="p-2 text-slate-600">
               {isMenuOpen ? <X size={28} /> : <Menu size={28} />}
             </button>

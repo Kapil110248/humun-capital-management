@@ -18,9 +18,28 @@ const LoginPage = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
-  const [role, setRole] = useState('admin'); // Default role for demo
+  const [role, setRole] = useState('admin');
   const [loading, setLoading] = useState(false);
   const { login } = useAuth();
+
+  const demoCredentials = {
+    admin: { email: 'admin@hcm.ai', password: 'admin_password' },
+    hr: { email: 'hr.manager@hcm.ai', password: 'hr_password' },
+    manager: { email: 'dept.head@hcm.ai', password: 'manager_password' },
+    employee: { email: 'joshua.m@hcm.ai', password: 'emp_password' },
+    candidate: { email: 'alex.hiring@hcm.ai', password: 'cand_password' },
+  };
+
+  const handleRoleSelect = (roleId) => {
+    setRole(roleId);
+    setEmail(demoCredentials[roleId].email);
+    setPassword(demoCredentials[roleId].password);
+  };
+
+  // Pre-fill default role values on mount
+  React.useEffect(() => {
+    handleRoleSelect('admin');
+  }, []);
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -122,7 +141,7 @@ const LoginPage = () => {
                 <button
                   key={r.id}
                   type="button"
-                  onClick={() => setRole(r.id)}
+                  onClick={() => handleRoleSelect(r.id)}
                   className={cn(
                     "px-3 py-1.5 rounded-lg text-xs font-bold transition-all",
                     role === r.id 

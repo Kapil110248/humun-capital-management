@@ -28,11 +28,11 @@ const LogsDrawer = ({ isOpen, onClose }) => {
             className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-[110]"
           />
           <motion.div
-            initial={{ x: '100%' }}
-            animate={{ x: 0 }}
-            exit={{ x: '100%' }}
+            initial={{ opacity: 0, scale: 0.95, y: 20 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.95, y: 20 }}
             transition={{ type: 'spring', damping: 30, stiffness: 300 }}
-            className="fixed inset-y-0 right-0 w-full max-w-lg bg-slate-900 shadow-2xl z-[120] flex flex-col text-slate-300"
+            className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-lg max-h-[90vh] bg-slate-900 shadow-2xl z-[120] flex flex-col rounded-3xl overflow-hidden text-slate-300"
           >
             <div className="p-8 border-b border-white/10 flex items-center justify-between bg-slate-950/50">
               <div className="flex items-center gap-4">

@@ -69,11 +69,11 @@ const IntegrationModal = ({ isOpen, onClose, integration }) => {
             className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-[110]"
           />
           <motion.div
-            initial={{ x: '100%' }}
-            animate={{ x: 0 }}
-            exit={{ x: '100%' }}
+            initial={{ opacity: 0, scale: 0.95, y: 20 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.95, y: 20 }}
             transition={{ type: 'spring', damping: 30, stiffness: 300 }}
-            className="fixed inset-y-0 right-0 w-full max-w-xl bg-white shadow-2xl z-[120] flex flex-col"
+            className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-xl max-h-[90vh] bg-white shadow-2xl z-[120] flex flex-col rounded-3xl overflow-hidden"
           >
             <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto flex flex-col h-full">
                <div className="p-8 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
