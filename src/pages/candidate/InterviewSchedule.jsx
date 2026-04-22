@@ -16,14 +16,14 @@ const InterviewSchedule = () => {
   const [isCancelModalOpen, setIsCancelModalOpen] = useState(false);
 
   const stats = [
-    { label: 'Active Sessions', value: interviews.length, icon: CalendarIcon, color: 'text-primary-600', bg: 'bg-primary-50' },
-    { label: 'Total Audits', value: '18', icon: CheckCircle2, color: 'text-emerald-600', bg: 'bg-emerald-50' },
-    { label: 'Wait Time Avg', value: '4d', icon: Clock, color: 'text-amber-600', bg: 'bg-amber-50' },
-    { label: 'Prep Score', value: '94%', icon: Zap, color: 'text-purple-600', bg: 'bg-purple-50' },
+    { label: 'Scheduled', value: interviews.length, icon: CalendarIcon, color: 'text-primary-600', bg: 'bg-primary-50' },
+    { label: 'Completed', value: '18', icon: CheckCircle2, color: 'text-emerald-600', bg: 'bg-emerald-50' },
+    { label: 'Avg Wait Time', value: '4d', icon: Clock, color: 'text-amber-600', bg: 'bg-amber-50' },
+    { label: 'Preparation', value: '94%', icon: Zap, color: 'text-purple-600', bg: 'bg-purple-50' },
   ];
 
   const handleJoin = (link) => {
-    showToast('Initializing secure session buffer...');
+    showToast('Joining interview...');
     window.open(link, '_blank');
   };
 
@@ -45,8 +45,8 @@ const InterviewSchedule = () => {
       {/* Header Section */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-8 bg-white p-10 rounded-[3.5rem] border border-slate-50 shadow-soft">
         <div>
-          <h1 className="text-4xl font-black text-slate-900 tracking-tighter italic uppercase leading-none mb-2">ENGAGEMENT HUB</h1>
-          <p className="text-slate-400 font-bold tracking-tight uppercase text-xs">Phased Audits • <span className="text-slate-900 font-black">Live Radar active</span></p>
+          <h1 className="text-4xl font-black text-slate-900 tracking-tighter italic uppercase leading-none mb-2">UPCOMING INTERVIEWS</h1>
+          <p className="text-slate-400 font-bold tracking-tight uppercase text-xs">Interview Schedule • <span className="text-slate-900 font-black">Prepare for your next step</span></p>
         </div>
         <div className="flex items-center gap-4">
            <div className="bg-slate-50 p-2 rounded-2xl flex border border-slate-100">
@@ -54,13 +54,13 @@ const InterviewSchedule = () => {
                 onClick={() => setView('list')}
                 className={cn("px-6 py-3 text-[10px] font-black uppercase tracking-widest rounded-xl transition-all", view === 'list' ? "bg-slate-900 text-white shadow-xl" : "text-slate-400 hover:text-slate-600")}
               >
-                Registry
+                 List View
               </button>
               <button 
                 onClick={() => setView('calendar')}
                 className={cn("px-6 py-3 text-[10px] font-black uppercase tracking-widest rounded-xl transition-all", view === 'calendar' ? "bg-slate-900 text-white shadow-xl" : "text-slate-400 hover:text-slate-600")}
               >
-                Tactical
+                 Calendar View
               </button>
            </div>
            <button className="h-14 px-8 bg-primary-600 text-white rounded-2xl text-[10px] font-black uppercase tracking-[0.2em] shadow-xl shadow-primary-100 flex items-center gap-3 active:scale-95 transition-all">
@@ -101,7 +101,7 @@ const InterviewSchedule = () => {
                  <div className="relative z-10 space-y-10">
                     <div>
                        <div className="inline-block px-5 py-2 bg-white/10 backdrop-blur-xl rounded-2xl text-[9px] font-black uppercase tracking-[0.3em] mb-10 border border-white/5 italic">
-                          Target Phase Node: {next.round}
+                          Interview Round: {next.round}
                        </div>
                        <h3 className="text-5xl font-black italic tracking-tighter leading-none mb-4 uppercase">{next.role}</h3>
                        <p className="text-primary-400 font-black text-xl uppercase tracking-widest">{next.company}</p>
@@ -122,7 +122,7 @@ const InterviewSchedule = () => {
                              <User size={22} />
                           </div>
                           <div>
-                             <p className="text-[10px] font-black text-white/40 uppercase tracking-widest mb-1 italic">Audit Officer</p>
+                             <p className="text-[10px] font-black text-white/40 uppercase tracking-widest mb-1 italic">Hiring Manager</p>
                              <p className="text-xl font-black italic tracking-tight">{next.interviewer}</p>
                           </div>
                        </div>
@@ -133,7 +133,7 @@ const InterviewSchedule = () => {
                          onClick={() => handleJoin(next.link)}
                          className="flex-1 py-4 bg-white text-slate-900 rounded-[2rem] text-[10px] font-black uppercase tracking-[0.3em] shadow-2xl hover:scale-105 active:scale-95 transition-all flex items-center justify-center gap-3"
                        >
-                          <Play size={18} fill="currentColor" /> Engage Session
+                          <Play size={18} fill="currentColor" /> Join Interview
                        </button>
                     </div>
                  </div>
@@ -142,14 +142,14 @@ const InterviewSchedule = () => {
 
            <div className="card p-10 bg-white shadow-soft rounded-[3.5rem] border-none text-left">
               <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.4em] mb-10 flex items-center gap-3 italic">
-                 <ShieldCheck className="text-emerald-500" size={16} /> Pre-Audit Protocol
+                 <ShieldCheck className="text-emerald-500" size={16} /> Interview Checklist
               </h3>
               <div className="space-y-8">
                  {[
-                    { tip: 'Calibrate visual/audio hardware interface', done: true },
-                    { tip: 'Extract tactical intelligence on hiring officer', done: false },
-                    { tip: 'Formulate 3-5 strategic counter-queries', done: false },
-                    { tip: 'Review technical artifact submission history', done: true }
+                    { tip: 'Check camera and microphone settings', done: true },
+                    { tip: 'Research company and interviewers', done: false },
+                    { tip: 'Prepare questions for the team', done: false },
+                    { tip: 'Review your resume and portfolio', done: true }
                  ].map((item, i) => (
                     <div key={i} className="flex gap-5 group items-center">
                        <div className={cn("w-6 h-6 rounded-lg border-2 flex items-center justify-center transition-all", item.done ? "bg-emerald-500 border-emerald-500 text-white" : "border-slate-100 group-hover:border-primary-400")}>
@@ -160,7 +160,7 @@ const InterviewSchedule = () => {
                  ))}
               </div>
               <button className="w-full mt-12 py-4 bg-slate-50 text-slate-400 text-[9px] font-black uppercase tracking-widest rounded-2xl hover:bg-primary-50 hover:text-primary-600 transition-all">
-                 Launch Intelligence Suite
+                 Open Prep Guide
               </button>
            </div>
         </div>
@@ -171,8 +171,8 @@ const InterviewSchedule = () => {
               <div className="card p-0 border-none bg-white shadow-soft overflow-hidden rounded-[3.5rem]">
                  <div className="flex items-center justify-between p-10 border-b border-slate-50 bg-slate-50/20">
                     <div>
-                       <h2 className="text-2xl font-black text-slate-900 italic tracking-tight uppercase leading-none mb-2">ENGAGEMENT REGISTRY</h2>
-                       <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Audit history and upcoming phase activations</p>
+                       <h2 className="text-2xl font-black text-slate-900 italic tracking-tight uppercase leading-none mb-2">INTERVIEW LIST</h2>
+                       <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">History of your past and upcoming interviews</p>
                     </div>
                  </div>
                  
@@ -180,10 +180,10 @@ const InterviewSchedule = () => {
                     <table className="w-full text-left">
                        <thead>
                           <tr className="bg-slate-50/50">
-                             <th className="px-10 py-6 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Target Entity</th>
-                             <th className="px-10 py-6 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] text-center">Schedule Node</th>
-                             <th className="px-10 py-6 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] text-center">Audit Round</th>
-                             <th className="px-10 py-6 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] text-right">Phase Status</th>
+                             <th className="px-10 py-6 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Job / Company</th>
+                             <th className="px-10 py-6 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] text-center">Date / Time</th>
+                             <th className="px-10 py-6 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] text-center">Round</th>
+                             <th className="px-10 py-6 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] text-right">Status</th>
                           </tr>
                        </thead>
                        <tbody className="divide-y divide-slate-50">
@@ -253,15 +253,15 @@ const InterviewSchedule = () => {
                  ))}
                  <button onClick={() => showToast('Connecting to External API...', 'info')} className="flex flex-col items-center justify-center p-12 border-4 border-dashed border-slate-50 bg-slate-50/10 rounded-[3rem] group hover:border-primary-100 hover:bg-white transition-all text-slate-200">
                     <CalendarHeart size={48} className="mb-6 opacity-20 group-hover:opacity-100 group-hover:scale-110 transition-all text-primary-500" />
-                    <p className="text-[10px] font-black uppercase tracking-[0.4em] group-hover:text-slate-900 transition-colors">Sync External Nodes</p>
+                    <p className="text-[10px] font-black uppercase tracking-[0.4em] group-hover:text-slate-900 transition-colors">Sync Calendar</p>
                  </button>
               </div>
            )}
         </div>
       </div>
 
-      {/* Interview Tactical Audit Modal */}
-      <CenterModal isOpen={!!selectedInterview} onClose={() => setSelectedInterview(null)} title="Interview Tactical Log">
+      {/* Interview Detail Modal */}
+      <CenterModal isOpen={!!selectedInterview} onClose={() => setSelectedInterview(null)} title="Interview Details">
          {selectedInterview && (
             <div className="p-10 space-y-12 text-left">
                <div className="flex items-start gap-8 border-b border-slate-50 pb-10">
@@ -271,10 +271,10 @@ const InterviewSchedule = () => {
                   <div className="flex-1">
                     <h2 className="text-3xl font-black text-slate-900 tracking-tighter italic uppercase leading-none">{selectedInterview.role}</h2>
                     <p className="text-sm font-black text-primary-600 mt-3 uppercase tracking-widest flex items-center gap-3">
-                       {selectedInterview.company} • Phase Audit ID: {selectedInterview.id}
+                       {selectedInterview.company} • Interview ID: {selectedInterview.id}
                     </p>
                     <div className="flex gap-4 mt-6">
-                      <div className="px-4 py-1.5 bg-slate-50 rounded-xl text-[9px] font-black uppercase tracking-widest text-slate-400 whitespace-nowrap">{selectedInterview.round} Protocol</div>
+                      <div className="px-4 py-1.5 bg-slate-50 rounded-xl text-[9px] font-black uppercase tracking-widest text-slate-400 whitespace-nowrap">{selectedInterview.round} Interview</div>
                     </div>
                   </div>
                </div>
@@ -283,19 +283,19 @@ const InterviewSchedule = () => {
                   <div className="space-y-10">
                      <section>
                         <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.4em] mb-6 flex items-center gap-3 leading-none italic">
-                           <Clock size={14} className="text-primary-600" /> Operational Window
+                           <Clock size={14} className="text-primary-600" /> Interview Time
                         </h3>
                         <div className="p-8 bg-slate-50 rounded-[2.5rem] border border-slate-100 space-y-4">
                            <div className="flex justify-between items-center">
-                              <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Target Date</span>
+                              <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Date</span>
                               <span className="text-sm font-black text-slate-900 uppercase italic">{selectedInterview.date}</span>
                            </div>
                            <div className="flex justify-between items-center">
-                              <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Engagement Time</span>
+                              <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Time</span>
                               <span className="text-sm font-black text-slate-900 uppercase italic">{selectedInterview.time} {selectedInterview.timezone}</span>
                            </div>
                            <div className="flex justify-between items-center">
-                              <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Engagement Mode</span>
+                              <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Interview Mode</span>
                               <span className="text-sm font-black text-slate-900 uppercase italic flex items-center gap-2">
                                  {selectedInterview.type} {selectedInterview.type?.includes('Video') && <Video size={14} />}
                               </span>
@@ -305,13 +305,13 @@ const InterviewSchedule = () => {
 
                      <section>
                         <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.4em] mb-6 flex items-center gap-3 leading-none italic">
-                           <User size={14} className="text-primary-600" /> Evaluation Lead
+                           <User size={14} className="text-primary-600" /> Interviewer
                         </h3>
                         <div className="flex items-center gap-5 p-8 bg-white border border-slate-100 rounded-[2.5rem] shadow-soft">
                            <img src={`https://i.pravatar.cc/100?u=${selectedInterview.id}`} className="w-16 h-16 rounded-2xl shadow-lg border-2 border-white" />
                            <div>
                               <p className="text-lg font-black text-slate-900 uppercase italic tracking-tighter leading-none">{selectedInterview.interviewer || 'Hiring Lead'}</p>
-                              <p className="text-[9px] font-black text-primary-600 uppercase tracking-widest mt-2">{selectedInterview.interviewerRole || 'Senior Strategic Officer'}</p>
+                              <p className="text-[9px] font-black text-primary-600 uppercase tracking-widest mt-2">{selectedInterview.interviewerRole || 'Hiring Lead'}</p>
                            </div>
                         </div>
                      </section>
@@ -322,13 +322,10 @@ const InterviewSchedule = () => {
                         <div className="absolute top-0 right-0 p-8 opacity-10 blur-md">
                            <Zap size={140} fill="#fff" />
                         </div>
-                        <h4 className="text-[10px] font-black text-primary-400 uppercase tracking-[0.4em] mb-8 leading-none italic italic">AI Tactical Notes</h4>
-                        <div className="space-y-6 relative z-10">
-                           <p className="text-sm font-bold text-white/80 leading-relaxed italic border-l-2 border-primary-600 pl-6">
-                              "HCM.ai typically audits 'Systems Thinking' in early rounds. Prepare artifacts demonstrating architectural scalability."
-                           </p>
-                           <button className="w-full py-4 bg-white/10 hover:bg-white text-white hover:text-slate-900 rounded-2xl text-[9px] font-black uppercase tracking-[0.3em] transition-all border border-white/10">Extract Full Profile</button>
-                        </div>
+                        <p className="text-sm font-bold text-white/80 leading-relaxed italic border-l-2 border-primary-600 pl-6">
+                           "This company focuses on core values and technical proficiency. Be prepared to discuss your project history."
+                        </p>
+                        <button className="w-full py-4 bg-white/10 hover:bg-white text-white hover:text-slate-900 rounded-2xl text-[9px] font-black uppercase tracking-[0.3em] transition-all border border-white/10">View Prep Guide</button>
                      </section>
                   </div>
                </div>
@@ -338,13 +335,13 @@ const InterviewSchedule = () => {
                     onClick={() => { setIsCancelModalOpen(true); }}
                     className="flex-1 py-5 bg-rose-50 text-rose-600 border border-rose-100 rounded-3xl font-black uppercase tracking-widest text-[10px] hover:bg-rose-100 transition-all active:scale-95 flex items-center justify-center gap-3"
                   >
-                    <VideoOff size={18} /> Reschedule Session
+                    <VideoOff size={18} /> Reschedule Interview
                   </button>
                   <button 
                     onClick={() => { handleJoin(selectedInterview.link); }}
                     className="flex-2 py-5 bg-slate-900 text-white rounded-3xl font-black uppercase tracking-widest text-[10px] shadow-xl shadow-slate-200 active:scale-95 flex items-center justify-center gap-3"
                   >
-                    <Play size={18} fill="currentColor" /> Engage Protocol
+                    <Play size={18} fill="currentColor" /> Join Interview
                   </button>
                </div>
             </div>
@@ -352,18 +349,18 @@ const InterviewSchedule = () => {
       </CenterModal>
 
       {/* Reschedule Confirmation */}
-      <CenterModal isOpen={isCancelModalOpen} onClose={() => setIsCancelModalOpen(false)} title="Operational Delay Signal">
+      <CenterModal isOpen={isCancelModalOpen} onClose={() => setIsCancelModalOpen(false)} title="Reschedule Interview">
          <div className="p-10 text-center space-y-10">
             <div className="w-20 h-20 bg-rose-50 rounded-[2.5rem] flex items-center justify-center mx-auto text-rose-500 shadow-xl border border-rose-100 animate-pulse">
                <AlertCircle size={40} />
             </div>
             <div>
-               <h3 className="text-3xl font-black text-slate-900 italic tracking-tight mb-4 uppercase">Node Delay Confirmation</h3>
-               <p className="text-sm font-bold text-slate-400 uppercase tracking-[0.1em] leading-relaxed max-w-sm mx-auto">This signal will inform <span className="text-slate-900">{selectedInterview?.company}</span> about your tactical requirement to reschedule Phase {selectedInterview?.id}.</p>
+               <h3 className="text-3xl font-black text-slate-900 italic tracking-tight mb-4 uppercase">Confirm Rescheduling</h3>
+               <p className="text-sm font-bold text-slate-400 uppercase tracking-[0.1em] leading-relaxed max-w-sm mx-auto">This will notify <span className="text-slate-900">{selectedInterview?.company}</span> that you would like to reschedule your interview.</p>
             </div>
             <div className="flex gap-4 pt-4">
-               <button onClick={() => setIsCancelModalOpen(false)} className="flex-1 py-4 bg-slate-50 text-slate-400 rounded-[1.5rem] font-black uppercase tracking-widest text-[10px]">Abort Signal</button>
-               <button onClick={() => { showToast('Reschedule request sent to HQ'); setIsCancelModalOpen(false); setSelectedInterview(null); }} className="flex-1 py-4 bg-rose-600 text-white rounded-[1.5rem] font-black uppercase tracking-widest text-[10px] shadow-xl shadow-rose-200 active:scale-95">Send Delay Signal</button>
+               <button onClick={() => setIsCancelModalOpen(false)} className="flex-1 py-4 bg-slate-50 text-slate-400 rounded-[1.5rem] font-black uppercase tracking-widest text-[10px]">Cancel</button>
+               <button onClick={() => { showToast('Reschedule request sent'); setIsCancelModalOpen(false); setSelectedInterview(null); }} className="flex-1 py-4 bg-rose-600 text-white rounded-[1.5rem] font-black uppercase tracking-widest text-[10px] shadow-xl shadow-rose-200 active:scale-95">Send Request</button>
             </div>
          </div>
       </CenterModal>

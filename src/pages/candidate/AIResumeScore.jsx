@@ -17,11 +17,11 @@ const AIResumeScore = () => {
   const [score, setScore] = useState(0);
 
   const analysisSteps = [
-    "Parsing semantic structure...",
-    "Extracting competency vectors...",
-    "Cross-referencing industry benchmarks...",
-    "Calculating ATS compatibility matrix...",
-    "Finalizing strategic report..."
+    "Analyzing resume structure...",
+    "Extracting key skills and experience...",
+    "Comparing with industry standards...",
+    "Checking ATS compatibility...",
+    "Generating your resume report..."
   ];
 
   const metrics = [
@@ -70,26 +70,26 @@ const AIResumeScore = () => {
     return (
       <div className="space-y-8 animate-fade-in max-w-5xl mx-auto text-left">
         <div className="text-center space-y-4 mb-16">
-          <h1 className="text-5xl font-black text-slate-900 tracking-tighter italic uppercase leading-none">STRATEGIC AUDIT BRAIN</h1>
-          <p className="text-slate-400 font-bold tracking-widest uppercase text-xs">Deploy AI to optimize your professional dossier</p>
+          <h1 className="text-5xl font-black text-slate-900 tracking-tighter italic uppercase leading-none">AI Resume Score</h1>
+          <p className="text-slate-400 font-bold tracking-widest uppercase text-xs">Get instant feedback on your resume using AI analysis</p>
         </div>
 
         <div className="min-h-[500px] flex flex-col items-center justify-center p-16 bg-white border-2 border-dashed border-slate-100 rounded-[4rem] group hover:border-primary-100 hover:bg-slate-50 transition-all duration-700 shadow-soft">
            <div className="w-32 h-32 bg-primary-50 rounded-[3rem] flex items-center justify-center text-primary-600 mb-10 group-hover:scale-110 transition-transform duration-700 shadow-inner group-hover:rotate-6">
               <Sparkles size={64} className="animate-pulse" />
            </div>
-           <h2 className="text-3xl font-black text-slate-900 mb-4 italic tracking-tight uppercase">Unleash Competitive Metrics</h2>
+           <h2 className="text-3xl font-black text-slate-900 mb-4 italic tracking-tight uppercase">Improve Your Resume Score</h2>
            <p className="text-slate-500 font-bold mb-12 text-center max-w-md uppercase tracking-tight text-sm leading-relaxed">
-             Submit your resume registry for deep-scan analysis of ATS compatibility, keyword coverage, and strategic impact.
+             Upload your resume to analyze ATS compatibility, keyword match, formatting, and job-readiness.
            </p>
            <label className="cursor-pointer">
               <input type="file" className="hidden" onChange={handleStartAnalysis} />
               <div className="flex items-center gap-4 px-12 py-5 bg-slate-900 text-white rounded-[2rem] text-[10px] font-black uppercase tracking-[0.3em] shadow-2xl shadow-slate-200 hover:bg-black transition-all active:scale-95">
                  <Upload size={22} />
-                 <span>Upload Dossier</span>
+                 <span>Upload Resume</span>
               </div>
            </label>
-           <p className="mt-8 text-[9px] font-black text-slate-300 uppercase tracking-widest">Supports: PDF / DOCX / JSON (MAX 5MB)</p>
+           <p className="mt-8 text-[9px] font-black text-slate-300 uppercase tracking-widest">Supported: PDF, DOCX (Max 5MB)</p>
         </div>
       </div>
     );
@@ -107,7 +107,7 @@ const AIResumeScore = () => {
          </div>
          <div className="text-center space-y-4">
             <h3 className="text-2xl font-black text-slate-900 italic tracking-tight uppercase">{analysisSteps[analysisPhase]}</h3>
-            <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.4em] animate-pulse">Processing Vector: HCM_BRAIN_V4</p>
+            <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.4em] animate-pulse">Analyzing content and formatting...</p>
          </div>
       </div>
     );
@@ -118,14 +118,14 @@ const AIResumeScore = () => {
       {/* Header Section */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-8 bg-white p-10 rounded-[3.5rem] border border-slate-50 shadow-soft">
         <div>
-          <h1 className="text-4xl font-black text-slate-900 tracking-tighter italic uppercase leading-none mb-2">AUDIT PAYLOAD ANALYSIS</h1>
-          <p className="text-slate-400 font-bold tracking-tight uppercase text-xs">Artifact: <span className="text-slate-900 font-black">MASTER_CV_STRAT_2026.PDF</span></p>
+          <h1 className="text-4xl font-black text-slate-900 tracking-tighter italic uppercase leading-none mb-2">Resume Analysis Results</h1>
+          <p className="text-slate-400 font-bold tracking-tight uppercase text-xs">File: <span className="text-slate-900 font-black">RESUME_2026.PDF</span></p>
         </div>
         <div className="flex gap-4">
            <button onClick={() => { setIsUploaded(false); handleStartAnalysis(); }} className="w-14 h-14 bg-slate-50 text-slate-400 border border-slate-100 hover:text-primary-600 rounded-2xl flex items-center justify-center transition-all shadow-sm">
              <RotateCcw size={24} />
            </button>
-           <button onClick={() => { showToast('Audit artifact saved'); }} className="h-14 px-8 bg-slate-900 text-white rounded-2xl text-[10px] font-black uppercase tracking-[0.2em] shadow-xl flex items-center gap-3 active:scale-95 transition-all">
+           <button onClick={() => { showToast('Report saved successfully'); }} className="h-14 px-8 bg-slate-900 text-white rounded-2xl text-[10px] font-black uppercase tracking-[0.2em] shadow-xl flex items-center gap-3 active:scale-95 transition-all">
              <Download size={20} /> Save Report
            </button>
         </div>
@@ -137,7 +137,7 @@ const AIResumeScore = () => {
         {/* Core Score Meter */}
         <div className="lg:col-span-5 card p-12 flex flex-col items-center justify-center bg-white border-none shadow-soft relative overflow-hidden rounded-[4rem]">
           <div className="absolute top-10 left-10 text-[9px] font-black text-slate-300 uppercase tracking-[0.4em] flex items-center gap-3">
-             <Microscope size={14} className="text-primary-600" /> Competency Yield
+             <Microscope size={14} className="text-primary-600" /> Resume Strength
           </div>
           
           <div className="relative w-64 h-64 flex items-center justify-center mb-10 mt-6">
@@ -155,16 +155,16 @@ const AIResumeScore = () => {
              </svg>
              <div className="absolute inset-0 flex flex-col items-center justify-center">
                 <span className="text-7xl font-black text-slate-900 tracking-tighter italic">{score}</span>
-                <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest mt-2">Aggregate Score</span>
+                <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest mt-2">Overall Score</span>
              </div>
           </div>
 
           <div className="text-center space-y-6">
              <div className="px-6 py-2 bg-emerald-50 text-emerald-600 rounded-2xl text-[10px] font-black uppercase tracking-[0.3em] inline-block border border-emerald-100 italic">
-                Strategic Fit Protocol: ACTIVE
+                ATS Compatibility: High
              </div>
              <p className="text-sm font-bold text-slate-500 px-8 leading-relaxed italic">
-               Your dossier significantly outperforms the industry baseline of 62%. Key competency voids detected in "Leadership Scale".
+               Your resume score is significantly higher than the industry average of 62%. Some improvements could be made to "Leadership" roles.
              </p>
           </div>
         </div>
@@ -200,7 +200,7 @@ const AIResumeScore = () => {
              <div className="absolute top-0 right-0 p-8 opacity-10">
                 <AlertCircle size={120} className="text-white" />
              </div>
-             <h3 className="text-[10px] font-black text-primary-400 uppercase tracking-[0.4em] mb-10 leading-none">Strategic Optimization Required</h3>
+             <h3 className="text-[10px] font-black text-primary-400 uppercase tracking-[0.4em] mb-10 leading-none">Recommendations for Improvement</h3>
              <div className="space-y-6 relative z-10">
                 {suggestions.map((s, i) => (
                    <div key={i} className="flex items-start gap-6 p-6 bg-white/5 rounded-3xl group hover:bg-white/10 transition-all cursor-pointer border border-white/5">
@@ -208,7 +208,7 @@ const AIResumeScore = () => {
                          <s.icon size={20} />
                       </div>
                       <div>
-                         <p className={cn("text-[9px] font-black uppercase tracking-widest mb-1", s.color)}>{s.type} Warning</p>
+                         <p className={cn("text-[9px] font-black uppercase tracking-widest mb-1", s.color)}>{s.type}</p>
                          <p className="text-sm font-black text-white italic tracking-tight">{s.text}</p>
                       </div>
                    </div>
@@ -222,7 +222,7 @@ const AIResumeScore = () => {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
          <div className="card p-10 bg-white border-none shadow-soft rounded-[3rem]">
             <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.4em] mb-10 flex items-center gap-3">
-               <Target size={14} className="text-primary-600" /> Sector Benchmarking
+               <Target size={14} className="text-primary-600" /> Industry Benchmarking
             </h4>
             <div className="space-y-8">
                {[
@@ -248,14 +248,14 @@ const AIResumeScore = () => {
                <ShieldCheck size={180} />
             </div>
             <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.4em] mb-10 flex items-center gap-3">
-               <CheckCircle2 size={14} className="text-emerald-500" /> Protocol Integrity
+               <CheckCircle2 size={14} className="text-emerald-500" /> Analysis Checks
             </h4>
             <ul className="space-y-6">
                {[
-                  'Secure PII Redaction Active',
+                  'Secure Data Processing',
                   'ATS Metadata Optimization',
-                  'PDF Structural Integrity',
-                  'Semantic Keyword Mapping'
+                  'File Structural Check',
+                  'Keyword Mapping Analysis'
                ].map((item, i) => (
                   <li key={i} className="flex items-center gap-4 text-[10px] font-black text-slate-600 uppercase tracking-widest">
                      <Check size={14} className="text-emerald-500" strokeWidth={4} /> {item}
@@ -268,9 +268,9 @@ const AIResumeScore = () => {
              <div className="absolute -top-6 -right-6 p-4 opacity-20 group-hover:rotate-12 transition-transform duration-1000">
                 <Zap size={150} fill="#fff" />
              </div>
-             <p className="text-[9px] font-black text-primary-200 uppercase tracking-[0.4em] mb-6 italic leading-none">Automated Optimization</p>
-             <h4 className="text-2xl font-black italic tracking-tighter mb-10 leading-tight">Apply suggested vector fixes in one cycle.</h4>
-             <button onClick={() => { showToast('Syncing with Resume Builder...'); navigate('/candidate/resume'); }} className="w-full py-5 bg-white text-primary-600 rounded-2xl text-[10px] font-black uppercase tracking-[0.3em] shadow-2xl hover:scale-105 active:scale-95 transition-all">Launch Fix Suite</button>
+             <p className="text-[9px] font-black text-primary-200 uppercase tracking-[0.4em] mb-6 italic leading-none">Instant Improvements</p>
+             <h4 className="text-2xl font-black italic tracking-tighter mb-10 leading-tight">Apply suggested improvements to your resume now.</h4>
+             <button onClick={() => { showToast('Redirecting to Resume Builder...'); navigate('/candidate/resume'); }} className="w-full py-5 bg-white text-primary-600 rounded-2xl text-[10px] font-black uppercase tracking-[0.3em] shadow-2xl hover:scale-105 active:scale-95 transition-all">Open Resume Builder</button>
          </div>
       </div>
     </div>

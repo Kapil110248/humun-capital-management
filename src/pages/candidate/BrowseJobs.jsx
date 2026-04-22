@@ -61,8 +61,8 @@ const BrowseJobs = () => {
       {/* Header Section */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
         <div>
-          <h1 className="text-4xl font-black text-slate-900 tracking-tighter italic">MARKET RADAR</h1>
-          <p className="text-slate-500 font-bold tracking-tight uppercase text-xs mt-1">Discover strategic roles across the ecosystem</p>
+          <h1 className="text-4xl font-black text-slate-900 tracking-tighter italic">BROWSE JOBS</h1>
+          <p className="text-slate-500 font-bold tracking-tight uppercase text-xs mt-1">Discover your next career move</p>
         </div>
         <div className="flex items-center gap-3">
            <button 
@@ -70,26 +70,26 @@ const BrowseJobs = () => {
              className="flex items-center gap-3 px-6 py-3 bg-white border border-slate-200 text-slate-700 rounded-2xl text-[10px] font-black uppercase tracking-widest hover:bg-slate-50 transition-all shadow-sm active:scale-95"
            >
              <Clock size={16} />
-             <span>Active Logs</span>
+             <span>My Applications</span>
            </button>
         </div>
       </div>
 
-      {/* Strategic Filter Engine */}
+      {/* Job Search Filters */}
       <div className="card p-8 border-none bg-white shadow-soft">
          <div className="flex items-center justify-between mb-8">
             <div className="flex items-center gap-3">
               <div className="p-2.5 bg-primary-50 text-primary-600 rounded-xl">
                  <Filter size={20} />
               </div>
-              <h3 className="text-xl font-black text-slate-900 italic tracking-tight leading-none">Filter Engine</h3>
+              <h3 className="text-xl font-black text-slate-900 italic tracking-tight leading-none">Search Filters</h3>
             </div>
             <button 
               onClick={() => { setSearchTerm(''); setFilters({ department: '', location: '', type: '', experience: '', salary: '' }); }}
               className="text-[10px] font-black text-slate-400 hover:text-primary-600 flex items-center gap-2 uppercase tracking-widest transition-all"
             >
               <RotateCcw size={14} />
-              <span>Reset Signal</span>
+              <span>Clear Filters</span>
             </button>
          </div>
 
@@ -98,7 +98,7 @@ const BrowseJobs = () => {
               <Search className="absolute left-4 top-3.5 text-slate-400" size={18} />
               <input 
                 type="text" 
-                placeholder="Query positions..." 
+                placeholder="Search jobs by title or keyword..." 
                 className="input-field pl-12 h-14 bg-slate-50 border-transparent font-black"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
@@ -111,7 +111,7 @@ const BrowseJobs = () => {
                 value={filters.department}
                 onChange={(e) => setFilters({...filters, department: e.target.value})}
               >
-                <option value="">All Vectors</option>
+                <option value="">All Departments</option>
                 <option value="Design">Design</option>
                 <option value="Engineering">Engineering</option>
                 <option value="Product">Product</option>
@@ -125,11 +125,11 @@ const BrowseJobs = () => {
                 value={filters.location}
                 onChange={(e) => setFilters({...filters, location: e.target.value})}
               >
-                <option value="">Global Coverage</option>
-                <option value="Remote">Remote Operations</option>
-                <option value="New York">New York Hub</option>
-                <option value="San Francisco">San Francisco Hub</option>
-                <option value="London">London Hub</option>
+                <option value="">All Locations</option>
+                <option value="Remote">Remote</option>
+                <option value="New York">New York</option>
+                <option value="San Francisco">San Francisco</option>
+                <option value="London">London</option>
               </select>
             </div>
             <div className="relative">
@@ -139,20 +139,20 @@ const BrowseJobs = () => {
                  value={filters.type}
                  onChange={(e) => setFilters({...filters, type: e.target.value})}
                >
-                <option value="">Employment Mode</option>
-                <option value="Full-time">Strategic Perm</option>
-                <option value="Contract">Task Force (Contract)</option>
-                <option value="Hybrid">Hybrid Mode</option>
+                <option value="">Job Type</option>
+                <option value="Full-time">Full-time</option>
+                <option value="Contract">Contract</option>
+                <option value="Hybrid">Hybrid</option>
               </select>
             </div>
          </div>
          
          <div className="flex items-center justify-between mt-8 pt-8 border-t border-slate-50">
             <div className="flex items-center gap-6">
-               <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Active Signals: <span className="text-slate-900">{filteredJobs.length} Positions</span></span>
+               <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Active Jobs: <span className="text-slate-900">{filteredJobs.length} Positions Found</span></span>
                <div className="h-4 w-px bg-slate-200"></div>
                <div className="flex items-center gap-3">
-                  <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Sequence:</span>
+                  <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Sort by:</span>
                   <select 
                     value={sortBy}
                     onChange={(e) => setSortBy(e.target.value)}
@@ -235,28 +235,28 @@ const BrowseJobs = () => {
                   onClick={() => setSelectedJob(job)}
                   className="flex-1 py-4 bg-slate-50 text-slate-400 border border-slate-100 rounded-2xl text-[10px] font-black uppercase tracking-[0.3em] hover:bg-white hover:text-primary-600 hover:border-primary-100 transition-all active:scale-95 shadow-sm"
                 >
-                  Log Details
+                  View Details
                 </button>
                 <button 
                   onClick={() => { setSelectedJob(job); setIsApplyModalOpen(true); }}
                   className="flex-1 py-4 bg-slate-900 text-white rounded-2xl text-[10px] font-black uppercase tracking-[0.3em] hover:bg-black transition-all active:scale-95 shadow-xl shadow-slate-200 flex items-center justify-center gap-3"
                 >
-                  Apply Phase <ArrowRight size={16} />
+                  Apply Now <ArrowRight size={16} />
                 </button>
               </div>
             </motion.div>
           )) : (
             <div className="col-span-full py-40 flex flex-col items-center justify-center card border-dashed border-2 bg-slate-50/50 text-slate-300">
                <Search size={64} className="mb-6 opacity-40 animate-pulse" />
-               <p className="text-xl font-black uppercase tracking-[0.3em]">No Signal Detected</p>
-               <p className="text-[10px] font-bold uppercase tracking-widest mt-2">Adjust your filter parameters to find matches</p>
+               <p className="text-xl font-black uppercase tracking-[0.3em]">No Jobs Found</p>
+               <p className="text-[10px] font-bold uppercase tracking-widest mt-2">Adjust your filters to find suitable positions</p>
             </div>
           )}
         </AnimatePresence>
       </div>
 
       {/* Job Record Detail Modal */}
-      <CenterModal isOpen={!!selectedJob && !isApplyModalOpen} onClose={() => setSelectedJob(null)} title="Position Strategic Log">
+      <CenterModal isOpen={!!selectedJob && !isApplyModalOpen} onClose={() => setSelectedJob(null)} title="Job Details">
          {selectedJob && (
             <div className="p-10 space-y-12 text-left">
                <div className="flex items-start gap-8 border-b border-slate-50 pb-10">
@@ -280,13 +280,13 @@ const BrowseJobs = () => {
                   <div className="md:col-span-8 space-y-12">
                      <section>
                         <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.4em] mb-6 flex items-center gap-3">
-                           <Info size={16} className="text-primary-600" /> Objective
+                           <Info size={16} className="text-primary-600" /> Job Description
                         </h3>
                         <p className="text-base font-bold text-slate-600 leading-relaxed italic">{selectedJob.desc}</p>
                      </section>
 
                      <section>
-                        <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.4em] mb-6">Strategic Requirements</h3>
+                        <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.4em] mb-6">Requirements</h3>
                         <div className="grid grid-cols-1 gap-4">
                            {selectedJob.requirements.map((req, i) => (
                               <div key={i} className="p-5 rounded-2xl bg-slate-50 border border-slate-100 flex items-center gap-5 group hover:bg-white hover:shadow-lg transition-all">
@@ -303,7 +303,7 @@ const BrowseJobs = () => {
                         <div className="absolute -right-5 -top-5 opacity-10 rotate-12 group-hover:scale-125 transition-transform duration-1000">
                            <Zap size={150} className="text-white" />
                         </div>
-                        <h3 className="text-[10px] font-black text-primary-400 uppercase tracking-[0.3em] mb-8 leading-none">Ecosystem Perks</h3>
+                        <h3 className="text-[10px] font-black text-primary-400 uppercase tracking-[0.3em] mb-8 leading-none">Benefits & Perks</h3>
                         <div className="space-y-4 relative z-10">
                            {selectedJob.benefits.map((ben, i) => (
                               <div key={i} className="flex items-center gap-3 text-white font-black text-[9px] uppercase tracking-widest opacity-80">
@@ -316,12 +316,12 @@ const BrowseJobs = () => {
                            onClick={() => { setIsApplyModalOpen(true); }}
                            className="w-full mt-10 py-4 bg-white text-slate-900 rounded-2xl text-[10px] font-black uppercase tracking-[0.3em] shadow-2xl hover:bg-primary-50 transition-all"
                         >
-                           Submit Dossier
+                           Apply Now
                         </button>
                      </div>
                      
                      <div className="p-8 bg-slate-50 rounded-[2.5rem] border border-slate-100">
-                        <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-4">Talent Lead</p>
+                        <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-4">Hiring Manager</p>
                         <div className="flex items-center gap-4">
                            <img src="https://i.pravatar.cc/100?img=12" className="w-12 h-12 rounded-2xl border-2 border-white shadow-lg" alt="" />
                            <div>
@@ -337,7 +337,7 @@ const BrowseJobs = () => {
       </CenterModal>
 
       {/* Application Submision Modal */}
-      <CenterModal isOpen={isApplyModalOpen} onClose={() => {setIsApplyModalOpen(false); setSelectedJob(null);}} title="Submit Application Dossier">
+      <CenterModal isOpen={isApplyModalOpen} onClose={() => {setIsApplyModalOpen(false); setSelectedJob(null);}} title="Submit Application">
          {selectedJob && (
             <form onSubmit={handleApplySubmit} className="p-10 space-y-8 text-left">
                <div className="flex items-center gap-6 p-6 bg-slate-900 rounded-[2rem] text-white italic">
@@ -345,7 +345,7 @@ const BrowseJobs = () => {
                     {selectedJob.company[0]}
                   </div>
                   <div>
-                    <p className="text-[9px] font-black text-primary-400 uppercase tracking-widest leading-none mb-2 italic">Target Vector</p>
+                    <p className="text-[9px] font-black text-primary-400 uppercase tracking-widest leading-none mb-2 italic">Job Role</p>
                     <p className="text-xl font-black leading-none">{selectedJob.title}</p>
                     <p className="text-[10px] font-bold opacity-60 uppercase tracking-widest mt-2">{selectedJob.company}</p>
                   </div>
@@ -353,41 +353,41 @@ const BrowseJobs = () => {
 
                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                   <div className="space-y-2">
-                     <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest px-1 italic">Internal Artifact (Resume)</label>
+                     <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest px-1 italic">Resume</label>
                      <select className="input-field h-14 bg-slate-50 border-transparent font-black appearance-none cursor-pointer">
-                        <option>Current_Master_CV_2026.pdf</option>
-                        <option>Product_Design_Specific.pdf</option>
-                        <option>Upload New Registry...</option>
+                        <option>Current_Resume_2026.pdf</option>
+                        <option>Product_Designer_CV.pdf</option>
+                        <option>Upload New Resume...</option>
                      </select>
                   </div>
                   <div className="space-y-2">
-                     <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest px-1 italic">Deployment Window</label>
+                     <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest px-1 italic">Availability</label>
                      <select name="availability" className="input-field h-14 bg-slate-50 border-transparent font-black appearance-none cursor-pointer">
-                        <option>Immediate Activation</option>
-                        <option>15 Day Transition</option>
-                        <option>30 Day Transition</option>
-                        <option>Negotiable Window</option>
+                        <option>Immediate</option>
+                        <option>2 Weeks Notice</option>
+                        <option>4 Weeks Notice</option>
+                        <option>Negotiable</option>
                      </select>
                   </div>
                   <div className="space-y-2">
-                     <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest px-1 italic">Comp Expectations (Annual)</label>
+                     <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest px-1 italic">Expected Salary (Annual)</label>
                      <input name="expectedSalary" type="text" placeholder="e.g. $165,000" className="input-field h-14 bg-slate-50 border-transparent font-black" required />
                   </div>
                   <div className="space-y-2">
-                     <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest px-1 italic">Portfolio Evidence (URL)</label>
+                     <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest px-1 italic">Portfolio URL</label>
                      <input type="url" placeholder="https://registry.design/..." className="input-field h-14 bg-slate-50 border-transparent font-black" />
                   </div>
                </div>
 
                <div className="space-y-2">
-                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest px-1 italic">Engagement Narrative (Cover Message)</label>
-                  <textarea name="coverLetter" rows="5" required className="input-field py-5 bg-slate-50 border-transparent font-black resize-none" placeholder="Provide strategic context for your application..."></textarea>
+                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest px-1 italic">Cover Letter</label>
+                  <textarea name="coverLetter" rows="5" required className="input-field py-5 bg-slate-50 border-transparent font-black resize-none" placeholder="Tell us why you are a good fit for this role..."></textarea>
                </div>
 
                <div className="pt-4 flex gap-4">
-                  <button type="button" onClick={() => setIsApplyModalOpen(false)} className="flex-1 py-4 bg-slate-100 text-slate-600 rounded-2xl font-black uppercase tracking-widest text-[10px]">Abort</button>
+                  <button type="button" onClick={() => setIsApplyModalOpen(false)} className="flex-1 py-4 bg-slate-100 text-slate-600 rounded-2xl font-black uppercase tracking-widest text-[10px]">Cancel</button>
                   <button type="submit" className="flex-2 py-4 bg-slate-900 text-white rounded-2xl font-black uppercase tracking-widest text-[10px] shadow-xl shadow-slate-200 active:scale-95 flex items-center justify-center gap-3">
-                     Finalize Deployment <Send size={16} />
+                     Submit Application <Send size={16} />
                   </button>
                </div>
             </form>

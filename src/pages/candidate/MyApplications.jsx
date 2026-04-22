@@ -20,10 +20,10 @@ const MyApplications = () => {
   const [isWithdrawConfirmOpen, setIsWithdrawConfirmOpen] = useState(false);
 
   const stats = [
-    { label: 'Active Dossiers', value: applications.length, icon: Briefcase, color: 'blue', bg: 'bg-blue-50', iconColor: 'text-blue-600' },
-    { label: 'Phase: Review', value: applications.filter(a => a.status === 'Applied' || a.status === 'Under Review').length, icon: Clock, color: 'amber', bg: 'bg-amber-50', iconColor: 'text-amber-600' },
-    { label: 'Phase: Interview', value: applications.filter(a => a.status === 'Shortlisted' || a.status === 'Interview').length, icon: Calendar, color: 'purple', bg: 'bg-purple-50', iconColor: 'text-purple-600' },
-    { label: 'Win Rate', value: '15%', icon: TrendingUp, color: 'green', bg: 'bg-emerald-50', iconColor: 'text-emerald-600' },
+    { label: 'Active Applications', value: applications.length, icon: Briefcase, color: 'blue', bg: 'bg-blue-50', iconColor: 'text-blue-600' },
+    { label: 'Under Review', value: applications.filter(a => a.status === 'Applied' || a.status === 'Under Review').length, icon: Clock, color: 'amber', bg: 'bg-amber-50', iconColor: 'text-amber-600' },
+    { label: 'Interviews Scheduled', value: applications.filter(a => a.status === 'Shortlisted' || a.status === 'Interview').length, icon: Calendar, color: 'purple', bg: 'bg-purple-50', iconColor: 'text-purple-600' },
+    { label: 'Success Rate', value: '15%', icon: TrendingUp, color: 'green', bg: 'bg-emerald-50', iconColor: 'text-emerald-600' },
   ];
 
   const filteredApplications = useMemo(() => {
@@ -55,15 +55,15 @@ const MyApplications = () => {
       {/* Header Section */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
         <div>
-          <h1 className="text-4xl font-black text-slate-900 tracking-tighter italic uppercase">APPLICATION REGISTRY</h1>
-          <p className="text-slate-500 font-bold tracking-tight uppercase text-xs mt-1">Audit your strategic deployments and phase responses</p>
+          <h1 className="text-4xl font-black text-slate-900 tracking-tighter italic uppercase">MY APPLICATIONS</h1>
+          <p className="text-slate-500 font-bold tracking-tight uppercase text-xs mt-1">Track your job applications and hiring status</p>
         </div>
         <button 
           onClick={() => navigate('/candidate/jobs')}
           className="flex items-center gap-3 px-8 py-3.5 bg-slate-900 text-white rounded-2xl text-[10px] font-black uppercase tracking-[0.2em] hover:bg-black transition-all shadow-xl shadow-slate-200 active:scale-95"
         >
           <Search size={18} />
-          <span>New Deployment</span>
+          <span>Browse Jobs</span>
         </button>
       </div>
 
@@ -94,7 +94,7 @@ const MyApplications = () => {
           <Search className="absolute left-4 top-3.5 text-slate-400" size={18} />
           <input 
             type="text" 
-            placeholder="Query dossiers..." 
+            placeholder="Search applications..." 
             className="input-field pl-12 h-14 bg-slate-50 border-transparent font-black"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
@@ -106,12 +106,12 @@ const MyApplications = () => {
             onChange={(e) => setStatusFilter(e.target.value)}
             className="input-field h-14 px-6 bg-slate-50 border-transparent font-black appearance-none cursor-pointer w-full md:w-56"
           >
-            <option value="">Status Vector: ALL</option>
-            <option value="Applied">Phase: Applied</option>
-            <option value="Under Review">Phase: Under Review</option>
-            <option value="Shortlisted">Phase: Shortlisted</option>
-            <option value="Interview">Phase: Interview</option>
-            <option value="Rejected">Phase: Rejected</option>
+            <option value="">Filter by Status: All</option>
+            <option value="Applied">Applied</option>
+            <option value="Under Review">Under Review</option>
+            <option value="Shortlisted">Shortlisted</option>
+            <option value="Interview">Interview</option>
+            <option value="Rejected">Rejected</option>
           </select>
           <button 
             onClick={() => { setSearchTerm(''); setStatusFilter(''); }}
@@ -128,11 +128,11 @@ const MyApplications = () => {
           <table className="w-full text-left">
             <thead>
               <tr className="bg-slate-50/50">
-                <th className="px-8 py-5 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Application Identity</th>
+                <th className="px-8 py-5 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Job Details</th>
                 <th className="px-8 py-5 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] text-center">Applied On</th>
-                <th className="px-8 py-5 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] text-center">Status Matrix</th>
-                <th className="px-8 py-5 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] text-center">Phase Alert</th>
-                <th className="px-8 py-5 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] text-right">Activity</th>
+                <th className="px-8 py-5 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] text-center">Status</th>
+                <th className="px-8 py-5 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] text-center">Next Step</th>
+                <th className="px-8 py-5 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] text-right">Action</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-50">
@@ -144,7 +144,7 @@ const MyApplications = () => {
                         {app.company.charAt(0)}
                       </div>
                       <div>
-                        <p className="text-sm font-black text-slate-900 leading-none italic tracking-tight">{app.role}</p>
+                        <p className="text-sm font-black text-slate-900 leading-none italic tracking-tight uppercase">{app.role}</p>
                         <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mt-2">{app.company}</p>
                       </div>
                     </div>
@@ -178,7 +178,7 @@ const MyApplications = () => {
                 <tr>
                    <td colSpan="5" className="py-32 text-center flex flex-col items-center">
                       <Search size={48} className="text-slate-200 mb-6 animate-pulse" />
-                      <p className="text-[10px] font-black text-slate-300 uppercase tracking-[0.3em]">No registry entries found</p>
+                      <p className="text-[10px] font-black text-slate-300 uppercase tracking-[0.3em]">No applications found</p>
                    </td>
                 </tr>
               )}
@@ -188,7 +188,7 @@ const MyApplications = () => {
       </div>
 
       {/* Record Tracker Modal */}
-      <CenterModal isOpen={!!selectedApp} onClose={() => setSelectedApp(null)} title="Application Tactical Audit">
+      <CenterModal isOpen={!!selectedApp} onClose={() => setSelectedApp(null)} title="Application Details">
          {selectedApp && (
             <div className="p-10 space-y-12 text-left">
                <div className="flex items-start gap-8 border-b border-slate-50 pb-10">
@@ -207,7 +207,7 @@ const MyApplications = () => {
                </div>
 
                <div className="space-y-8">
-                  <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.4em] mb-8 leading-none">Process Evolution</h3>
+                  <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.4em] mb-8 leading-none">Application Timeline</h3>
                   <div className="relative space-y-10 pl-10 border-l-2 border-slate-50 ml-4">
                      {['Applied', 'Under Review', 'Shortlisted', 'Interview', 'Offer'].map((step, idx) => {
                         const historyIndex = selectedApp.timeline.findIndex(t => t.status === step);
@@ -224,7 +224,7 @@ const MyApplications = () => {
                               <div className={cn("transition-all duration-500", !isCompleted && "opacity-30")}>
                                  <p className="text-sm font-black text-slate-900 italic tracking-tight uppercase">{step}</p>
                                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">
-                                    {isCompleted ? `Audit Timestamp: ${selectedApp.timeline[historyIndex].date}` : 'Awaiting progression phase'}
+                                    {isCompleted ? `Updated On: ${selectedApp.timeline[historyIndex].date}` : 'Not yet reached'}
                                  </p>
                               </div>
                            </div>
@@ -237,7 +237,7 @@ const MyApplications = () => {
                   <div className="absolute top-0 right-0 p-6 opacity-10">
                      <MessageSquare size={100} className="text-white" />
                   </div>
-                  <h4 className="text-[10px] font-black text-primary-400 uppercase tracking-[0.4em] mb-4 leading-none italic">Recruiter Evaluation</h4>
+                  <h4 className="text-[10px] font-black text-primary-400 uppercase tracking-[0.4em] mb-4 leading-none italic">Recruiter Feedback</h4>
                   <p className="text-sm font-bold text-white italic leading-relaxed relative z-10">
                      "Candidate's technical profile aligns with strategic core competencies. Digital footprint shows strong ecosystem engagement. Maintain in high-priority queue."
                   </p>
@@ -248,13 +248,13 @@ const MyApplications = () => {
                     onClick={() => { setIsWithdrawConfirmOpen(true); }}
                     className="flex-1 py-4 bg-rose-50 text-rose-600 border border-rose-100 rounded-[1.5rem] font-black uppercase tracking-widest text-[10px] hover:bg-rose-100 transition-all active:scale-95 flex items-center justify-center gap-2"
                   >
-                    <Trash2 size={16} /> Withdraw Dossier
+                    <Trash2 size={16} /> Withdraw Application
                   </button>
                   <button 
                     onClick={() => showToast('Full report generated', 'info')}
                     className="flex-1 py-4 bg-slate-900 text-white rounded-[1.5rem] font-black uppercase tracking-widest text-[10px] shadow-xl shadow-slate-200 active:scale-95 flex items-center justify-center gap-2"
                   >
-                    <Download size={16} /> Audit Summary
+                    <Download size={16} /> Download Summary
                   </button>
                </div>
             </div>
@@ -262,18 +262,18 @@ const MyApplications = () => {
       </CenterModal>
 
       {/* Withdrawal Confirmation */}
-      <CenterModal isOpen={isWithdrawConfirmOpen} onClose={() => setIsWithdrawConfirmOpen(false)} title="System Termination Alert">
+      <CenterModal isOpen={isWithdrawConfirmOpen} onClose={() => setIsWithdrawConfirmOpen(false)} title="Confirm Action">
          <div className="p-10 text-center space-y-8">
             <div className="w-20 h-20 bg-rose-50 rounded-[2rem] flex items-center justify-center mx-auto text-rose-500 shadow-lg border border-rose-100 animate-pulse">
                <ShieldAlert size={36} />
             </div>
             <div>
                <h3 className="text-2xl font-black text-slate-900 italic tracking-tight mb-2">Confirm Withdrawal</h3>
-               <p className="text-sm font-bold text-slate-400 uppercase tracking-widest leading-relaxed">This will permanently terminate your application dossier for the <span className="text-slate-900">{selectedApp?.role}</span> position at <span className="text-slate-900">{selectedApp?.company}</span>.</p>
+               <p className="text-sm font-bold text-slate-400 uppercase tracking-widest leading-relaxed">This will permanently withdraw your application for the <span className="text-slate-900">{selectedApp?.role}</span> position at <span className="text-slate-900">{selectedApp?.company}</span>.</p>
             </div>
             <div className="flex gap-4">
-               <button onClick={() => setIsWithdrawConfirmOpen(false)} className="flex-1 py-4 bg-slate-50 text-slate-400 rounded-2xl font-black uppercase tracking-widest text-[10px]">Abort Action</button>
-               <button onClick={handleWithdraw} className="flex-1 py-4 bg-rose-600 text-white rounded-2xl font-black uppercase tracking-widest text-[10px] shadow-xl shadow-rose-200 active:scale-95">Terminate Dossier</button>
+               <button onClick={() => setIsWithdrawConfirmOpen(false)} className="flex-1 py-4 bg-slate-50 text-slate-400 rounded-2xl font-black uppercase tracking-widest text-[10px]">Cancel</button>
+               <button onClick={handleWithdraw} className="flex-1 py-4 bg-rose-600 text-white rounded-2xl font-black uppercase tracking-widest text-[10px] shadow-xl shadow-rose-200 active:scale-95">Withdraw Application</button>
             </div>
          </div>
       </CenterModal>

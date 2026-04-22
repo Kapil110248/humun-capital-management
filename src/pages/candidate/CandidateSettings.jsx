@@ -2,7 +2,8 @@ import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   User, ShieldCheck, Bell, Settings2, Lock, Smartphone, 
-  Monitor, Key, Zap, Globe, Clock, ChevronRight, Save, RotateCcw, X, LogOut
+  Monitor, Key, Zap, Globe, Clock, ChevronRight, Save, RotateCcw, X, LogOut,
+  Eye, EyeOff
 } from 'lucide-react';
 import { cn } from '../../utils/cn';
 import { useCandidate } from '../../context/CandidateContext';
@@ -20,17 +21,18 @@ const CandidateSettings = () => {
     preferences: { theme: 'light', language: 'English', timezone: 'UTC -5', defaultDashboard: 'Standard' }
   });
   const [isSignoutModalOpen, setIsSignoutModalOpen] = useState(false);
+  const [showPasswords, setShowPasswords] = useState(false);
 
   const tabs = [
-    { id: 'account', label: 'Account Core', icon: User },
-    { id: 'security', label: 'Shield Hub', icon: ShieldCheck },
-    { id: 'notifications', label: 'Signal Stream', icon: Bell },
-    { id: 'preferences', label: 'Ecosystem', icon: Settings2 },
+    { id: 'account', label: 'Account', icon: User },
+    { id: 'security', label: 'Security', icon: ShieldCheck },
+    { id: 'notifications', label: 'Notifications', icon: Bell },
+    { id: 'preferences', label: 'Preferences', icon: Settings2 },
   ];
 
   const handleSave = () => {
     updateProfile({ settings: formData });
-    showToast('Infrastructure settings synchronized');
+    showToast('Settings synchronized successfully');
   };
 
   const handleReset = () => {
@@ -48,8 +50,8 @@ const CandidateSettings = () => {
       {/* Header Section */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-8 bg-white p-10 rounded-[3.5rem] border border-slate-50 shadow-soft">
         <div>
-          <h1 className="text-4xl font-black text-slate-900 tracking-tighter italic uppercase leading-none mb-2">SYSTEM CONFIG</h1>
-          <p className="text-slate-400 font-bold tracking-tight uppercase text-xs">Ecosystem Parameters • <span className="text-slate-900 font-black">Authorized Access</span></p>
+          <h1 className="text-4xl font-black text-slate-900 tracking-tighter italic uppercase leading-none mb-2">SETTINGS</h1>
+          <p className="text-slate-400 font-bold tracking-tight uppercase text-xs">Manage your account and preferences</p>
         </div>
         <div className="flex items-center gap-4">
            <button onClick={handleReset} className="w-14 h-14 bg-slate-50 text-slate-400 border border-slate-100 hover:text-slate-900 rounded-2xl flex items-center justify-center transition-all shadow-sm group">
@@ -91,7 +93,7 @@ const CandidateSettings = () => {
             onClick={() => setIsSignoutModalOpen(true)}
             className="w-full flex items-center justify-center gap-4 p-6 bg-white border border-slate-100 rounded-[2.5rem] text-[10px] font-black text-slate-400 uppercase tracking-[0.4em] hover:bg-slate-50 hover:text-rose-500 transition-all shadow-soft group"
           >
-             <LogOut size={20} className="group-hover:translate-x-1 transition-transform" /> Terminate Session
+             <LogOut size={20} className="group-hover:translate-x-1 transition-transform" /> Sign Out
           </button>
         </div>
 
@@ -110,14 +112,14 @@ const CandidateSettings = () => {
                   <div className="space-y-12">
                      <div className="flex items-center gap-4 border-b border-slate-50 pb-6">
                         <User className="text-primary-600" size={24} />
-                        <h3 className="text-xl font-black text-slate-900 italic tracking-tight uppercase">Registry Node</h3>
+                        <h3 className="text-xl font-black text-slate-900 italic tracking-tight uppercase">Account Details</h3>
                      </div>
                      <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
                         {[
-                          { label: 'Authorized Name', key: 'name', type: 'text' },
-                          { label: 'Signal Identification (Email)', key: 'email', type: 'email' },
-                          { label: 'Contact Frequency (Phone)', key: 'phone', type: 'text' },
-                          { label: 'Base Coordinate (Location)', key: 'location', type: 'text' },
+                          { label: 'Full Name', key: 'name', type: 'text' },
+                          { label: 'Email Address', key: 'email', type: 'email' },
+                          { label: 'Phone Number', key: 'phone', type: 'text' },
+                          { label: 'Location', key: 'location', type: 'text' },
                         ].map(field => (
                           <div key={field.key} className="space-y-3">
                             <label className="text-[10px] font-black text-slate-400 uppercase tracking-[0.3em] ml-1 italic">{field.label}</label>
@@ -141,11 +143,11 @@ const CandidateSettings = () => {
                      <section className="space-y-8">
                         <div className="flex items-center gap-4 border-b border-slate-50 pb-6">
                            <Key className="text-primary-600" size={24} />
-                           <h3 className="text-xl font-black text-slate-900 italic tracking-tight uppercase">Credential Rotation</h3>
+                           <h3 className="text-xl font-black text-slate-900 italic tracking-tight uppercase">Update Password</h3>
                         </div>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                            <div className="space-y-3 relative">
-                              <label className="text-[10px] font-black text-slate-400 uppercase tracking-[0.3em] ml-1 italic">New Access Key</label>
+                              <label className="text-[10px] font-black text-slate-400 uppercase tracking-[0.3em] ml-1 italic">New Password</label>
                               <div className="relative">
                                 <input type={showPasswords ? "text" : "password"} placeholder="••••••••••••" className="input-field h-14 bg-slate-50 border-transparent font-black shadow-inner pr-14" />
                                 <button 
@@ -158,7 +160,7 @@ const CandidateSettings = () => {
                               </div>
                            </div>
                            <div className="space-y-3 relative">
-                              <label className="text-[10px] font-black text-slate-400 uppercase tracking-[0.3em] ml-1 italic">Confirm Access Key</label>
+                              <label className="text-[10px] font-black text-slate-400 uppercase tracking-[0.3em] ml-1 italic">Confirm Password</label>
                               <div className="relative">
                                 <input type={showPasswords ? "text" : "password"} placeholder="••••••••••••" className="input-field h-14 bg-slate-50 border-transparent font-black shadow-inner pr-14" />
                                 <button 
@@ -188,7 +190,7 @@ const CandidateSettings = () => {
                      <section className="space-y-8">
                         <div className="flex items-center gap-4 border-b border-slate-50 pb-6">
                            <Smartphone className="text-primary-600" size={24} />
-                           <h3 className="text-xl font-black text-slate-900 italic tracking-tight uppercase">Pulse History</h3>
+                           <h3 className="text-xl font-black text-slate-900 italic tracking-tight uppercase">Active Sessions</h3>
                         </div>
                         <div className="space-y-4">
                            {formData.security.activeSessions.map((session) => (
@@ -214,12 +216,12 @@ const CandidateSettings = () => {
                   <div className="space-y-12">
                      <div className="flex items-center gap-4 border-b border-slate-50 pb-6">
                         <Bell className="text-primary-600" size={24} />
-                        <h3 className="text-xl font-black text-slate-900 italic tracking-tight uppercase">Signal Intelligence</h3>
+                        <h3 className="text-xl font-black text-slate-900 italic tracking-tight uppercase">Notification Settings</h3>
                      </div>
                      <div className="space-y-6">
                         {[
-                          { label: 'Email Communication Alerts', key: 'emailAlerts', sub: 'Primary dossier updates' },
-                          { label: 'Interview Synchronizations', key: 'interviewAlerts', sub: 'Real-time schedule pings' },
+                          { label: 'Email Notifications', key: 'emailAlerts', sub: 'Receive updates via email' },
+                          { label: 'Interview Reminders', key: 'interviewAlerts', sub: 'Get notified about upcoming interviews' },
                           { label: 'Career Offer Dispatches', key: 'offerAlerts', sub: 'Direct reward signals' },
                           { label: 'Strategic Job Intelligence', key: 'jobRecommendations', sub: 'AI-filtered opportunities' },
                           { label: 'Mobile Push Frequency', key: 'pushNotifications', sub: 'Real-time device alerts' },
@@ -248,14 +250,14 @@ const CandidateSettings = () => {
                   <div className="space-y-12">
                      <div className="flex items-center gap-4 border-b border-slate-50 pb-6">
                         <Settings2 className="text-primary-600" size={24} />
-                        <h3 className="text-xl font-black text-slate-900 italic tracking-tight uppercase">Ecosystem Parameters</h3>
+                        <h3 className="text-xl font-black text-slate-900 italic tracking-tight uppercase">Preferences</h3>
                      </div>
                      <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
                         {[
-                          { label: 'Interface Architecture (Theme)', key: 'theme', options: ['Light Node', 'Dark Void', 'System Sync'] },
-                          { label: 'Core Language Engine', key: 'language', options: ['English (Global)', 'Spanish (Localized)', 'Mandarin'] },
-                          { label: 'Temporal Coordinate', key: 'timezone', options: ['UTC -5 (Eastern)', 'UTC -8 (Pacific)', 'UTC +0 (Greenwich)'] },
-                          { label: 'Initial Viewport (Dashboard)', key: 'defaultDashboard', options: ['Premium Overview', 'Condensed List', 'Action Center'] },
+                          { label: 'Theme Preference', key: 'theme', options: ['Light Mode', 'Dark Mode', 'System Default'] },
+                          { label: 'Language Selection', key: 'language', options: ['English', 'Spanish', 'French'] },
+                          { label: 'Timezone', key: 'timezone', options: ['UTC -5 (Eastern)', 'UTC -8 (Pacific)', 'UTC +0 (GMT)'] },
+                          { label: 'Default Dashboard', key: 'defaultDashboard', options: ['Overview', 'List View', 'Compact'] },
                         ].map(pref => (
                           <div key={pref.key} className="space-y-3">
                             <label className="text-[10px] font-black text-slate-400 uppercase tracking-[0.3em] ml-1 italic">{pref.label}</label>
@@ -281,7 +283,7 @@ const CandidateSettings = () => {
       </div>
 
       {/* Sign Out Confirmation */}
-      <CenterModal isOpen={isSignoutModalOpen} onClose={() => setIsSignoutModalOpen(false)} title="System Logout Protocol">
+      <CenterModal isOpen={isSignoutModalOpen} onClose={() => setIsSignoutModalOpen(false)} title="Sign Out">
          <div className="p-12 text-center space-y-10">
             <div className="w-24 h-24 bg-slate-50 rounded-[3rem] flex items-center justify-center mx-auto text-slate-900 shadow-2xl border border-slate-100 italic font-black text-4xl">
                HCM
@@ -292,7 +294,7 @@ const CandidateSettings = () => {
             </div>
             <div className="flex gap-4 pt-4">
                <button onClick={() => setIsSignoutModalOpen(false)} className="flex-1 py-5 bg-slate-50 text-slate-400 rounded-3xl font-black uppercase tracking-widest text-[10px]">Stay Connected</button>
-               <button onClick={handleSignOut} className="flex-1 py-5 bg-slate-900 text-white rounded-3xl font-black uppercase tracking-widest text-[10px] shadow-xl shadow-slate-200 active:scale-95">Terminate Session</button>
+               <button onClick={handleSignOut} className="flex-1 py-5 bg-slate-900 text-white rounded-3xl font-black uppercase tracking-widest text-[10px] shadow-xl shadow-slate-200 active:scale-95">Sign Out</button>
             </div>
          </div>
       </CenterModal>

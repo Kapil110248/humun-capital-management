@@ -34,12 +34,12 @@ const ResumeBuilder = () => {
   }, [localData]);
 
   const steps = [
-    { title: 'Personal', icon: User, helper: 'Core contact identity' },
-    { title: 'Experience', icon: Briefcase, helper: 'Professional timeline' },
-    { title: 'Education', icon: GraduationCap, helper: 'Academic credentials' },
-    { title: 'Skills', icon: Sparkles, helper: 'Strategic competencies' },
-    { title: 'Extras', icon: Award, helper: 'Strategic modifiers' },
-    { title: 'Template', icon: Layout, helper: 'Architectural design' },
+    { title: 'Personal', icon: User, helper: 'Basic contact information' },
+    { title: 'Experience', icon: Briefcase, helper: 'Work history' },
+    { title: 'Education', icon: GraduationCap, helper: 'Academic background' },
+    { title: 'Skills', icon: Sparkles, helper: 'Technical & professional skills' },
+    { title: 'Extras', icon: Award, helper: 'Certifications & achievements' },
+    { title: 'Template', icon: Layout, helper: 'Visual layout design' },
   ];
 
   const handleNext = () => {
@@ -100,8 +100,8 @@ const ResumeBuilder = () => {
           </button>
         </div>
         <div className="flex-1 space-y-2">
-           <h3 className="text-2xl font-black text-slate-900 tracking-tight italic">Identity Node</h3>
-           <p className="text-sm font-bold text-slate-400 leading-relaxed max-w-md">Provide core contact vectors and professional summary for recruiter audit cycles.</p>
+           <h3 className="text-2xl font-black text-slate-900 tracking-tight italic">Personal Information</h3>
+           <p className="text-sm font-bold text-slate-400 leading-relaxed max-w-md">Provide your contact details and professional summary for potential employers.</p>
         </div>
       </div>
 
@@ -109,12 +109,12 @@ const ResumeBuilder = () => {
         {[
           { label: 'First Name', key: 'firstName', icon: User },
           { label: 'Last Name', key: 'lastName', icon: User },
-          { label: 'Professional Title', key: 'title', icon: Briefcase },
-          { label: 'Email Vector', key: 'email', icon: Mail, type: 'email' },
-          { label: 'Phone Line', key: 'phone', icon: Phone },
-          { label: 'Location Hub', key: 'city', icon: MapPin },
-          { label: 'LinkedIn Profile', key: 'linkedin', icon: Globe },
-          { label: 'Portfolio (URL)', key: 'portfolio', icon: LinkIcon },
+          { label: 'Job Title', key: 'title', icon: Briefcase },
+          { label: 'Email', key: 'email', icon: Mail, type: 'email' },
+          { label: 'Phone', key: 'phone', icon: Phone },
+          { label: 'City / Location', key: 'city', icon: MapPin },
+          { label: 'LinkedIn', key: 'linkedin', icon: Globe },
+          { label: 'Portfolio URL', key: 'portfolio', icon: LinkIcon },
         ].map(field => (
           <div key={field.key} className="space-y-2 group">
             <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1 italic group-focus-within:text-primary-600 transition-colors uppercase">{field.label}</label>
@@ -130,13 +130,13 @@ const ResumeBuilder = () => {
           </div>
         ))}
         <div className="md:col-span-2 space-y-2 group">
-          <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1 italic group-focus-within:text-primary-600 transition-colors uppercase">Professional Directive (Summary)</label>
+          <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1 italic group-focus-within:text-primary-600 transition-colors uppercase">Professional Summary</label>
           <textarea 
             rows={5}
             value={localData.personal.summary}
             onChange={(e) => updatePersonal('summary', e.target.value)}
             className="input-field py-6 bg-slate-50 border-transparent resize-none font-bold text-sm leading-relaxed" 
-            placeholder="Sumarize your career objectives and core competencies..."
+            placeholder="Summarize your career goals and key strengths..."
           />
         </div>
       </div>
@@ -147,14 +147,14 @@ const ResumeBuilder = () => {
     <div className="space-y-12 animate-fade-in text-left">
       <div className="flex items-center justify-between">
         <div className="space-y-1">
-          <h3 className="text-2xl font-black text-slate-900 tracking-tight italic">Work Registry</h3>
-          <p className="text-sm font-bold text-slate-400 uppercase tracking-widest text-[10px]">Chronicle your professional evolution</p>
+          <h3 className="text-2xl font-black text-slate-900 tracking-tight italic">Work Experience</h3>
+          <p className="text-sm font-bold text-slate-400 uppercase tracking-widest text-[10px]">Add your previous employment history</p>
         </div>
         <button 
           onClick={() => addItem('experience')}
           className="flex items-center gap-3 px-8 py-3.5 bg-slate-900 text-white rounded-2xl text-[10px] font-black uppercase tracking-widest shadow-xl shadow-slate-200 hover:bg-black transition-all active:scale-95"
         >
-          <Plus size={18} /> <span>Log Entry</span>
+          <Plus size={18} /> <span>Add Experience</span>
         </button>
       </div>
 
@@ -169,7 +169,7 @@ const ResumeBuilder = () => {
             </button>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
               <div className="space-y-2">
-                <label className="text-[9px] font-black uppercase tracking-widest text-slate-400 italic">Position Title</label>
+                <label className="text-[9px] font-black uppercase tracking-widest text-slate-400 italic">Job Title</label>
                 <input 
                   type="text" 
                   value={exp.role}
@@ -178,7 +178,7 @@ const ResumeBuilder = () => {
                 />
               </div>
               <div className="space-y-2">
-                <label className="text-[9px] font-black uppercase tracking-widest text-slate-400 italic">Company Vector</label>
+                <label className="text-[9px] font-black uppercase tracking-widest text-slate-400 italic">Company Name</label>
                 <input 
                   type="text" 
                   value={exp.company}
@@ -188,26 +188,26 @@ const ResumeBuilder = () => {
               </div>
               <div className="grid grid-cols-2 gap-6 md:col-span-1">
                 <div className="space-y-2">
-                  <label className="text-[9px] font-black uppercase tracking-widest text-slate-400 italic">Launch Date</label>
+                  <label className="text-[9px] font-black uppercase tracking-widest text-slate-400 italic">Start Date</label>
                   <input type="month" value={exp.start} onChange={(e) => updateArrayItem('experience', idx, 'start', e.target.value)} className="input-field h-14 bg-slate-50 border-transparent font-black" />
                 </div>
                 <div className="space-y-2">
-                  <label className="text-[9px] font-black uppercase tracking-widest text-slate-400 italic">Cycle End</label>
+                  <label className="text-[9px] font-black uppercase tracking-widest text-slate-400 italic">End Date</label>
                   <input type="month" disabled={exp.current} value={exp.end} onChange={(e) => updateArrayItem('experience', idx, 'end', e.target.value)} className="input-field h-14 bg-slate-50 border-transparent font-black disabled:opacity-30" />
                 </div>
               </div>
               <div className="md:col-span-1 flex items-center gap-4 pt-6">
                  <input type="checkbox" checked={exp.current} onChange={(e) => updateArrayItem('experience', idx, 'current', e.target.checked)} className="w-6 h-6 rounded-lg accent-slate-900 border-2" />
-                 <label className="text-xs font-black uppercase tracking-widest text-slate-600">Active Operational Node (Current)</label>
+                 <label className="text-xs font-black uppercase tracking-widest text-slate-600">I am currently working here</label>
               </div>
               <div className="md:col-span-2 space-y-2">
-                <label className="text-[9px] font-black uppercase tracking-widest text-slate-400 italic">Impact Report & Achievements</label>
+                <label className="text-[9px] font-black uppercase tracking-widest text-slate-400 italic">Description & Achievements</label>
                 <textarea 
                   rows={4} 
                   value={exp.desc}
                   onChange={(e) => updateArrayItem('experience', idx, 'desc', e.target.value)}
                   className="input-field py-6 bg-slate-50 border-transparent resize-none font-bold text-sm leading-relaxed" 
-                  placeholder="Describe your strategic impact and key growth metrics..."
+                  placeholder="Describe your role and key accomplishments..."
                 />
               </div>
             </div>
@@ -221,14 +221,14 @@ const ResumeBuilder = () => {
     <div className="space-y-12 animate-fade-in text-left">
       <div className="flex items-center justify-between">
         <div className="space-y-1">
-          <h3 className="text-2xl font-black text-slate-900 tracking-tight italic">Academic Registry</h3>
-          <p className="text-sm font-bold text-slate-400 uppercase tracking-widest text-[10px]">Credentials and theoretical foundations</p>
+          <h3 className="text-2xl font-black text-slate-900 tracking-tight italic">Education</h3>
+          <p className="text-sm font-bold text-slate-400 uppercase tracking-widest text-[10px]">Academic background and qualifications</p>
         </div>
         <button 
           onClick={() => addItem('education')}
           className="flex items-center gap-3 px-8 py-3.5 bg-slate-900 text-white rounded-2xl text-[10px] font-black uppercase tracking-widest shadow-xl shadow-slate-200"
         >
-          <Plus size={18} /> <span>Log Degree</span>
+          <Plus size={18} /> <span>Add Education</span>
         </button>
       </div>
 
@@ -240,15 +240,15 @@ const ResumeBuilder = () => {
             </button>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
               <div className="space-y-2">
-                <label className="text-[9px] font-black uppercase tracking-widest text-slate-400 italic">Institute / Academy</label>
+                <label className="text-[9px] font-black uppercase tracking-widest text-slate-400 italic">School / University</label>
                 <input type="text" value={edu.school} onChange={(e) => updateArrayItem('education', idx, 'school', e.target.value)} className="input-field h-14 bg-slate-50 border-transparent font-black" />
               </div>
               <div className="space-y-2">
-                <label className="text-[9px] font-black uppercase tracking-widest text-slate-400 italic">Credential Title (Degree)</label>
+                <label className="text-[9px] font-black uppercase tracking-widest text-slate-400 italic">Degree / Qualification</label>
                 <input type="text" value={edu.degree} onChange={(e) => updateArrayItem('education', idx, 'degree', e.target.value)} className="input-field h-14 bg-slate-50 border-transparent font-black" />
               </div>
               <div className="space-y-2">
-                <label className="text-[9px] font-black uppercase tracking-widest text-slate-400 italic">Focus / Field</label>
+                <label className="text-[9px] font-black uppercase tracking-widest text-slate-400 italic">Field of Study</label>
                 <input type="text" value={edu.field} onChange={(e) => updateArrayItem('education', idx, 'field', e.target.value)} className="input-field h-14 bg-slate-50 border-transparent font-black" />
               </div>
               <div className="grid grid-cols-3 gap-6">
@@ -257,7 +257,7 @@ const ResumeBuilder = () => {
                     <input type="text" value={edu.end} onChange={(e) => updateArrayItem('education', idx, 'end', e.target.value)} className="input-field h-14 bg-slate-50 border-transparent font-black" />
                  </div>
                  <div className="col-span-2 space-y-2">
-                    <label className="text-[9px] font-black uppercase tracking-widest text-slate-400 italic">Grade / GPA Vector</label>
+                    <label className="text-[9px] font-black uppercase tracking-widest text-slate-400 italic">Grade / GPA</label>
                     <input type="text" value={edu.grade} onChange={(e) => updateArrayItem('education', idx, 'grade', e.target.value)} className="input-field h-14 bg-slate-50 border-transparent font-black px-6" />
                  </div>
               </div>
@@ -272,11 +272,11 @@ const ResumeBuilder = () => {
     <div className="space-y-12 animate-fade-in text-left">
       <div className="flex items-center justify-between">
         <div className="space-y-1">
-          <h3 className="text-2xl font-black text-slate-900 tracking-tight italic">Strategic Matrix</h3>
-          <p className="text-sm font-bold text-slate-400 uppercase tracking-widest text-[10px]">Quantifiable professional power units</p>
+          <h3 className="text-2xl font-black text-slate-900 tracking-tight italic">Skills</h3>
+          <p className="text-sm font-bold text-slate-400 uppercase tracking-widest text-[10px]">Highlight your technical and professional expertise</p>
         </div>
         <button onClick={() => addItem('skills')} className="flex items-center gap-3 px-8 py-3.5 bg-slate-900 text-white rounded-2xl text-[10px] font-black uppercase tracking-widest shadow-xl">
-          <Plus size={18} /> <span>Deploy Skill</span>
+          <Plus size={18} /> <span>Add Skill</span>
         </button>
       </div>
 
@@ -289,7 +289,7 @@ const ResumeBuilder = () => {
                   type="text" 
                   value={skill.name}
                   onChange={(e) => updateArrayItem('skills', idx, 'name', e.target.value)}
-                  placeholder="Query skill..." 
+                  placeholder="Type skill..." 
                   className="bg-transparent border-none text-base font-black text-slate-900 focus:ring-0 p-0 uppercase italic tracking-tight" 
                 />
                  <span className="text-[10px] font-black text-primary-600 uppercase tracking-widest">{skill.level}% Mastery</span>
@@ -322,8 +322,8 @@ const ResumeBuilder = () => {
             <Zap size={150} fill="#fff" />
          </div>
          <div className="relative z-10">
-            <h4 className="text-[10px] font-black text-primary-400 uppercase tracking-[0.4em] mb-4 leading-none italic">AI Meta-Suggestions</h4>
-            <p className="text-lg font-black text-white italic tracking-tight mb-8 leading-tight max-w-[350px]">Employers in your target sector are searching for these strategic competencies.</p>
+            <h4 className="text-[10px] font-black text-primary-400 uppercase tracking-[0.4em] mb-4 leading-none italic">Recommended Skills</h4>
+            <p className="text-lg font-black text-white italic tracking-tight mb-8 leading-tight max-w-[350px]">Employers in your sector are looking for these skills.</p>
             <div className="flex flex-wrap gap-3">
                {['Rust Engineering', 'LLM Fine-tuning', 'Vector Databases', 'Strategic Forecasting', 'Cyber Audit'].map(s => (
                   <button key={s} onClick={() => { setLocalData(prev => ({ ...prev, skills: [...prev.skills, { name: s, level: 75 }] })); showToast(`Skill ${s} drafted`); }} className="px-5 py-2.5 bg-white/10 hover:bg-white text-white hover:text-slate-900 rounded-full text-[9px] font-black uppercase tracking-widest transition-all border border-white/10">
@@ -343,7 +343,7 @@ const ResumeBuilder = () => {
           <div className="space-y-10">
              <section className="space-y-6">
                 <div className="flex justify-between items-center px-2">
-                   <h4 className="text-sm font-black text-slate-400 uppercase tracking-widest italic">Certification Vault</h4>
+                   <h4 className="text-sm font-black text-slate-400 uppercase tracking-widest italic">Certifications</h4>
                    <button onClick={() => setLocalData(prev => ({ ...prev, extras: { ...prev.extras, certs: [...prev.extras.certs, 'New Certification'] } }))} className="text-[10px] font-black text-primary-600 uppercase tracking-[0.2em]">+ ADD</button>
                 </div>
                 {localData.extras.certs.map((c, i) => (
@@ -366,7 +366,7 @@ const ResumeBuilder = () => {
 
              <section className="space-y-6">
                 <div className="flex justify-between items-center px-2">
-                   <h4 className="text-sm font-black text-slate-400 uppercase tracking-widest italic">Linguistic Vectors</h4>
+                   <h4 className="text-sm font-black text-slate-400 uppercase tracking-widest italic">Languages</h4>
                 </div>
                 <div className="grid grid-cols-1 gap-4">
                   {localData.extras.languages.map((l, i) => (
@@ -395,7 +395,7 @@ const ResumeBuilder = () => {
                        </select>
                     </div>
                   ))}
-                  <button onClick={() => setLocalData(prev => ({ ...prev, extras: { ...prev.extras, languages: [...prev.extras.languages, 'New Language (Basic)'] } }))} className="w-full py-4 border-2 border-dashed border-slate-100 rounded-[2rem] text-[9px] font-black text-slate-300 uppercase tracking-widest hover:border-primary-100 hover:text-primary-500 transition-all">Add Linguistic Entry</button>
+                  <button onClick={() => setLocalData(prev => ({ ...prev, extras: { ...prev.extras, languages: [...prev.extras.languages, 'New Language (Basic)'] } }))} className="w-full py-4 border-2 border-dashed border-slate-100 rounded-[2rem] text-[9px] font-black text-slate-300 uppercase tracking-widest hover:border-primary-100 hover:text-primary-500 transition-all">Add Language</button>
                 </div>
              </section>
           </div>
@@ -407,7 +407,7 @@ const ResumeBuilder = () => {
                    <Trophy size={140} fill="#fff" />
                 </div>
                 <div className="relative z-10">
-                   <h4 className="text-[9px] font-black text-indigo-200 uppercase tracking-[0.4em] mb-4 italic">Achievement Log</h4>
+                   <h4 className="text-[9px] font-black text-indigo-200 uppercase tracking-[0.4em] mb-4 italic">Achievements & Awards</h4>
                    <div className="space-y-6">
                       {localData.extras.awards.map((a, i) => (
                          <div key={i} className="flex gap-4 group">
@@ -425,13 +425,13 @@ const ResumeBuilder = () => {
                             <button onClick={() => setLocalData(prev => ({ ...prev, extras: { ...prev.extras, awards: prev.extras.awards.filter((_, ai) => ai !== i) } }))} className="text-white/20 hover:text-rose-400"><Trash2 size={16} /></button>
                          </div>
                       ))}
-                      <button onClick={() => setLocalData(prev => ({ ...prev, extras: { ...prev.extras, awards: [...prev.extras.awards, 'Strategic Award Title'] } }))} className="text-[9px] font-black uppercase tracking-widest text-indigo-300 hover:text-white transition-all">+ Add Achievement</button>
+                      <button onClick={() => setLocalData(prev => ({ ...prev, extras: { ...prev.extras, awards: [...prev.extras.awards, 'Strategic Award Title'] } }))} className="text-[9px] font-black uppercase tracking-widest text-indigo-300 hover:text-white transition-all">+ Add Award</button>
                    </div>
                 </div>
              </section>
              
              <section className="space-y-6">
-                <h4 className="text-sm font-black text-slate-400 uppercase tracking-widest italic px-2">Ecosystem Interests</h4>
+                <h4 className="text-sm font-black text-slate-400 uppercase tracking-widest italic px-2">Interests</h4>
                 <div className="flex flex-wrap gap-3">
                    {localData.extras.interests.map((int, i) => (
                       <div key={i} className="px-5 py-2.5 bg-slate-900 text-white rounded-2xl text-[10px] font-black uppercase tracking-widest flex items-center gap-3">
@@ -453,7 +453,7 @@ const ResumeBuilder = () => {
           {/* Customizer */}
           <div className="col-span-1 space-y-10">
              <div className="space-y-6">
-                <p className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-400 italic">Palette Strategy</p>
+                <p className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-400 italic">Color Scheme</p>
                 <div className="grid grid-cols-5 gap-4">
                    {['#0f172a', '#4f46e5', '#10b981', '#f43f5e', '#8b5cf6', '#d946ef', '#f97316', '#22c55e', '#ec4899', '#14b8a6'].map(c => (
                       <button key={c} style={{ backgroundColor: c }} className="w-12 h-12 rounded-2xl border-4 border-white shadow-xl hover:scale-110 transition-transform active:rotate-12" />
@@ -462,7 +462,7 @@ const ResumeBuilder = () => {
              </div>
              
              <div className="space-y-6">
-                <p className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-400 italic">Architecture Settings</p>
+                <p className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-400 italic">Resume Template</p>
                 <div className="grid grid-cols-1 gap-3">
                    {['Modern Adaptive', 'Strict Industrial', 'Strategic Clean', 'High-Impact Grid'].map((t, i) => (
                       <button key={t} className={cn("p-5 rounded-2xl border text-[10px] font-black uppercase tracking-widest text-left transition-all", i === 0 ? "bg-slate-900 text-white border-transparent shadow-xl translate-x-4" : "bg-slate-50 text-slate-400 border-slate-100")}>
@@ -475,7 +475,7 @@ const ResumeBuilder = () => {
 
           {/* Template Preview Grid */}
           <div className="col-span-2 grid grid-cols-1 sm:grid-cols-2 gap-8">
-             {[1,2,3,4].map(idx => (
+             {['Modern', 'Industrial', 'Clean', 'Grid'].map((t, idx) => (
                 <div key={idx} className="group relative overflow-hidden rounded-[3rem] border border-slate-100 shadow-soft cursor-pointer">
                    <div className="aspect-[4/5] bg-slate-50 flex items-center justify-center p-8 overflow-hidden group-hover:scale-105 transition-transform duration-1000">
                       <div className="w-full h-full bg-white shadow-2xl rounded-sm transform translate-y-8 group-hover:translate-y-0 transition-transform duration-700">
@@ -491,10 +491,10 @@ const ResumeBuilder = () => {
                       </div>
                    </div>
                    <div className="absolute inset-0 bg-gradient-to-t from-slate-900/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex flex-col justify-end p-8 text-left">
-                      <p className="text-white font-black italic text-xl">V{idx}.0 Tactical Layout</p>
-                      <button className="mt-4 py-3 bg-white text-slate-900 rounded-2xl text-[10px] font-black uppercase tracking-widest">Select Architecture</button>
+                      <p className="text-white font-black italic text-xl">{t} Style</p>
+                      <button className="mt-4 py-3 bg-white text-slate-900 rounded-2xl text-[10px] font-black uppercase tracking-widest">Select Template</button>
                    </div>
-                   {idx === 1 && (
+                   {idx === 0 && (
                       <div className="absolute top-6 left-6 p-2 bg-primary-600 text-white rounded-lg shadow-xl animate-bounce">
                         <Check size={16} strokeWidth={4} />
                       </div>
@@ -511,20 +511,20 @@ const ResumeBuilder = () => {
       {/* Header Section */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 bg-white p-8 rounded-[3rem] border border-slate-50 shadow-soft">
         <div className="text-left">
-          <h1 className="text-4xl font-black text-slate-900 tracking-tighter italic uppercase leading-none mb-2">Resume Engine</h1>
+          <h1 className="text-4xl font-black text-slate-900 tracking-tighter italic uppercase leading-none mb-2">Resume Builder</h1>
           <p className="text-slate-400 font-bold tracking-tight uppercase text-xs">Phased Configuration: <span className="text-slate-900 font-black">{steps[activeStep].title}</span></p>
         </div>
         <div className="flex items-center gap-4">
            {isSaving && (
              <div className="flex items-center gap-3 px-5 py-2.5 bg-emerald-50 text-emerald-600 rounded-2xl text-[10px] font-black uppercase tracking-widest animate-pulse border border-emerald-100 h-14">
-               <Zap size={16} /> Syncing...
+               <Zap size={16} /> Saving...
              </div>
            )}
            <button onClick={() => setIsPreviewOpen(true)} className="w-14 h-14 bg-slate-50 text-slate-400 border border-slate-100 hover:text-primary-600 rounded-2xl flex items-center justify-center transition-all shadow-sm">
              <Eye size={24} />
            </button>
            <button onClick={() => { showToast('Artifact exported to PDF vault'); }} className="h-14 px-8 bg-slate-900 text-white rounded-2xl text-[10px] font-black uppercase tracking-[0.2em] shadow-xl shadow-slate-100 flex items-center justify-center gap-3 active:scale-95 transition-all">
-             <Download size={20} /> Export CV 2026
+             <Download size={20} /> Download PDF
            </button>
         </div>
       </div>
@@ -560,7 +560,7 @@ const ResumeBuilder = () => {
               </div>
               <p className="text-[9px] font-black text-indigo-200 uppercase tracking-[0.4em] mb-6 italic leading-none">AI Generative Mode</p>
               <h4 className="text-xl font-black italic tracking-tight mb-8 leading-tight">Elevate your summary with AI insights.</h4>
-              <button className="w-full py-4 bg-white text-indigo-600 rounded-2xl text-[10px] font-black uppercase tracking-[0.3em] shadow-2xl hover:bg-slate-50 transition-all active:scale-95">Initiate AI Write</button>
+              <button className="w-full py-4 bg-white text-indigo-600 rounded-2xl text-[10px] font-black uppercase tracking-[0.3em] shadow-2xl hover:bg-slate-50 transition-all active:scale-95">Auto-Generate Summary</button>
            </div>
         </div>
 
@@ -569,7 +569,7 @@ const ResumeBuilder = () => {
            <div className="card h-full p-12 bg-white border-none shadow-soft flex flex-col relative rounded-[3.5rem] min-h-[750px]">
               <div className="flex-1">
                  <div className="mb-12 text-left">
-                    <h2 className="text-4xl font-black text-slate-900 tracking-tighter italic uppercase mb-2">{steps[activeStep].title} Integration</h2>
+                    <h2 className="text-4xl font-black text-slate-900 tracking-tighter italic uppercase mb-2">{steps[activeStep].title} Details</h2>
                     <p className="text-slate-400 font-bold text-sm tracking-tight">{steps[activeStep].helper}</p>
                  </div>
                  
@@ -598,17 +598,17 @@ const ResumeBuilder = () => {
                   disabled={activeStep === 0}
                   className="flex items-center gap-3 px-8 py-4 text-slate-400 hover:text-slate-900 text-xs font-black uppercase tracking-widest disabled:opacity-0 transition-all"
                 >
-                    <ChevronLeft size={20} /> Previous Phase
+                    <ChevronLeft size={20} /> Previous Step
                  </button>
                  <div className="flex gap-4">
                     <button className="hidden sm:flex items-center gap-3 px-6 py-4 bg-slate-50 text-slate-400 rounded-2xl text-[9px] font-black uppercase tracking-[0.2em] border border-slate-50 hover:bg-white hover:border-slate-100 transition-all">
-                       <RotateCcw size={16} /> Reset Node
+                       <RotateCcw size={16} /> Reset Step
                     </button>
                     <button 
                       onClick={() => activeStep === steps.length - 1 ? setIsPreviewOpen(true) : handleNext()}
                       className="px-10 py-4 bg-slate-900 text-white rounded-2xl text-[10px] font-black uppercase tracking-[0.3em] shadow-xl shadow-slate-200 flex items-center gap-3 hover:bg-black transition-all group"
                     >
-                       <span>{activeStep === steps.length - 1 ? 'Review Deployment' : 'Proceed to Next Cycle'}</span>
+                       <span>{activeStep === steps.length - 1 ? 'Preview Resume' : 'Continue to Next Step'}</span>
                        <ChevronRight size={18} className="group-hover:translate-x-2 transition-transform" />
                     </button>
                  </div>
@@ -618,7 +618,7 @@ const ResumeBuilder = () => {
       </div>
 
       {/* Artifact Preview Modal */}
-      <CenterModal isOpen={isPreviewOpen} onClose={() => setIsPreviewOpen(false)} title="Resume Artifact Preview" maxWidth="max-w-5xl">
+      <CenterModal isOpen={isPreviewOpen} onClose={() => setIsPreviewOpen(false)} title="Resume Preview" maxWidth="max-w-5xl">
          <div className="p-12 text-left bg-slate-50">
             <div className="bg-white shadow-[0_30px_100px_rgba(0,0,0,0.1)] rounded-sm min-h-[1100px] flex flex-col mx-auto max-w-[800px] overflow-hidden">
                {/* Document Header */}
@@ -646,7 +646,7 @@ const ResumeBuilder = () => {
                <div className="p-16 grid grid-cols-12 gap-16 flex-1">
                   <div className="col-span-8 space-y-12">
                      <section className="space-y-8">
-                        <h3 className="text-sm font-black uppercase tracking-[0.4em] text-slate-300 border-b-2 border-slate-50 pb-2">Experience Portfolio</h3>
+                        <h3 className="text-sm font-black uppercase tracking-[0.4em] text-slate-300 border-b-2 border-slate-50 pb-2">Employment History</h3>
                         <div className="space-y-12">
                            {localData.experience.map((e, i) => (
                               <div key={i} className="relative pl-8">
@@ -667,7 +667,7 @@ const ResumeBuilder = () => {
 
                   <div className="col-span-4 space-y-12">
                      <section className="space-y-6">
-                        <h3 className="text-[9px] font-black uppercase tracking-[0.5em] text-slate-300">Strategic Matrix</h3>
+                        <h3 className="text-[9px] font-black uppercase tracking-[0.5em] text-slate-300">Technical Skills</h3>
                         <div className="space-y-6">
                            {localData.skills.map((s, i) => (
                               <div key={i} className="space-y-2">
@@ -684,7 +684,7 @@ const ResumeBuilder = () => {
                      </section>
 
                      <section className="space-y-6">
-                        <h3 className="text-[9px] font-black uppercase tracking-[0.5em] text-slate-300">Education Registry</h3>
+                        <h3 className="text-[9px] font-black uppercase tracking-[0.5em] text-slate-300">Education</h3>
                         <div className="space-y-6">
                            {localData.education.map((edu, i) => (
                               <div key={i}>
@@ -710,7 +710,7 @@ const ResumeBuilder = () => {
             </div>
             
             <div className="mt-12 flex justify-center">
-               <button onClick={() => setIsPreviewOpen(false)} className="px-12 py-5 bg-slate-900 text-white rounded-3xl text-[10px] font-black uppercase tracking-widest shadow-2xl hover:scale-105 active:scale-95 transition-all">Abort Preview Mode</button>
+               <button onClick={() => setIsPreviewOpen(false)} className="px-12 py-5 bg-slate-900 text-white rounded-3xl text-[10px] font-black uppercase tracking-widest shadow-2xl hover:scale-105 active:scale-95 transition-all">Close Preview</button>
             </div>
          </div>
       </CenterModal>

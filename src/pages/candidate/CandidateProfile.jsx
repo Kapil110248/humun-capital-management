@@ -17,18 +17,18 @@ const CandidateProfile = () => {
   const fileInputRef = useRef(null);
 
   const tabs = [
-    { id: 'personal', label: 'Identity Node', icon: User },
-    { id: 'professional', label: 'Career Vector', icon: Briefcase },
-    { id: 'resume', label: 'Dossier', icon: FileText },
-    { id: 'skills', label: 'Skill Grid', icon: Zap },
-    { id: 'social', label: 'Network Matrix', icon: Globe },
-    { id: 'documents', label: 'Artifact Vault', icon: Cloud },
+    { id: 'personal', label: 'Personal Info', icon: User },
+    { id: 'professional', label: 'Professional Info', icon: Briefcase },
+    { id: 'resume', label: 'Resume', icon: FileText },
+    { id: 'skills', label: 'Skills', icon: Zap },
+    { id: 'social', label: 'Social Links', icon: Globe },
+    { id: 'documents', label: 'Documents', icon: Cloud },
   ];
 
   const handleSave = () => {
     updateProfile(formData);
     setIsEditing(false);
-    showToast('Infrastructure core updated successfully');
+    showToast('Profile updated successfully');
   };
 
   const handleCancel = () => {
@@ -42,7 +42,7 @@ const CandidateProfile = () => {
       const reader = new FileReader();
       reader.onloadend = () => {
         setFormData(prev => ({ ...prev, avatar: reader.result }));
-        showToast('Avatar signal updated');
+        showToast('Profile picture updated');
       };
       reader.readAsDataURL(file);
     }
@@ -83,7 +83,7 @@ const CandidateProfile = () => {
            </div>
            <div>
               <h1 className="text-3xl font-black text-slate-900 tracking-tighter italic uppercase leading-none mb-2">{formData.fullName}</h1>
-              <p className="text-slate-400 font-bold tracking-tight uppercase text-[10px]">{formData.role} • <span className="text-slate-900 font-black">Level 4 Node</span></p>
+              <p className="text-slate-400 font-bold tracking-tight uppercase text-[10px]">{formData.role} • <span className="text-slate-900 font-black">Professional Profile</span></p>
            </div>
         </div>
         <div className="flex items-center gap-3">
@@ -106,7 +106,7 @@ const CandidateProfile = () => {
                   onClick={handleSave}
                   className="h-14 px-8 bg-slate-900 text-white rounded-2xl text-[10px] font-black uppercase tracking-[0.2em] shadow-xl shadow-slate-200 flex items-center gap-3 hover:scale-[1.02] active:scale-95 transition-all"
                 >
-                  <Save size={18} /> Save Matrix
+                   <Save size={18} /> Save Profile
                 </button>
               </div>
            )}
@@ -152,18 +152,18 @@ const CandidateProfile = () => {
                        <div className="space-y-12 text-left">
                           <div className="flex items-center gap-4 border-b border-slate-50 pb-6">
                              <User className="text-primary-600" size={24} />
-                             <h3 className="text-xl font-black text-slate-900 italic tracking-tight uppercase">Identity Hub</h3>
+                             <h3 className="text-xl font-black text-slate-900 italic tracking-tight uppercase">Personal Details</h3>
                           </div>
                           <div className="grid grid-cols-1 md:grid-cols-2 gap-x-10 gap-y-8">
                              {[
-                                { label: 'Full Node Name', key: 'fullName', type: 'text' },
-                                { label: 'Email Communication', key: 'email', type: 'email' },
-                                { label: 'Contact Signal', key: 'phone', type: 'text' },
-                                { label: 'Solar Cycle (DOB)', key: 'dob', type: 'date' },
-                                { label: 'Base Location', key: 'location', type: 'text' },
+                                { label: 'Full Name', key: 'fullName', type: 'text' },
+                                { label: 'Email Address', key: 'email', type: 'email' },
+                                { label: 'Phone Number', key: 'phone', type: 'text' },
+                                { label: 'Date of Birth', key: 'dob', type: 'date' },
+                                { label: 'Current Location', key: 'location', type: 'text' },
                                 { label: 'Street Address', key: 'address', type: 'text' },
-                                { label: 'Vector City', key: 'city', type: 'text' },
-                                { label: 'Zone Country', key: 'country', type: 'text' },
+                                { label: 'City', key: 'city', type: 'text' },
+                                { label: 'Country', key: 'country', type: 'text' },
                              ].map(field => (
                                 <div key={field.key} className="space-y-3">
                                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-[0.3em] ml-1 italic">{field.label}</label>
@@ -180,7 +180,7 @@ const CandidateProfile = () => {
                                 </div>
                              ))}
                              <div className="md:col-span-2 space-y-3">
-                                <label className="text-[10px] font-black text-slate-400 uppercase tracking-[0.3em] ml-1 italic">Professional Dossier (Bio)</label>
+                                <label className="text-[10px] font-black text-slate-400 uppercase tracking-[0.3em] ml-1 italic">Professional Summary (Bio)</label>
                                 <textarea 
                                    value={formData.bio || ''}
                                    readOnly={!isEditing}
@@ -200,15 +200,15 @@ const CandidateProfile = () => {
                        <div className="space-y-12 text-left">
                           <div className="flex items-center gap-4 border-b border-slate-50 pb-6">
                              <Briefcase className="text-primary-600" size={24} />
-                             <h3 className="text-xl font-black text-slate-900 italic tracking-tight uppercase">Career Metrics</h3>
+                             <h3 className="text-xl font-black text-slate-900 italic tracking-tight uppercase">Employment Details</h3>
                           </div>
                           <div className="grid grid-cols-1 md:grid-cols-2 gap-x-10 gap-y-8">
                              {[
-                                { label: 'Current Role Vector', key: 'role' },
-                                { label: 'Experience Magnitude', key: 'experience' },
-                                { label: 'Current Energy (Salary)', key: 'currentSalary' },
-                                { label: 'Target Energy (Salary)', key: 'expectedSalary' },
-                                { label: 'Notice Buffer', key: 'noticePeriod' },
+                                { label: 'Current Job Title', key: 'role' },
+                                { label: 'Years of Experience', key: 'experience' },
+                                { label: 'Current Salary', key: 'currentSalary' },
+                                { label: 'Expected Salary', key: 'expectedSalary' },
+                                { label: 'Notice Period', key: 'noticePeriod' },
                              ].map(field => (
                                 <div key={field.key} className="space-y-3">
                                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-[0.3em] ml-1 italic">{field.label}</label>
@@ -232,15 +232,15 @@ const CandidateProfile = () => {
                        <div className="space-y-12 text-left">
                           <div className="flex items-center gap-4 border-b border-slate-50 pb-6">
                              <FileText className="text-primary-600" size={24} />
-                             <h3 className="text-xl font-black text-slate-900 italic tracking-tight uppercase">Dossier Repository</h3>
+                             <h3 className="text-xl font-black text-slate-900 italic tracking-tight uppercase">Resume Documents</h3>
                           </div>
                           
                           <div className="p-12 border-4 border-dashed border-slate-100 rounded-[3rem] bg-slate-50/50 flex flex-col items-center justify-center group hover:border-primary-200 transition-all cursor-pointer">
                              <div className="w-20 h-20 bg-white rounded-[2rem] flex items-center justify-center text-slate-200 group-hover:text-primary-600 group-hover:scale-110 group-hover:rotate-6 transition-all shadow-xl mb-6">
                                 <Cloud size={40} />
                              </div>
-                             <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.4em] mb-4 italic">Injection Protocol Active</p>
-                             <h4 className="text-lg font-black text-slate-900 italic uppercase">Pulse New Resume Node</h4>
+                             <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.4em] mb-4 italic">Upload Protocol Active</p>
+                             <h4 className="text-lg font-black text-slate-900 italic uppercase">Upload New Resume</h4>
                              <p className="text-[9px] font-black text-slate-300 uppercase tracking-widest mt-4">PDF, DOCX (Max 10MB)</p>
                           </div>
 
@@ -250,8 +250,8 @@ const CandidateProfile = () => {
                                    <FileText size={24} />
                                 </div>
                                 <div className="text-left">
-                                   <p className="text-sm font-black text-white italic tracking-tight uppercase"> Rivera_Dossier_Final.pdf </p>
-                                   <p className="text-[9px] font-black text-white/40 uppercase tracking-widest mt-1 italic">Synced 2 cycles ago • 4.2 MB</p>
+                                   <p className="text-sm font-black text-white italic tracking-tight uppercase"> {profile.fullName.split(' ')[0]}_Resume_Final.pdf </p>
+                                   <p className="text-[9px] font-black text-white/40 uppercase tracking-widest mt-1 italic">Updated recently • 4.2 MB</p>
                                 </div>
                              </div>
                              <div className="flex items-center gap-3">
@@ -270,7 +270,7 @@ const CandidateProfile = () => {
                        <div className="space-y-12 text-left">
                           <div className="flex items-center gap-4 border-b border-slate-50 pb-6">
                              <Zap className="text-primary-600" size={24} />
-                             <h3 className="text-xl font-black text-slate-900 italic tracking-tight uppercase">Skill Grid Expansion</h3>
+                             <h3 className="text-xl font-black text-slate-900 italic tracking-tight uppercase">Skills & Expertise</h3>
                           </div>
                           
                           {isEditing && (
@@ -278,10 +278,10 @@ const CandidateProfile = () => {
                                 <Plus className="absolute left-6 top-6 text-slate-300 group-focus-within:text-primary-600 transition-colors" size={20} />
                                 <input 
                                    name="skill"
-                                   placeholder="Pulse new skill frequency..."
+                                   placeholder="Type a new skill..."
                                    className="input-field h-20 pl-16 pr-40 bg-slate-50 border-transparent font-black shadow-inner uppercase italic text-sm"
                                 />
-                                <button type="submit" className="absolute right-4 top-4 h-12 px-8 bg-slate-900 text-white rounded-[1.25rem] text-[9px] font-black uppercase tracking-[0.2em] shadow-xl">Inject Node</button>
+                                <button type="submit" className="absolute right-4 top-4 h-12 px-8 bg-slate-900 text-white rounded-[1.25rem] text-[9px] font-black uppercase tracking-[0.2em] shadow-xl">Add Skill</button>
                              </form>
                           )}
 
@@ -309,13 +309,13 @@ const CandidateProfile = () => {
                        <div className="space-y-12 text-left">
                           <div className="flex items-center gap-4 border-b border-slate-50 pb-6">
                              <Globe className="text-primary-600" size={24} />
-                             <h3 className="text-xl font-black text-slate-900 italic tracking-tight uppercase">Network Topology</h3>
+                             <h3 className="text-xl font-black text-slate-900 italic tracking-tight uppercase">Online Presence</h3>
                           </div>
                           <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
                              {[
-                                { label: 'LinkedIn Uplink', key: 'linkedin', icon: ExternalLink },
-                                { label: 'Portfolio Matrix', key: 'portfolio', icon: ExternalLink },
-                                { label: 'Global Website', key: 'website', icon: Globe },
+                                { label: 'LinkedIn Profile', key: 'linkedin', icon: ExternalLink },
+                                { label: 'Portfolio Website', key: 'portfolio', icon: ExternalLink },
+                                { label: 'Personal Website', key: 'website', icon: Globe },
                              ].map(field => (
                                 <div key={field.key} className="space-y-3 group">
                                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-[0.3em] ml-1 italic">{field.label}</label>
@@ -341,14 +341,14 @@ const CandidateProfile = () => {
                     {activeTab === 'documents' && (
                        <div className="space-y-12 text-left">
                           <div className="flex items-center justify-between border-b border-slate-50 pb-10">
-                             <h3 className="text-2xl font-black text-slate-900 italic tracking-tight uppercase">Artifact Archive</h3>
+                             <h3 className="text-2xl font-black text-slate-900 italic tracking-tight uppercase">Other Documents</h3>
                              <button className="flex items-center gap-3 px-8 py-4 bg-slate-900 text-white rounded-2xl text-[10px] font-black uppercase tracking-widest shadow-xl active:scale-95 transition-all">
                                 <Plus size={18} /> Upload New
                              </button>
                           </div>
 
                           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                             {formData.documents.map((doc, idx) => (
+                             {formData.documents?.map((doc, idx) => (
                                 <div key={idx} className="p-8 bg-slate-50 rounded-[2.5rem] border border-slate-50 group hover:bg-white hover:shadow-2xl transition-all">
                                    <div className="flex items-center gap-6 mb-6">
                                       <div className="w-16 h-16 bg-white rounded-2xl flex items-center justify-center text-slate-200 group-hover:text-primary-600 transition-colors shadow-inner">
