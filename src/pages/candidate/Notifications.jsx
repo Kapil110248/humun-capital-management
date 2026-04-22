@@ -1,227 +1,199 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
-  Bell, 
-  Search, 
-  Trash2, 
-  CheckCircle2, 
-  Briefcase, 
-  MessageSquare, 
-  Calendar, 
-  AlertCircle, 
-  Zap, 
-  Star,
-  X, 
-  ChevronRight,
-  Filter,
-  Check,
-  CheckCheck
+  Bell, Search, Trash2, CheckCircle2, Briefcase, MessageSquare, Calendar, 
+  AlertCircle, Zap, Star, X, ChevronRight, Filter, Check, CheckCheck, 
+  ArrowRight, ShieldAlert, Info, RotateCcw
 } from 'lucide-react';
 import { cn } from '../../utils/cn';
+import { useCandidate } from '../../context/CandidateContext';
+import CenterModal from '../../components/layout/CenterModal';
 
 const Notifications = () => {
+  const { notifications, markAsRead, markAllAsRead, deleteNotification, clearAllNotifications, showToast } = useCandidate();
   const [activeTab, setActiveTab] = useState('all');
+  const [searchTerm, setSearchTerm] = useState('');
 
   const categories = [
-    { id: 'all', label: 'All Notifications' },
-    { id: 'jobs', label: 'Job Progress' },
-    { id: 'interviews', label: 'Interviews' },
-    { id: 'offers', label: 'Offer Updates' },
-    { id: 'system', label: 'System' },
+    { id: 'all', label: 'All Signals' },
+    { id: 'jobs', label: 'Career Vectors' },
+    { id: 'interviews', label: 'Audit Phases' },
+    { id: 'offers', label: 'Offer Intel' },
+    { id: 'system', label: 'Ecosystem' },
   ];
 
-  const notifications = [
-    {
-      id: 1,
-      type: 'offers',
-      title: 'New Offer Received!',
-      message: 'Great news! You have received a job offer from TechFlow for the Lead Designer position.',
-      time: '2 hours ago',
-      isUnread: true,
-      priority: 'high',
-      icon: Zap,
-      color: 'bg-emerald-50 text-emerald-600',
-      action: 'View Offer'
-    },
-    {
-      id: 2,
-      type: 'interviews',
-      title: 'Interview Reminder',
-      message: 'Your interview withsarah Johnson starts in 1 hour. Get ready!',
-      time: '1 hour ago',
-      isUnread: true,
-      priority: 'high',
-      icon: Calendar,
-      color: 'bg-purple-50 text-purple-600',
-      action: 'Join Meeting'
-    },
-    {
-      id: 3,
-      type: 'jobs',
-      title: 'Resume Shortlisted',
-      message: 'Your application for Senior Product Designer at HCM.ai has been shortlisted.',
-      time: 'Yesterday, 4:32 PM',
-      isUnread: false,
-      priority: 'medium',
-      icon: Briefcase,
-      color: 'bg-primary-50 text-primary-600',
-      action: 'View Application'
-    },
-    {
-      id: 4,
-      type: 'system',
-      title: 'Profile Strengh Low',
-      message: 'Your profile completion is 65%. Fill in your education details to attract more recruiters.',
-      time: 'Oct 22, 2026',
-      isUnread: false,
-      priority: 'low',
-      icon: AlertCircle,
-      color: 'bg-amber-50 text-amber-600',
-      action: 'Complete Profile'
-    },
-    {
-      id: 5,
-      type: 'jobs',
-      title: 'New Matching Job',
-      message: 'A new UI Designer role was posted at Stripe that matches your skill set.',
-      time: 'Oct 20, 2026',
-      isUnread: false,
-      priority: 'medium',
-      icon: Star,
-      color: 'bg-blue-50 text-blue-600',
-      action: 'View Job'
-    }
-  ];
+  const filteredNotifications = useMemo(() => {
+    return notifications.filter(note => {
+      const matchesTab = activeTab === 'all' || note.type === activeTab;
+      const matchesSearch = note.title.toLowerCase().includes(searchTerm.toLowerCase()) || 
+                            note.message.toLowerCase().includes(searchTerm.toLowerCase());
+      return matchesTab && matchesSearch;
+    });
+  }, [notifications, activeTab, searchTerm]);
 
-  const filteredNotifications = activeTab === 'all' 
-    ? notifications 
-    : notifications.filter(n => n.type === activeTab);
+  const unreadCount = notifications.filter(n => n.isUnread).length;
+
+  const handleAction = (note) => {
+    markAsRead(note.id);
+    showToast(`Redirecting to: ${note.action || 'Event Details'}`, 'info');
+  };
 
   return (
-    <div className="space-y-8 pb-12 animate-fade-in relative">
+    <div className="space-y-10 pb-12 animate-fade-in max-w-5xl mx-auto text-left">
       {/* Header Section */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-8 bg-white p-10 rounded-[3.5rem] border border-slate-50 shadow-soft">
         <div>
-          <h1 className="text-3xl font-extrabold text-slate-900 tracking-tight">Notifications</h1>
-          <p className="text-slate-500 font-medium">Stay updated with your job applications and system alerts</p>
+          <h1 className="text-4xl font-black text-slate-900 tracking-tighter italic uppercase leading-none mb-2">SIGNAL QUEUE</h1>
+          <p className="text-slate-400 font-bold tracking-tight uppercase text-xs">
+            Operational Intelligence • <span className="text-primary-600 font-black">{unreadCount} New Alerts</span>
+          </p>
         </div>
         <div className="flex items-center gap-3">
-          <button className="text-sm font-bold text-slate-500 hover:text-primary-600 px-4 py-2 hover:bg-primary-50 rounded-xl transition-all flex items-center gap-2">
+          <button 
+            onClick={() => { markAllAsRead(); showToast('Ecosystem synchronized'); }}
+            className="flex items-center gap-3 px-6 py-4 bg-slate-50 text-slate-500 rounded-2xl text-[10px] font-black uppercase tracking-widest hover:bg-slate-900 hover:text-white transition-all shadow-sm active:scale-95"
+          >
             <CheckCheck size={18} />
-            <span>Mark All as Read</span>
+            <span>Mark All Read</span>
           </button>
-          <button className="text-sm font-bold text-rose-500 hover:bg-rose-50 px-4 py-2 rounded-xl transition-all flex items-center gap-2">
+          <button 
+            onClick={() => { clearAllNotifications(); showToast('Signal queue purged'); }}
+            className="flex items-center gap-3 px-6 py-4 bg-rose-50 text-rose-500 rounded-2xl text-[10px] font-black uppercase tracking-widest hover:bg-rose-600 hover:text-white transition-all shadow-sm active:scale-95"
+          >
             <Trash2 size={18} />
-            <span>Clear All</span>
           </button>
         </div>
       </div>
 
-      {/* Tabs Filter */}
-      <div className="flex flex-wrap items-center gap-2 border-b border-slate-100 pb-2">
-        {categories.map((cat) => (
-          <button
-            key={cat.id}
-            onClick={() => setActiveTab(cat.id)}
-            className={cn(
-              "px-5 py-2.5 rounded-full text-sm font-bold transition-all whitespace-nowrap",
-              activeTab === cat.id 
-                ? "bg-slate-900 text-white shadow-lg" 
-                : "text-slate-500 hover:text-slate-900 hover:bg-slate-50"
-            )}
-          >
-            {cat.label}
-          </button>
-        ))}
-      </div>
-
-      {/* Notifications List */}
-      <div className="space-y-4 max-w-4xl">
-        <AnimatePresence mode="popLayout">
-          {filteredNotifications.length > 0 ? (
-            filteredNotifications.map((note) => (
-              <motion.div
-                layout
-                key={note.id}
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, scale: 0.95 }}
+      {/* Control Engine */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-center">
+         <div className="flex flex-wrap items-center gap-3">
+            {categories.map((cat) => (
+              <button
+                key={cat.id}
+                onClick={() => setActiveTab(cat.id)}
                 className={cn(
-                  "card p-0 border-none bg-white shadow-soft group relative overflow-hidden transition-all duration-300",
-                  note.isUnread ? "ring-2 ring-primary-100" : ""
+                  "px-6 py-3 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all italic border",
+                  activeTab === cat.id 
+                    ? "bg-slate-900 text-white border-transparent shadow-xl" 
+                    : "text-slate-400 border-slate-100 hover:bg-white hover:border-primary-100"
                 )}
               >
-                <div className="p-6 flex items-start gap-6">
-                  {/* Icon */}
-                  <div className={cn("w-14 h-14 rounded-2xl flex items-center justify-center shrink-0 shadow-sm", note.color)}>
-                    <note.icon size={26} />
-                  </div>
+                {cat.label}
+              </button>
+            ))}
+         </div>
+         <div className="relative">
+            <Search className="absolute left-5 top-5 text-slate-300" size={18} />
+            <input 
+              type="text" 
+              placeholder="Query signals..." 
+              className="input-field h-14 pl-14 bg-white border-slate-50 font-black shadow-inner"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
+         </div>
+      </div>
 
-                  {/* Content */}
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center justify-between mb-1.5">
-                      <div className="flex items-center gap-3">
-                         <h3 className={cn("text-lg font-bold truncate", note.isUnread ? "text-slate-900" : "text-slate-600")}>
-                           {note.title}
-                         </h3>
-                         {note.priority === 'high' && (
-                           <span className="px-2 py-0.5 bg-rose-50 text-rose-500 text-[10px] font-extrabold uppercase rounded shadow-sm border border-rose-100">Urgent</span>
-                         )}
+      {/* Signal List */}
+      <div className="space-y-6">
+        <AnimatePresence mode="popLayout">
+          {filteredNotifications.length > 0 ? (
+            filteredNotifications.map((note) => {
+               const Icon = note.type === 'offers' ? Zap : note.type === 'interviews' ? Calendar : note.type === 'jobs' ? Briefcase : AlertCircle;
+               return (
+                <motion.div
+                  layout
+                  key={note.id}
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, scale: 0.95 }}
+                  className={cn(
+                    "group p-10 rounded-[3rem] bg-white border border-slate-50 shadow-soft transition-all duration-500 relative overflow-hidden",
+                    note.isUnread ? "border-l-8 border-l-primary-600 shadow-xl" : "opacity-60 grayscale-[0.5]"
+                  )}
+                >
+                  <div className="flex flex-col md:flex-row items-start gap-10 relative z-10">
+                    {/* Visual Anchor */}
+                    <div className={cn(
+                       "w-20 h-20 rounded-[2rem] flex items-center justify-center shrink-0 shadow-2xl transition-transform duration-700 group-hover:rotate-12",
+                       note.type === 'offers' ? "bg-emerald-50 text-emerald-600" :
+                       note.type === 'interviews' ? "bg-purple-50 text-purple-600" :
+                       note.type === 'jobs' ? "bg-primary-50 text-primary-600" : "bg-amber-50 text-amber-600"
+                    )}>
+                      <Icon size={32} />
+                    </div>
+
+                    {/* Metadata Content */}
+                    <div className="flex-1 space-y-4">
+                      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                         <div className="flex items-center gap-4">
+                            <h3 className="text-2xl font-black text-slate-900 italic tracking-tighter uppercase leading-none">{note.title}</h3>
+                            {note.isUnread && (
+                               <span className="w-2.5 h-2.5 bg-primary-600 rounded-full animate-pulse shadow-lg shadow-primary-200" />
+                            )}
+                         </div>
+                         <span className="text-[10px] font-black text-slate-300 uppercase tracking-widest">{note.time}</span>
                       </div>
-                      <span className="text-[11px] font-bold text-slate-400 uppercase tracking-widest">{note.time}</span>
-                    </div>
-                    <p className="text-slate-500 font-medium leading-relaxed mb-4">{note.message}</p>
-                    
-                    <div className="flex items-center gap-4">
-                      <button className="text-sm font-bold text-primary-600 hover:text-primary-700 flex items-center gap-1.5 active:scale-95 transition-all">
-                        {note.action}
-                        <ChevronRight size={16} />
-                      </button>
-                      <span className="w-1 h-1 bg-slate-300 rounded-full" />
-                      <button className="text-xs font-bold text-slate-400 hover:text-slate-600">Dismiss</button>
+                      <p className="text-sm font-bold text-slate-500 italic leading-relaxed max-w-3xl">"{note.message}"</p>
+                      
+                      <div className="pt-6 flex flex-wrap items-center gap-6">
+                        <button 
+                          onClick={() => handleAction(note)}
+                          className="px-8 py-3 bg-slate-900 text-white rounded-2xl text-[10px] font-black uppercase tracking-[0.3em] hover:bg-black transition-all active:scale-95 flex items-center gap-3 shadow-xl shadow-slate-200"
+                        >
+                          Execute Response <ArrowRight size={14} />
+                        </button>
+                        <button 
+                           onClick={() => deleteNotification(note.id)}
+                           className="p-3 text-slate-200 hover:text-rose-500 transition-colors"
+                        >
+                           <Trash2 size={20} />
+                        </button>
+                      </div>
                     </div>
                   </div>
-
-                  {/* Actions */}
-                  <div className="flex flex-col gap-2 items-center self-stretch justify-center pl-6 border-l border-slate-50">
-                    {note.isUnread && (
-                      <div className="w-2.5 h-2.5 bg-primary-600 rounded-full shadow-lg shadow-primary-200" />
-                    )}
-                    <button className="p-2 text-slate-300 hover:text-rose-500 transition-colors opacity-0 group-hover:opacity-100">
-                      <Trash2 size={18} />
-                    </button>
+                  
+                  {/* Background Aura */}
+                  <div className="absolute -bottom-10 -right-10 opacity-[0.02] pointer-events-none group-hover:scale-110 transition-transform duration-1000">
+                     <Icon size={200} />
                   </div>
-                </div>
-              </motion.div>
-            ))
+                </motion.div>
+               );
+            })
           ) : (
-            <div className="py-24 text-center">
-               <div className="w-20 h-20 bg-slate-50 rounded-full flex items-center justify-center text-slate-200 mx-auto mb-6">
-                  <Bell size={40} />
+            <div className="py-40 text-center space-y-8 flex flex-col items-center">
+               <div className="w-24 h-24 bg-slate-50 rounded-[2.5rem] flex items-center justify-center text-slate-200 animate-pulse border border-slate-100 shadow-inner">
+                  <Bell size={48} />
                </div>
-               <h3 className="text-xl font-bold text-slate-900">No notifications found</h3>
-               <p className="text-slate-500 font-medium max-w-xs mx-auto mt-2">We'll let you know when something important happens in your hiring journey.</p>
+               <div>
+                  <h3 className="text-2xl font-black text-slate-900 italic tracking-tight uppercase">Silent Ecosystem</h3>
+                  <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.4em] mt-4">Monitoring for strategic signals...</p>
+               </div>
+               <button onClick={() => setActiveTab('all')} className="text-[10px] font-black text-primary-600 uppercase tracking-[0.3em] hover:underline">Reset Frequency</button>
             </div>
           )}
         </AnimatePresence>
       </div>
 
-      {/* Floating Options Bar (Optional) */}
-      <div className="hidden lg:block fixed right-12 bottom-12 space-y-4">
-         <div className="card p-4 bg-white/10 backdrop-blur-3xl border border-white/20 shadow-2xl space-y-4 text-white">
-            <h4 className="text-sm font-bold opacity-60">Notification Stats</h4>
-            <div className="flex gap-6">
-               <div>
-                  <p className="text-2xl font-extrabold">{notifications.filter(n => n.isUnread).length}</p>
-                  <p className="text-[10px] font-bold uppercase tracking-widest opacity-40">Unread</p>
+      {/* Tertiary Metrics Overlay */}
+      <AnimatePresence>
+         {unreadCount > 0 && (
+            <motion.div 
+               initial={{ opacity: 0, y: 100 }}
+               animate={{ opacity: 1, y: 0 }}
+               exit={{ opacity: 0, y: 100 }}
+               className="fixed bottom-10 left-1/2 -translate-x-1/2 z-50 px-8 py-4 bg-slate-900 text-white rounded-3xl shadow-[0_30px_60px_rgba(0,0,0,0.4)] flex items-center gap-8 border border-white/10"
+            >
+               <div className="flex items-center gap-3">
+                  <div className="w-3 h-3 bg-primary-500 rounded-full animate-pulse" />
+                  <span className="text-[10px] font-black uppercase tracking-[0.3em] italic">Live Signals: {unreadCount} Priority</span>
                </div>
-               <div>
-                  <p className="text-2xl font-extrabold">{notifications.length}</p>
-                  <p className="text-[10px] font-bold uppercase tracking-widest opacity-40">Total</p>
-               </div>
-            </div>
-         </div>
-      </div>
+               <div className="w-px h-6 bg-white/20" />
+               <button onClick={markAllAsRead} className="text-[10px] font-black uppercase tracking-[0.3em] text-primary-400 hover:text-white transition-colors">Acknowledge All</button>
+            </motion.div>
+         )}
+      </AnimatePresence>
     </div>
   );
 };

@@ -1,5 +1,5 @@
-import React from 'react';
-import { motion } from 'framer-motion';
+import React, { useState, useMemo } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { 
   FileText, 
   BarChart3, 
@@ -16,47 +16,80 @@ import {
   ArrowUpRight, 
   Filter, 
   Search,
-  LayoutGrid
+  LayoutGrid,
+  Settings2,
+  Clock,
+  Mail,
+  FileSpreadsheet,
+  X,
+  ShieldCheck
 } from 'lucide-react';
 import { cn } from '../../utils/cn';
+import { useManager } from '../../context/ManagerContext';
+import CenterModal from '../../components/common/CenterModal';
 
 const ManagerReports = () => {
-  const stats = [
-    { label: 'Team Productivity', value: '94%', icon: TrendingUp, color: 'text-emerald-600', bg: 'bg-emerald-50' },
-    { label: 'Attendance Rate', value: '98.2%', icon: Users, color: 'text-indigo-600', bg: 'bg-indigo-50' },
-    { label: 'Goal Completion', value: '86%', icon: Target, color: 'text-primary-600', bg: 'bg-primary-50' },
-    { label: 'Avg Rating', value: '4.7', icon: BarChart3, color: 'text-amber-600', bg: 'bg-amber-50' },
-  ];
+  const { teamMembers, tasks, reviews, leaves, attendance, showToast } = useManager();
+  
+  // UI States
+  const [selectedReport, setSelectedReport] = useState(null);
+  const [showCustomModal, setShowCustomModal] = useState(false);
+  const [showScheduleModal, setShowScheduleModal] = useState(false);
+  
+  // Stats calculation
+  const stats = useMemo(() => {
+    return [
+      { label: 'Team Productivity', value: '94%', icon: TrendingUp, color: 'text-emerald-600', bg: 'bg-emerald-50' },
+      { label: 'Attendance Rate', value: '98.2%', icon: Users, color: 'text-indigo-600', bg: 'bg-indigo-50' },
+      { label: 'Goal Completion', value: '86%', icon: Target, color: 'text-primary-600', bg: 'bg-primary-50' },
+      { label: 'Avg Rating', value: '4.7', icon: BarChart3, color: 'text-amber-600', bg: 'bg-amber-50' },
+    ];
+  }, []);
 
   const reportTypes = [
-     { id: 1, name: 'Attendance Report', icon: Timer, color: 'text-indigo-600', bg: 'bg-indigo-50' },
-     { id: 2, name: 'Task Completion', icon: Briefcase, color: 'text-primary-600', bg: 'bg-primary-50' },
-     { id: 3, name: 'KPI Progress', icon: Target, color: 'text-emerald-600', bg: 'bg-emerald-50' },
-     { id: 4, name: 'Leave Summary', icon: Calendar, color: 'text-rose-600', bg: 'bg-rose-50' },
-     { id: 5, name: 'Review Summary', icon: FileText, color: 'text-amber-600', bg: 'bg-amber-50' },
-     { id: 6, name: 'Productivity Trend', icon: TrendingUp, color: 'text-indigo-600', bg: 'bg-indigo-50' },
+     { id: 1, name: 'Attendance Report', icon: Timer, color: 'text-indigo-600', bg: 'bg-indigo-50', desc: 'Detailed login/logout patterns and punctuality indices.' },
+     { id: 2, name: 'Task Completion', icon: Briefcase, color: 'text-primary-600', bg: 'bg-primary-50', desc: 'Efficiency metrics, velocity and overdue mission tracking.' },
+     { id: 3, name: 'KPI Progress', icon: Target, color: 'text-emerald-600', bg: 'bg-emerald-50', desc: 'Objective performance reviews and target alignment.' },
+     { id: 4, name: 'Leave Summary', icon: Calendar, color: 'text-rose-600', bg: 'bg-rose-50', desc: 'Vacation trends, department availability and burn rates.' },
+     { id: 5, name: 'Review Summary', icon: FileText, color: 'text-amber-600', bg: 'bg-amber-50', desc: 'Consolidated performance ratings and manager feedback.' },
+     { id: 6, name: 'Productivity Trend', icon: TrendingUp, color: 'text-indigo-600', bg: 'bg-indigo-50', desc: 'Month-over-month growth and output analytics.' },
   ];
 
-  const topPerformance = [
-     { name: 'John Wick', attendance: '100%', tasks: 42, kpi: 98, rating: 5.0, img: 'https://i.pravatar.cc/150?u=john' },
-     { name: 'Alice Cooper', attendance: '98%', tasks: 38, kpi: 94, rating: 4.8, img: 'https://i.pravatar.cc/150?u=alice' },
-     { name: 'Bob Marley', attendance: '92%', tasks: 30, kpi: 88, rating: 4.5, img: 'https://i.pravatar.cc/150?u=bob' },
-  ];
+  const leaderboard = useMemo(() => {
+    return teamMembers.slice(0, 3).map((m, i) => ({
+      ...m,
+      attendance: i === 0 ? '100%' : i === 1 ? '98%' : '94%',
+      tasks: 30 + (3 - i) * 5,
+      kpi: 90 + (3 - i) * 2,
+      rating: 4.5 + (3 - i) * 0.1
+    }));
+  }, [teamMembers]);
+
+  const handleGenerateReport = (type) => {
+    showToast(`Generating ${type} report...`);
+    setSelectedReport(null);
+  };
+
+  const handleScheduleReport = (e) => {
+    e.preventDefault();
+    showToast('Weekly report scheduling enabled.');
+    setShowScheduleModal(false);
+  };
 
   return (
-    <div className="space-y-8 pb-12 animate-fade-in focus:outline-none">
+    <div className="space-y-8 pb-12 animate-fade-in focus:outline-none text-left">
       {/* Header Section */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-extrabold text-slate-900 tracking-tight">Team Insights & Reports</h1>
-          <p className="text-slate-500 font-medium tracking-tight">Generate deep analytics for attendance, tasks and performance metrics</p>
+          <h1 className="text-3xl font-black text-slate-900 tracking-tight">Team Insights & Reports</h1>
+          <p className="text-slate-500 font-medium tracking-tight mt-1">Generate deep analytics for attendance, tasks and performance metrics</p>
         </div>
         <div className="flex items-center gap-3">
-          <button className="btn-secondary px-5 py-2.5 font-bold flex items-center gap-2">
+          <button onClick={() => showToast('Compiling analytical bundle...')} className="btn-secondary px-5 py-2.5 font-bold flex items-center gap-2">
             <Download size={18} />
-            <span className="hidden sm:inline text-indigo-600">Export PDF</span>
+            <span className="hidden sm:inline text-indigo-600">Export All</span>
           </button>
-          <button className="btn-primary px-6 py-2.5 font-bold flex items-center gap-2 shadow-lg shadow-primary-200">
+          <button onClick={() => setShowCustomModal(true)} className="btn-primary px-6 py-2.5 font-bold flex items-center gap-2 shadow-lg shadow-primary-200 active:scale-95">
              <LayoutGrid size={18} />
              <span>Custom Report</span>
           </button>
@@ -71,13 +104,13 @@ const ManagerReports = () => {
             whileHover={{ y: -5 }}
             className="card p-6 bg-white border border-slate-100 shadow-soft"
           >
-            <div className="flex items-center gap-4">
+            <div className="flex items-center gap-4 text-left">
                <div className={cn("p-3 rounded-2xl", stat.bg, stat.color)}>
                   <stat.icon size={26} />
                </div>
                <div>
-                  <p className="text-sm font-bold text-slate-400 uppercase tracking-widest leading-none mb-1.5">{stat.label}</p>
-                  <h3 className="text-3xl font-extrabold text-slate-900 tracking-tight">{stat.value}</h3>
+                  <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest leading-none mb-1.5 text-left">{stat.label}</p>
+                  <h3 className="text-3xl font-black text-slate-900 tracking-tighter text-left">{stat.value}</h3>
                </div>
             </div>
           </motion.div>
@@ -89,13 +122,13 @@ const ManagerReports = () => {
          
          {/* Report Generation Center */}
          <div className="lg:col-span-8 space-y-8 h-full">
-            <div className="card p-8 bg-white border-none shadow-soft flex flex-col">
-               <div className="flex items-center justify-between mb-8">
-                  <h3 className="text-xl font-bold text-slate-900">Available Report Suites</h3>
-                  <div className="flex items-center gap-2 text-slate-400">
-                     <Search size={18} className="cursor-pointer hover:text-slate-900 transition-colors" />
-                     <div className="w-px h-4 bg-slate-100 mx-2" />
-                     <Filter size={18} className="cursor-pointer hover:text-slate-900 transition-colors" />
+            <div className="card p-10 bg-white border-none shadow-soft flex flex-col text-left">
+               <div className="flex items-center justify-between mb-10">
+                  <h3 className="text-xl font-black text-slate-900 uppercase tracking-tight">Available Intelligence Suites</h3>
+                  <div className="flex items-center gap-4 text-slate-400">
+                     <Search size={18} className="cursor-pointer hover:text-slate-900 transition-colors" title="Search Reports" />
+                     <div className="w-px h-5 bg-slate-100" />
+                     <Filter size={18} className="cursor-pointer hover:text-slate-900 transition-colors" title="Filter Suites" />
                   </div>
                </div>
                
@@ -103,18 +136,24 @@ const ManagerReports = () => {
                   {reportTypes.map((type) => (
                      <motion.div
                        key={type.id}
-                       whileHover={{ y: -4, backgroundColor: '#f8fafc' }}
-                       className="p-6 border border-slate-100 rounded-[2.5rem] flex flex-col gap-5 group cursor-pointer transition-all"
+                       whileHover={{ y: -5, backgroundColor: '#f8fafc', borderColor: '#e2e8f0' }}
+                       onClick={() => setSelectedReport(type)}
+                       className="p-8 border border-slate-50 rounded-[3rem] flex flex-col gap-6 group cursor-pointer transition-all text-left relative overflow-hidden"
                      >
-                        <div className={cn("w-12 h-12 rounded-2xl flex items-center justify-center shadow-sm group-hover:scale-110 group-hover:shadow-lg transition-all", type.bg, type.color)}>
-                           <type.icon size={24} />
+                        <div className="absolute top-0 right-0 p-6 opacity-0 group-hover:opacity-10 transition-all transform scale-150 rotate-12">
+                           <type.icon size={60} />
                         </div>
-                        <div className="space-y-1">
-                           <h4 className="text-sm font-extrabold text-slate-900 leading-none">{type.name}</h4>
-                           <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest leading-none mt-2">Generate Insights</p>
+                        <div className={cn("w-14 h-14 rounded-2xl flex items-center justify-center shadow-lg group-hover:scale-110 transition-all", type.bg, type.color)}>
+                           <type.icon size={28} />
                         </div>
-                        <div className="mt-2 flex items-center gap-1.5 text-xs font-extrabold text-primary-600 opacity-0 group-hover:opacity-100 transition-opacity">
-                           Configure <ArrowUpRight size={14} />
+                        <div className="space-y-2">
+                           <h4 className="text-base font-black text-slate-900 leading-none uppercase tracking-tight">{type.name}</h4>
+                           <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest leading-relaxed">
+                              Deep Analytics Insight
+                           </p>
+                        </div>
+                        <div className="mt-auto flex items-center gap-2 text-[10px] font-black text-primary-600 uppercase tracking-widest opacity-0 group-hover:opacity-100 transition-all translate-y-2 group-hover:translate-y-0 text-left">
+                           Configure Data <ArrowUpRight size={14} />
                         </div>
                      </motion.div>
                   ))}
@@ -122,18 +161,18 @@ const ManagerReports = () => {
             </div>
 
             {/* Performance Analytics Table Preview */}
-            <div className="card p-0 border-none bg-white shadow-soft overflow-hidden">
-               <div className="p-8 border-b border-slate-50 flex items-center justify-between">
-                  <h3 className="text-xl font-bold text-slate-900 flex items-center gap-3">
+            <div className="card p-0 border-none bg-white shadow-soft overflow-hidden text-left">
+               <div className="p-10 border-b border-slate-50 flex items-center justify-between">
+                  <h3 className="text-xl font-black text-slate-900 flex items-center gap-3 uppercase tracking-tight text-left">
                      <BarChart3 className="text-amber-500" size={24} />
                      Team Efficiency Leaderboard
                   </h3>
-                  <button className="text-[10px] font-extrabold text-primary-600 uppercase tracking-widest hover:underline">Full Analytics</button>
+                  <button onClick={() => showToast('Opening deep analytics dashboard...')} className="text-[10px] font-black text-primary-600 uppercase tracking-[0.2em] hover:underline">Full Audit</button>
                </div>
                <div className="overflow-x-auto">
                   <table className="w-full text-left">
                      <thead>
-                        <tr className="bg-slate-50/50 text-[10px] uppercase font-bold text-slate-400 tracking-[0.15em]">
+                        <tr className="bg-slate-50/50 text-[10px] uppercase font-black text-slate-400 tracking-[0.2em]">
                            <th className="px-8 py-5">Team Member</th>
                            <th className="px-8 py-5 text-center">Attendance %</th>
                            <th className="px-8 py-5 text-center">Tasks Done</th>
@@ -142,23 +181,23 @@ const ManagerReports = () => {
                         </tr>
                      </thead>
                      <tbody className="divide-y divide-slate-50 text-sm">
-                        {topPerformance.map((user, i) => (
+                        {leaderboard.map((user, i) => (
                            <tr key={i} className="group hover:bg-slate-50/20 transition-colors">
                               <td className="px-8 py-6">
                                  <div className="flex items-center gap-4">
-                                    <img src={user.img} alt={user.name} className="w-10 h-10 rounded-xl object-cover ring-2 ring-white shadow-sm" />
-                                    <p className="font-bold text-slate-900">{user.name}</p>
+                                    <img src={user.img} alt={user.name} className="w-10 h-10 rounded-xl object-cover ring-2 ring-white shadow-md" />
+                                    <p className="font-black text-slate-900 uppercase tracking-tight">{user.name}</p>
                                  </div>
                               </td>
-                              <td className="px-8 py-6 text-center font-bold text-slate-700">{user.attendance}</td>
+                              <td className="px-8 py-6 text-center font-black text-slate-600 tabular-nums">{user.attendance}</td>
                               <td className="px-8 py-6 text-center">
-                                 <span className="px-3 py-1 bg-slate-50 text-slate-900 rounded-lg font-bold">{user.tasks}</span>
+                                 <span className="px-3 py-1 bg-slate-100 text-slate-900 rounded-lg font-black text-[11px] tabular-nums">{user.tasks}</span>
                               </td>
-                              <td className="px-8 py-6 text-center font-black text-indigo-600">{user.kpi}</td>
+                              <td className="px-8 py-6 text-center font-black text-indigo-600 tabular-nums">{user.kpi}</td>
                               <td className="px-8 py-6 text-right">
-                                 <div className="flex justify-end gap-1 items-center">
-                                    <p className="font-extrabold text-slate-900">{user.rating}</p>
-                                    <BarChart3 size={14} className="text-amber-400" />
+                                 <div className="flex justify-end gap-1.5 items-center">
+                                    <p className="font-black text-slate-900 text-base">{user.rating}</p>
+                                    <BarChart3 size={16} className="text-amber-400" />
                                  </div>
                               </td>
                            </tr>
@@ -170,81 +209,265 @@ const ManagerReports = () => {
          </div>
 
          {/* Sidebar: Distribution & Insights */}
-         <div className="lg:col-span-4 space-y-8 h-full flex flex-col">
-            <div className="card p-8 bg-slate-900 text-white border-none shadow-soft flex-1 relative overflow-hidden group">
+         <div className="lg:col-span-4 space-y-8 h-full flex flex-col text-left">
+            <div className="card p-10 bg-slate-900 text-white border-none shadow-soft flex-1 relative overflow-hidden group text-left">
                <div className="absolute top-0 right-0 p-4 opacity-5 pointer-events-none group-hover:scale-110 transition-transform">
                   <PieChart size={120} />
                </div>
-               <h3 className="text-[10px] font-bold uppercase tracking-[0.2em] text-primary-400 mb-8">Quick Distribution Preview</h3>
+               <h3 className="text-[10px] font-black uppercase tracking-[0.3em] text-primary-400 mb-10 text-left">Internal Distribution Index</h3>
                
-               <div className="space-y-10">
-                  {/* Visual Representation of Leave Distribution (Mock Pie Chart Style) */}
-                  <div className="flex items-center justify-center py-4">
-                     <div className="relative w-40 h-40">
+               <div className="space-y-12 text-left">
+                  {/* Visual Representation of Uptime */}
+                  <div className="flex items-center justify-center py-6">
+                     <div className="relative w-44 h-44">
                         <svg className="w-full h-full transform -rotate-90">
-                           <circle cx="80" cy="80" r="70" className="stroke-white/5 fill-none" strokeWidth="16" />
+                           <circle cx="88" cy="88" r="75" className="stroke-white/5 fill-none" strokeWidth="18" />
                            <motion.circle 
-                             cx="80" cy="80" r="70" 
+                             cx="88" cy="88" r="75" 
                              className="stroke-indigo-500 fill-none" 
-                             strokeWidth="16" 
-                             strokeDasharray={440}
-                             strokeDashoffset={440 - (440 * 0.45)}
+                             strokeWidth="18" 
+                             strokeDasharray={471}
+                             strokeDashoffset={471 - (471 * 0.94)}
                              strokeLinecap="round"
-                             initial={{ strokeDashoffset: 440 }}
-                             animate={{ strokeDashoffset: 440 - (440 * 0.45) }}
-                             transition={{ duration: 2 }}
+                             initial={{ strokeDashoffset: 471 }}
+                             animate={{ strokeDashoffset: 471 - (471 * 0.94) }}
+                             transition={{ duration: 2, ease: "easeOut" }}
                            />
                            <motion.circle 
-                             cx="80" cy="80" r="70" 
+                             cx="88" cy="88" r="75" 
                              className="stroke-primary-500 fill-none" 
-                             strokeWidth="16" 
-                             strokeDasharray={440}
-                             strokeDashoffset={440 - (440 * 0.25)}
+                             strokeWidth="18" 
+                             strokeDasharray={471}
+                             strokeDashoffset={471 - (471 * 0.25)}
                              strokeLinecap="round"
-                             style={{ strokeDashoffset: 440 - (440 * 0.15), rotate: '160deg', transformOrigin: 'center' }}
+                             style={{ rotate: '270deg', transformOrigin: 'center' }}
                            />
                         </svg>
                         <div className="absolute inset-0 flex flex-col items-center justify-center">
-                           <p className="text-2xl font-black text-white leading-none">88%</p>
-                           <p className="text-[8px] font-extrabold text-slate-500 uppercase tracking-widest mt-1">Uptime</p>
+                           <p className="text-4xl font-black text-white tracking-tighter tabular-nums leading-none">94<span className="text-lg opacity-40">%</span></p>
+                           <p className="text-[9px] font-black text-slate-500 uppercase tracking-[0.3em] mt-3">Team Health</p>
                         </div>
                      </div>
                   </div>
 
-                  <div className="space-y-4 relative z-10">
+                  <div className="space-y-6 relative z-10 text-left">
                      {[
                         { label: 'Work Attendance', count: '94%', color: 'bg-indigo-500' },
                         { label: 'Task Execution', count: '82%', color: 'bg-primary-500' },
                         { label: 'KPI Alignment', count: '76%', color: 'bg-amber-500' },
                      ].map((item, i) => (
-                        <div key={i} className="flex flex-col gap-2">
-                           <div className="flex justify-between items-center text-[10px] font-extrabold uppercase tracking-widest">
-                              <span className="text-slate-400">{item.label}</span>
-                              <span className="text-white">{item.count}</span>
+                        <div key={i} className="flex flex-col gap-3 text-left">
+                           <div className="flex justify-between items-center text-[10px] font-black uppercase tracking-[0.2em] text-left">
+                              <span className="text-slate-500">{item.label}</span>
+                              <span className="text-white tabular-nums">{item.count}</span>
                            </div>
-                           <div className="w-full h-1.5 bg-white/5 rounded-full overflow-hidden">
-                              <div className={cn("h-full", item.color)} style={{ width: item.count }} />
+                           <div className="w-full h-1.5 bg-white/5 rounded-full overflow-hidden p-[1px]">
+                              <motion.div 
+                                initial={{ width: 0 }}
+                                animate={{ width: item.count }}
+                                transition={{ duration: 1, delay: i * 0.1 }}
+                                className={cn("h-full rounded-full shadow-lg shadow-white/5", item.color)} 
+                              />
                            </div>
                         </div>
                      ))}
                   </div>
 
-                  <button className="w-full py-4 bg-white/10 hover:bg-white/20 text-white rounded-2xl text-[10px] font-extrabold uppercase tracking-widest border border-white/10 transition-all">
-                     Download Analytics Bundle
+                  <button 
+                    onClick={() => showToast('Compiling executive summary...')}
+                    className="w-full py-5 bg-white/5 hover:bg-white/10 text-white rounded-[2rem] text-[10px] font-black uppercase tracking-[0.2em] border border-white/5 transition-all active:scale-95 shadow-2xl flex items-center justify-center gap-3"
+                  >
+                     <Download size={16} />
+                     Executive Bundle
                   </button>
                </div>
             </div>
 
             {/* Scheduler Card */}
-            <div className="card p-8 bg-indigo-600 text-white border-none shadow-soft">
-               <h3 className="text-xs font-bold uppercase tracking-widest text-primary-300 mb-6">Automated Reports</h3>
-               <p className="text-sm font-medium leading-relaxed mb-8">Schedule recurring PDF/Excel reports to be sent directly to your email every Monday.</p>
-               <button className="w-full py-4 bg-white text-indigo-600 rounded-2xl font-bold flex items-center justify-center gap-2 hover:bg-slate-50 transition-all shadow-xl">
-                  Enable Scheduling
+            <div className="card p-10 bg-gradient-to-br from-indigo-600 to-indigo-800 text-white border-none shadow-soft text-left relative overflow-hidden group">
+               <div className="absolute bottom-0 right-0 p-6 opacity-10 group-hover:scale-125 transition-transform rotate-12">
+                  <Clock size={100} />
+               </div>
+               <h3 className="text-[10px] font-black uppercase tracking-[0.3em] text-primary-300 mb-6 text-left">Automated Audit</h3>
+               <p className="text-sm font-bold leading-relaxed mb-10 opacity-80 text-left">Schedule recurring intelligence batches to be sent directly to your encrypted inbox.</p>
+               <button onClick={() => setShowScheduleModal(true)} className="w-full py-5 bg-white text-indigo-900 rounded-[2rem] text-[10px] font-black uppercase tracking-[0.2em] flex items-center justify-center gap-3 hover:bg-slate-50 transition-all shadow-2xl active:scale-95 relative z-10">
+                  <Mail size={16} />
+                  Configure Schedule
                </button>
             </div>
          </div>
       </div>
+
+      {/* Report Configuration Modal */}
+      <CenterModal
+        isOpen={!!selectedReport}
+        onClose={() => setSelectedReport(null)}
+        title={`Configure ${selectedReport?.name}`}
+      >
+         {selectedReport && (
+            <div className="p-10 space-y-10 text-left">
+               <div className="flex items-center gap-6 p-8 bg-slate-50 rounded-[3rem] border border-slate-100 text-left">
+                  <div className={cn("w-16 h-16 rounded-[2rem] flex items-center justify-center shadow-xl ring-4 ring-white", selectedReport.bg, selectedReport.color)}>
+                     <selectedReport.icon size={32} />
+                  </div>
+                  <div className="text-left">
+                     <h3 className="text-2xl font-black text-slate-900 uppercase tracking-tight leading-none">{selectedReport.name}</h3>
+                     <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mt-2">{selectedReport.desc}</p>
+                  </div>
+               </div>
+
+               <div className="grid grid-cols-2 gap-8 text-left">
+                  <div className="space-y-2 text-left">
+                     <label className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 px-1">Evaluation Period</label>
+                     <select className="input-field h-14 font-extrabold appearance-none bg-white border-slate-100 uppercase tracking-tight">
+                        <option>Current Quarter (Q4)</option>
+                        <option>Current Year (2026)</option>
+                        <option>Last 30 Days</option>
+                        <option>Custom Range</option>
+                     </select>
+                  </div>
+                  <div className="space-y-2 text-left">
+                     <label className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 px-1">File Format</label>
+                     <div className="flex gap-4">
+                        <button className="flex-1 h-14 bg-slate-900 text-white rounded-2xl font-black text-[10px] uppercase tracking-widest flex items-center justify-center gap-2">
+                           <FileText size={16} /> PDF
+                        </button>
+                        <button className="flex-1 h-14 bg-white border border-slate-200 text-slate-600 rounded-2xl font-black text-[10px] uppercase tracking-widest flex items-center justify-center gap-2 hover:bg-slate-50">
+                           <FileSpreadsheet size={16} /> XLSX
+                        </button>
+                     </div>
+                  </div>
+               </div>
+
+               <div className="space-y-4 text-left">
+                  <label className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 px-1">Include Metadata Modules</label>
+                  <div className="grid grid-cols-2 gap-4 text-left">
+                     {['Anonymized Data', 'Departmental Comparison', 'Trend Projections', 'Individual Transcripts'].map(mod => (
+                        <label key={mod} className="flex items-center gap-3 p-5 bg-slate-50 border border-slate-100 rounded-[2rem] cursor-pointer hover:border-primary-600 transition-all group">
+                           <div className="w-5 h-5 rounded-lg border-2 border-slate-200 group-hover:border-primary-600 bg-white" />
+                           <span className="text-[11px] font-black text-slate-600 uppercase tracking-tight">{mod}</span>
+                        </label>
+                     ))}
+                  </div>
+               </div>
+
+               <div className="pt-6 flex flex-col gap-4 text-left">
+                  <button onClick={() => handleGenerateReport(selectedReport.name)} className="btn-primary py-5 font-black uppercase tracking-[0.2em] shadow-2xl shadow-primary-200 flex items-center justify-center gap-3">
+                     <ShieldCheck size={20} />
+                     Generate Secured Report
+                  </button>
+                  <button onClick={() => setSelectedReport(null)} className="py-4 text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 hover:text-slate-600 transition-all">Cancel Configuration</button>
+               </div>
+            </div>
+         )}
+      </CenterModal>
+
+      {/* Custom Report Builder Modal */}
+      <CenterModal
+        isOpen={showCustomModal}
+        onClose={() => setShowCustomModal(false)}
+        title="Intelligence Report Architect"
+      >
+         <div className="p-10 space-y-10 text-left">
+            <div className="p-8 bg-indigo-50 border border-indigo-100 rounded-[3rem] flex items-center gap-6 text-left">
+               <div className="w-14 h-14 rounded-2xl bg-indigo-600 text-white flex items-center justify-center shadow-lg">
+                  <Settings2 size={28} />
+               </div>
+               <div className="text-left">
+                  <h4 className="text-lg font-black text-indigo-900 uppercase tracking-tight leading-none">Architect Workspace</h4>
+                  <p className="text-[10px] font-black text-indigo-400 uppercase tracking-widest mt-2 leading-none">Assemble custom data points from your entire team</p>
+               </div>
+            </div>
+
+            <div className="space-y-6 text-left">
+               <div className="space-y-2 text-left">
+                  <label className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 px-1">Report Identity</label>
+                  <input type="text" placeholder="e.g. Q4 Executive Velocity Audit" className="input-field h-14 font-black uppercase tracking-tight" />
+               </div>
+
+               <div className="grid grid-cols-2 gap-8 text-left">
+                  <div className="space-y-4 text-left">
+                     <label className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 px-1">Data Origin</label>
+                     <div className="space-y-3">
+                        {['Mission Core', 'Personnel Intel', 'Attendance Log', 'Assessment Score'].map(origin => (
+                           <label key={origin} className="flex items-center gap-3 p-4 bg-white border border-slate-100 rounded-2xl cursor-pointer hover:border-primary-600 transition-all">
+                              <div className="w-5 h-5 rounded-full border-2 border-primary-600 flex items-center justify-center">
+                                 <div className="w-2.5 h-2.5 bg-primary-600 rounded-full" />
+                              </div>
+                              <span className="text-[11px] font-black text-slate-700 uppercase tracking-tight">{origin}</span>
+                           </label>
+                        ))}
+                     </div>
+                  </div>
+                  <div className="space-y-2 text-left">
+                     <label className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 px-1">Select Personnel</label>
+                     <div className="h-[184px] p-4 bg-slate-50 rounded-2xl border border-slate-100 overflow-y-auto space-y-2 scrollbar-hide text-left">
+                        {teamMembers.map(m => (
+                           <div key={m.id} className="flex items-center gap-3 p-2 bg-white rounded-xl shadow-sm">
+                              <img src={m.img} className="w-6 h-6 rounded-lg object-cover" />
+                              <span className="text-[10px] font-black text-slate-600 uppercase tracking-tight">{m.name}</span>
+                              <div className="ml-auto w-4 h-4 rounded border-2 border-slate-100" />
+                           </div>
+                        ))}
+                     </div>
+                  </div>
+               </div>
+            </div>
+
+            <div className="pt-6 flex flex-col gap-4 text-left">
+               <button onClick={() => { showToast('Custom report layout encrypted and saved.'); setShowCustomModal(false); }} className="btn-primary py-5 font-black uppercase tracking-[0.2em] shadow-2xl shadow-primary-200">Construct & Generate</button>
+               <button onClick={() => setShowCustomModal(false)} className="py-4 text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 hover:text-slate-600 transition-all">Discard Workspace</button>
+            </div>
+         </div>
+      </CenterModal>
+
+      {/* Schedule Modal */}
+      <CenterModal
+        isOpen={showScheduleModal}
+        onClose={() => setShowScheduleModal(false)}
+        title="Automation Frequency Config"
+      >
+         <form onSubmit={handleScheduleReport} className="p-10 space-y-10 text-left">
+            <div className="p-8 bg-indigo-900 text-white rounded-[3rem] relative overflow-hidden group text-left">
+               <div className="absolute top-0 right-0 p-10 opacity-10 group-hover:scale-110 transition-transform">
+                  <Mail size={120} />
+               </div>
+               <div className="relative z-10 text-left">
+                  <h4 className="text-xl font-black uppercase tracking-tight leading-none mb-3">Sync Delivery</h4>
+                  <p className="text-[10px] font-black text-indigo-400 uppercase tracking-widest leading-none">Automated intelligence transmission</p>
+               </div>
+            </div>
+
+            <div className="space-y-8 text-left">
+               <div className="space-y-4 text-left">
+                  <label className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 px-1">Transmission Pulse</label>
+                  <div className="grid grid-cols-3 gap-4 text-left">
+                     {['Weekly', 'Bi-Monthly', 'Monthly'].map(pulse => (
+                        <button key={pulse} type="button" className={cn(
+                           "py-5 rounded-[2rem] text-[10px] font-black uppercase tracking-[0.1em] transition-all border",
+                           pulse === 'Weekly' ? "bg-slate-900 text-white border-slate-900 shadow-xl" : "bg-white text-slate-400 border-slate-100 hover:border-slate-300"
+                        )}>
+                           {pulse}
+                        </button>
+                     ))}
+                  </div>
+               </div>
+
+               <div className="space-y-2 text-left">
+                  <label className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 px-1">Recipient Channel</label>
+                  <div className="relative">
+                     <Mail className="absolute left-5 top-5 text-slate-300" size={18} />
+                     <input type="email" placeholder="manager@hcm.ai" className="input-field h-16 pl-14 font-black uppercase tracking-tight" />
+                  </div>
+               </div>
+            </div>
+
+            <div className="pt-6 flex flex-col gap-4 text-left">
+               <button type="submit" className="btn-primary py-5 font-black uppercase tracking-[0.2em] shadow-2xl shadow-primary-200">Activate Secure Loop</button>
+               <button type="button" onClick={() => setShowScheduleModal(false)} className="py-4 text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 hover:text-slate-600 transition-all text-left flex justify-center">Kill Schedule</button>
+            </div>
+         </form>
+      </CenterModal>
     </div>
   );
 };

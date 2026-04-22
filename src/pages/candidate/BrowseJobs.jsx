@@ -1,461 +1,398 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { 
-  Search, 
-  MapPin, 
-  Briefcase, 
-  DollarSign, 
-  Clock, 
-  Filter, 
-  RotateCcw, 
-  Bookmark, 
-  ChevronRight, 
-  X, 
-  Users, 
-  GraduationCap,
-  Calendar,
-  Layers,
-  ArrowRight,
-  CheckCircle2
+  Search, MapPin, Briefcase, DollarSign, Clock, Filter, RotateCcw, Bookmark, 
+  ChevronRight, X, Users, GraduationCap, Calendar, Layers, ArrowRight, CheckCircle2,
+  BookmarkCheck, Info, Send, FileText, Globe, Zap
 } from 'lucide-react';
 import { cn } from '../../utils/cn';
+import { useCandidate } from '../../context/CandidateContext';
+import CenterModal from '../../components/layout/CenterModal';
 
 const BrowseJobs = () => {
+  const { jobs, saveJob, applyForJob, showToast } = useCandidate();
+  const { savedIndices } = jobs;
   const navigate = useNavigate();
-  const [isFilterVisible, setIsFilterVisible] = useState(true);
+  
+  const [searchTerm, setSearchTerm] = useState('');
+  const [filters, setFilters] = useState({
+    department: '',
+    location: '',
+    type: '',
+    experience: '',
+    salary: ''
+  });
+  
   const [selectedJob, setSelectedJob] = useState(null);
-  const [searchQuery, setSearchQuery] = useState('');
+  const [isApplyModalOpen, setIsApplyModalOpen] = useState(false);
+  const [sortBy, setSortBy] = useState('Newest');
 
-  const jobs = [
-    {
-      id: 1,
-      title: 'Senior Product Designer',
-      company: 'HCM.ai Global',
-      department: 'Design',
-      location: 'Remote, US',
-      experience: '5-8 years',
-      salary: '$120k - $160k',
-      type: 'Full Time',
-      postedDate: '2 days ago',
-      positions: 2,
-      skills: ['Figma', 'UX Research', 'Design Systems'],
-      summary: 'We are looking for a Senior Product Designer to lead our core HCM platform redesign and improve candidate flows.',
-      description: 'As a Senior Product Designer at HCM.ai, you will be responsible for defining the visual and interaction patterns of our AI-driven platform. You will work closely with product managers and engineers to deliver world-class user experiences.',
-      responsibilities: [
-        'Lead the design process for major features from discovery to delivery.',
-        'Conduct user research and translate insights into actionable design improvements.',
-        'Maintain and evolve our design system.',
-        'Mentor junior designers and contribute to our design culture.'
-      ],
-      requirements: [
-        '5+ years of experience in product design for complex SaaS applications.',
-        'Strong portfolio demonstrating UX/UI excellence.',
-        'Experience with Figma and collaborative design tools.',
-        'Excellent communication and stakeholders management skills.'
-      ],
-      benefits: ['Remote Work', 'Unlimited PTO', 'Health Insurance', 'Equity Options']
-    },
-    {
-      id: 2,
-      title: 'Frontend Engineer (React)',
-      company: 'TechFlow',
-      department: 'Engineering',
-      location: 'San Francisco, CA',
-      experience: '3-5 years',
-      salary: '$140k - $180k',
-      type: 'Hybrid',
-      postedDate: 'Today',
-      positions: 1,
-      skills: ['React', 'TypeScript', 'Tailwind'],
-      summary: 'Join our frontend team to build high-performance dashboard components using the latest React features.',
-      description: 'TechFlow is looking for a talented Frontend Engineer who loves React and performance optimization.',
-      responsibilities: [
-        'Develop new features for our real-time analytics dashboard.',
-        'Optimize application performance and ensure scalability.',
-        'Stay up-to-date with the latest frontend technologies.'
-      ],
-      requirements: [
-        'Strong proficiency in React and its core principles.',
-        'Experience with TypeScript and modern CSS (Tailwind/PostCSS).',
-        'Familiarity with state management libraries like Redux or Zustand.'
-      ],
-      benefits: ['Competitive Salary', 'Daily Meals', 'Gym Membership']
-    },
-    {
-      id: 3,
-      title: 'Marketing Specialist',
-      company: 'GrowthLoop',
-      department: 'Marketing',
-      location: 'New York, NY',
-      experience: '2-4 years',
-      salary: '$80k - $110k',
-      type: 'Full Time',
-      postedDate: '1 week ago',
-      positions: 3,
-      skills: ['SEO', 'Content Strategy', 'Analytics'],
-      summary: 'Help us scale our customer acquisition channels through creative content and data-driven marketing.',
-      description: 'Marketing is the heart of GrowthLoop. We need someone who can blend creativity with numbers.',
-      responsibilities: [
-        'Create and manage content across all social media platforms.',
-        'Analyze campaign performance and report key metrics.',
-        'Collaborate with the sales team on lead generation.'
-      ],
-      requirements: [
-        '2+ years of experience in digital marketing.',
-        'Strong writing and communication skills.',
-        'Data-driven mindset with experience in Google Analytics.'
-      ],
-      benefits: ['Training budget', 'Performance bonuses', 'Pet-friendly office']
-    },
-    {
-      id: 4,
-      title: 'Backend Developer (Node.js)',
-      company: 'SecureNet',
-      department: 'Engineering',
-      location: 'Remote, Europe',
-      experience: '4-6 years',
-      experience_level: 'Mid-Senior',
-      salary: '€60k - €90k',
-      type: 'Remote',
-      postedDate: '3 days ago',
-      positions: 2,
-      skills: ['Node.js', 'PostgreSQL', 'AWS'],
-      summary: 'Build secure and scalable API services for our global infrastructure monitoring platform.',
-      description: 'SecureNet provides enterprise-grade monitoring. We need a backend pro to join our infra team.',
-      responsibilities: [
-        'Design and implement microservices in Node.js.',
-        'Optimize database queries and schema designs.',
-        'Ensure security best practices are followed.'
-      ],
-      requirements: [
-        'Strong Node.js background with TypeScript.',
-        'Deep understanding of relational databases.',
-        'Experience with cloud providers like AWS.'
-      ],
-      benefits: ['Remote First', 'Learning Stipend', 'Health & Wellness']
-    }
-  ];
+  const filteredJobs = useMemo(() => {
+    return jobs.allJobs.filter(job => {
+      const matchesSearch = job.title.toLowerCase().includes(searchTerm.toLowerCase()) || 
+                            job.company.toLowerCase().includes(searchTerm.toLowerCase());
+      const matchesDept = !filters.department || job.department === filters.department;
+      const matchesLocation = !filters.location || job.location.includes(filters.location);
+      const matchesType = !filters.type || job.type === filters.type;
+      
+      return matchesSearch && matchesDept && matchesLocation && matchesType;
+    }).sort((a, b) => {
+      if (sortBy === 'Salary (High)') return parseInt(b.salary.replace(/\D/g, '')) - parseInt(a.salary.replace(/\D/g, ''));
+      return 0; // Default Newest (mocked by array order)
+    });
+  }, [jobs.allJobs, searchTerm, filters, sortBy]);
+
+  const handleApplySubmit = (e) => {
+    e.preventDefault();
+    const formData = new FormData(e.target);
+    applyForJob(selectedJob.id, {
+      expectedSalary: formData.get('expectedSalary'),
+      availability: formData.get('availability'),
+      coverLetter: formData.get('coverLetter')
+    });
+    setIsApplyModalOpen(false);
+    setSelectedJob(null);
+    showToast(`Application for ${selectedJob.title} sent!`);
+  };
 
   return (
-    <div className="space-y-8 pb-12 animate-fade-in relative">
+    <div className="space-y-8 pb-12 animate-fade-in max-w-7xl mx-auto text-left">
       {/* Header Section */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
         <div>
-          <h1 className="text-3xl font-extrabold text-slate-900 tracking-tight">Browse Jobs</h1>
-          <p className="text-slate-500 font-medium">Discover opportunities that match your skills and career goals</p>
+          <h1 className="text-4xl font-black text-slate-900 tracking-tighter italic">MARKET RADAR</h1>
+          <p className="text-slate-500 font-bold tracking-tight uppercase text-xs mt-1">Discover strategic roles across the ecosystem</p>
         </div>
-        <button className="flex items-center justify-center gap-2 px-5 py-2.5 bg-white border border-slate-200 text-slate-700 rounded-xl font-bold hover:bg-slate-50 transition-all shadow-sm active:scale-95">
-          <Clock size={18} />
-          <span>My Applications</span>
-        </button>
+        <div className="flex items-center gap-3">
+           <button 
+             onClick={() => navigate('/candidate/applications')}
+             className="flex items-center gap-3 px-6 py-3 bg-white border border-slate-200 text-slate-700 rounded-2xl text-[10px] font-black uppercase tracking-widest hover:bg-slate-50 transition-all shadow-sm active:scale-95"
+           >
+             <Clock size={16} />
+             <span>Active Logs</span>
+           </button>
+        </div>
       </div>
 
-      {/* Filter Bar */}
-      <div className="card p-6 border-none bg-white shadow-soft">
-         <div className="flex items-center justify-between mb-6">
-            <div className="flex items-center gap-2 text-slate-800 font-bold">
-              <Filter size={18} className="text-primary-600" />
-              <span>Search Filters</span>
+      {/* Strategic Filter Engine */}
+      <div className="card p-8 border-none bg-white shadow-soft">
+         <div className="flex items-center justify-between mb-8">
+            <div className="flex items-center gap-3">
+              <div className="p-2.5 bg-primary-50 text-primary-600 rounded-xl">
+                 <Filter size={20} />
+              </div>
+              <h3 className="text-xl font-black text-slate-900 italic tracking-tight leading-none">Filter Engine</h3>
             </div>
-            <button className="text-sm font-bold text-slate-400 hover:text-primary-600 flex items-center gap-1.5 transition-colors">
+            <button 
+              onClick={() => { setSearchTerm(''); setFilters({ department: '', location: '', type: '', experience: '', salary: '' }); }}
+              className="text-[10px] font-black text-slate-400 hover:text-primary-600 flex items-center gap-2 uppercase tracking-widest transition-all"
+            >
               <RotateCcw size={14} />
-              <span>Reset</span>
+              <span>Reset Signal</span>
             </button>
          </div>
 
-         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             <div className="relative">
-              <Search className="absolute left-3 top-3 text-slate-400" size={18} />
+              <Search className="absolute left-4 top-3.5 text-slate-400" size={18} />
               <input 
                 type="text" 
-                placeholder="Job title or keywords..." 
-                className="input-field pl-10 h-11"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="Query positions..." 
+                className="input-field pl-12 h-14 bg-slate-50 border-transparent font-black"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
               />
             </div>
             <div className="relative">
-              <Layers className="absolute left-3 top-3 text-slate-400 pointer-events-none" size={18} />
-              <select className="input-field pl-10 h-11 appearance-none bg-white">
-                <option value="">All Departments</option>
-                <option value="eng">Engineering</option>
-                <option value="des">Design</option>
-                <option value="mkt">Marketing</option>
+              <Layers className="absolute left-4 top-3.5 text-slate-400 pointer-events-none" size={18} />
+              <select 
+                className="input-field pl-12 h-14 bg-slate-50 border-transparent font-black appearance-none cursor-pointer"
+                value={filters.department}
+                onChange={(e) => setFilters({...filters, department: e.target.value})}
+              >
+                <option value="">All Vectors</option>
+                <option value="Design">Design</option>
+                <option value="Engineering">Engineering</option>
+                <option value="Product">Product</option>
+                <option value="Marketing">Marketing</option>
               </select>
             </div>
             <div className="relative">
-              <MapPin className="absolute left-3 top-3 text-slate-400 pointer-events-none" size={18} />
-              <select className="input-field pl-10 h-11 appearance-none bg-white">
-                <option value="">All Locations</option>
-                <option value="remote">Remote</option>
-                <option value="us">United States</option>
-                <option value="eu">Europe</option>
+              <Globe className="absolute left-4 top-3.5 text-slate-400 pointer-events-none" size={18} />
+              <select 
+                className="input-field pl-12 h-14 bg-slate-50 border-transparent font-black appearance-none cursor-pointer"
+                value={filters.location}
+                onChange={(e) => setFilters({...filters, location: e.target.value})}
+              >
+                <option value="">Global Coverage</option>
+                <option value="Remote">Remote Operations</option>
+                <option value="New York">New York Hub</option>
+                <option value="San Francisco">San Francisco Hub</option>
+                <option value="London">London Hub</option>
               </select>
             </div>
             <div className="relative">
-               <Briefcase className="absolute left-3 top-3 text-slate-400 pointer-events-none" size={18} />
-               <select className="input-field pl-10 h-11 appearance-none bg-white">
-                <option value="">Employment Type</option>
-                <option value="ft">Full Time</option>
-                <option value="pt">Part Time</option>
-                <option value="rm">Remote</option>
+               <Zap className="absolute left-4 top-3.5 text-slate-400 pointer-events-none" size={18} />
+               <select 
+                 className="input-field pl-12 h-14 bg-slate-50 border-transparent font-black appearance-none cursor-pointer"
+                 value={filters.type}
+                 onChange={(e) => setFilters({...filters, type: e.target.value})}
+               >
+                <option value="">Employment Mode</option>
+                <option value="Full-time">Strategic Perm</option>
+                <option value="Contract">Task Force (Contract)</option>
+                <option value="Hybrid">Hybrid Mode</option>
               </select>
             </div>
          </div>
-
-         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mt-4 items-end">
-            <div className="relative">
-               <GraduationCap className="absolute left-3 top-3 text-slate-400 pointer-events-none" size={18} />
-               <select className="input-field pl-10 h-11 appearance-none bg-white font-medium text-slate-600">
-                <option value="">Experience Level</option>
-                <option value="jr">Junior</option>
-                <option value="md">Mid-Level</option>
-                <option value="sr">Senior</option>
-              </select>
-            </div>
-            <div className="relative">
-               <DollarSign className="absolute left-3 top-3 text-slate-400 pointer-events-none" size={18} />
-               <select className="input-field pl-10 h-11 appearance-none bg-white font-medium text-slate-600">
-                <option value="">Salary Range</option>
-                <option value="50">Under $50k</option>
-                <option value="100">$50k - $100k</option>
-                <option value="150">$100k - $150k</option>
-                <option value="150+">$150k+</option>
-              </select>
-            </div>
-            <div className="lg:col-span-2 flex gap-3">
-              <button className="btn-primary flex-1 h-11 font-bold">Apply Filters</button>
-            </div>
-         </div>
-      </div>
-
-      {/* Job Listings Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {jobs.map((job) => (
-          <motion.div
-            key={job.id}
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            whileHover={{ y: -5 }}
-            className="group card border-slate-100 hover:border-primary-100 hover:shadow-premium transition-all duration-300"
-          >
-            <div className="flex justify-between items-start mb-6">
-              <div className="flex gap-4">
-                <div className="w-12 h-12 rounded-2xl bg-slate-900 text-white flex items-center justify-center font-bold text-xl shadow-lg shrink-0">
-                  {job.company[0]}
-                </div>
-                <div>
-                  <h3 className="text-xl font-extrabold text-slate-900 group-hover:text-primary-600 transition-colors">{job.title}</h3>
-                  <div className="flex items-center gap-2 mt-1">
-                    <p className="text-sm font-bold text-slate-500">{job.company}</p>
-                    <span className="w-1 h-1 bg-slate-300 rounded-full" />
-                    <p className="text-xs font-medium text-slate-400">{job.postedDate}</p>
-                  </div>
-                </div>
-              </div>
-              <button className="p-2 text-slate-300 hover:text-primary-600 hover:bg-primary-50 rounded-lg transition-all">
-                <Bookmark size={20} />
-              </button>
-            </div>
-
-            <div className="grid grid-cols-2 gap-y-4 gap-x-2 mb-6">
-              {[
-                { icon: Layers, text: job.department },
-                { icon: MapPin, text: job.location },
-                { icon: Briefcase, text: job.experience },
-                { icon: DollarSign, text: job.salary },
-                { icon: Clock, text: job.type },
-                { icon: Users, text: `${job.positions} Openings` },
-              ].map((info, i) => (
-                <div key={i} className="flex items-center gap-2 text-slate-500">
-                  <info.icon size={16} className="text-slate-400 shrink-0" />
-                  <span className="text-xs font-bold truncate">{info.text}</span>
-                </div>
-              ))}
-            </div>
-
-            <p className="text-sm text-slate-600 mb-6 font-medium leading-relaxed line-clamp-2">
-              {job.summary}
-            </p>
-
-            <div className="flex flex-wrap gap-2 mb-8">
-              {job.skills.map((skill, i) => (
-                <span key={i} className="px-2.5 py-1 bg-slate-100 text-slate-600 rounded-lg text-[10px] font-bold uppercase tracking-wider">
-                  {skill}
-                </span>
-              ))}
-            </div>
-
-            <div className="flex items-center gap-3">
-              <button 
-                onClick={() => setSelectedJob(job)}
-                className="flex-1 btn-secondary h-11 text-sm font-bold"
-              >
-                View Details
-              </button>
-              <button 
-                onClick={() => navigate('/candidate/jobs/apply')}
-                className="flex-1 btn-primary h-11 text-sm font-bold flex items-center justify-center gap-2"
-              >
-                <span>Apply Now</span>
-                <ArrowRight size={16} />
-              </button>
-            </div>
-          </motion.div>
-        ))}
-      </div>
-
-      {/* Pagination Placeholder */}
-      <div className="flex items-center justify-center mt-12 gap-2">
-         <button className="p-2 text-slate-400 hover:bg-slate-100 rounded-lg disabled:opacity-30" disabled>
-            <X className="rotate-45" size={18} />
-         </button>
-         <button className="w-10 h-10 rounded-xl bg-primary-600 text-white font-bold shadow-lg shadow-primary-100">1</button>
-         <button className="w-10 h-10 rounded-xl hover:bg-white border border-slate-200 text-slate-600 font-bold">2</button>
-         <button className="w-10 h-10 rounded-xl hover:bg-white border border-slate-200 text-slate-600 font-bold">3</button>
-         <button className="p-2 text-slate-400 hover:bg-slate-100 rounded-lg">
-            <ChevronRight size={20} />
-         </button>
-      </div>
-
-      {/* Job Details Modal/Drawer */}
-      <AnimatePresence>
-        {selectedJob && (
-          <>
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              onClick={() => setSelectedJob(null)}
-              className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-[60]"
-            />
-            <motion.div
-              initial={{ x: '100%' }}
-              animate={{ x: 0 }}
-              exit={{ x: '100%' }}
-              transition={{ type: 'spring', damping: 30, stiffness: 300 }}
-              className="fixed inset-y-0 right-0 w-full max-w-2xl bg-white shadow-2xl z-[70] overflow-hidden flex flex-col"
-            >
-              <div className="p-6 border-b border-slate-100 flex items-center justify-between shrink-0">
-                <button 
-                  onClick={() => setSelectedJob(null)}
-                  className="p-2 text-slate-400 hover:bg-slate-100 rounded-xl transition-all"
-                >
-                  <X size={24} />
-                </button>
-                <div className="flex gap-3">
-                  <button className="p-2.5 text-slate-400 hover:bg-slate-50 border border-slate-200 rounded-xl transition-all">
-                    <Bookmark size={20} />
-                  </button>
-                  <button 
-                    onClick={() => navigate('/candidate/jobs/apply')}
-                    className="px-6 py-2.5 bg-primary-600 text-white rounded-xl font-bold hover:bg-primary-700 transition-all shadow-lg active:scale-95"
+         
+         <div className="flex items-center justify-between mt-8 pt-8 border-t border-slate-50">
+            <div className="flex items-center gap-6">
+               <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Active Signals: <span className="text-slate-900">{filteredJobs.length} Positions</span></span>
+               <div className="h-4 w-px bg-slate-200"></div>
+               <div className="flex items-center gap-3">
+                  <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Sequence:</span>
+                  <select 
+                    value={sortBy}
+                    onChange={(e) => setSortBy(e.target.value)}
+                    className="text-[10px] font-black text-primary-600 uppercase tracking-widest bg-transparent border-none outline-none cursor-pointer"
                   >
-                    Apply Now
-                  </button>
-                </div>
+                     <option>Newest</option>
+                     <option>Salary (High)</option>
+                     <option>Relevance</option>
+                  </select>
+               </div>
+            </div>
+            <p className="text-[10px] font-black text-slate-300 uppercase tracking-[0.3em] italic">Updated 2 minutes ago</p>
+         </div>
+      </div>
+
+      {/* Job Grid */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-8">
+        <AnimatePresence>
+          {filteredJobs.length > 0 ? filteredJobs.map((job) => (
+            <motion.div
+              key={job.id}
+              layout
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.9 }}
+              whileHover={{ y: -8 }}
+              className="group card border-none bg-white p-8 hover:shadow-premium transition-all duration-500 overflow-hidden relative"
+            >
+              <div className="absolute top-0 right-0 p-6 opacity-0 group-hover:opacity-100 transition-opacity">
+                 <div className="w-24 h-24 bg-primary-50 rounded-full -mr-12 -mt-12 flex items-center justify-center">
+                    <ChevronRight className="text-primary-600 ml-[-40px] mt-[40px]" size={32} />
+                 </div>
               </div>
 
-              <div className="flex-1 overflow-y-auto p-8">
-                <div className="flex items-start gap-6 mb-10">
-                  <div className="w-20 h-20 rounded-3xl bg-slate-900 text-white flex items-center justify-center font-bold text-3xl shadow-xl shrink-0">
-                    {selectedJob.company[0]}
+              <div className="flex justify-between items-start mb-8 relative z-10">
+                <div className="flex gap-6">
+                  <div className="w-16 h-16 rounded-[1.5rem] bg-slate-900 text-white flex items-center justify-center font-black text-2xl italic shadow-2xl group-hover:rotate-6 transition-transform">
+                    {job.company[0]}
                   </div>
                   <div>
-                    <h2 className="text-3xl font-extrabold text-slate-900 tracking-tight">{selectedJob.title}</h2>
-                    <p className="text-lg font-bold text-primary-600 mt-1">{selectedJob.company}</p>
-                    <div className="flex flex-wrap gap-4 mt-4">
-                      <div className="flex items-center gap-1.5 text-slate-500 font-bold text-sm">
-                        <MapPin size={16} className="text-slate-400" />
-                        {selectedJob.location}
-                      </div>
-                      <div className="flex items-center gap-1.5 text-slate-500 font-bold text-sm">
-                        <DollarSign size={16} className="text-slate-400" />
-                        {selectedJob.salary}
-                      </div>
-                      <div className="flex items-center gap-1.5 text-slate-500 font-bold text-sm">
-                        <Calendar size={16} className="text-slate-400" />
-                        {selectedJob.postedDate}
-                      </div>
+                    <h3 className="text-2xl font-black text-slate-900 tracking-tight italic leading-none group-hover:text-primary-600 transition-colors uppercase">{job.title}</h3>
+                    <div className="flex items-center gap-3 mt-3">
+                      <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{job.company}</p>
+                      <span className="w-1 h-1 bg-slate-200 rounded-full" />
+                      <p className="text-[10px] font-black text-primary-500 uppercase tracking-widest italic">{job.posted}</p>
                     </div>
                   </div>
                 </div>
-
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-12">
-                   {[
-                     { label: 'Type', val: selectedJob.type, icon: Clock },
-                     { label: 'Role', val: selectedJob.department, icon: Layers },
-                     { label: 'Exp', val: selectedJob.experience, icon: Briefcase },
-                     { label: 'Quota', val: selectedJob.positions, icon: Users },
-                   ].map((item, i) => (
-                     <div key={i} className="p-4 rounded-2xl bg-slate-50 border border-slate-100">
-                        <item.icon size={18} className="text-primary-500 mb-2" />
-                        <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">{item.label}</p>
-                        <p className="text-sm font-extrabold text-slate-800 mt-0.5">{item.val}</p>
-                     </div>
-                   ))}
-                </div>
-
-                <div className="space-y-10">
-                  <section>
-                    <h3 className="text-xl font-bold text-slate-900 mb-4 flex items-center gap-2">
-                       <CheckCircle2 size={24} className="text-primary-600" />
-                       Description
-                    </h3>
-                    <p className="text-slate-600 font-medium leading-relaxed">{selectedJob.description}</p>
-                  </section>
-
-                  <section>
-                    <h3 className="text-xl font-bold text-slate-900 mb-4">Responsibilities</h3>
-                    <ul className="space-y-3">
-                      {selectedJob.responsibilities.map((res, i) => (
-                        <li key={i} className="flex gap-3 text-slate-600 font-medium">
-                          <span className="shrink-0 w-1.5 h-1.5 rounded-full bg-primary-400 mt-2" />
-                          {res}
-                        </li>
-                      ))}
-                    </ul>
-                  </section>
-
-                  <section>
-                    <h3 className="text-xl font-bold text-slate-900 mb-4">Requirements</h3>
-                    <ul className="space-y-3">
-                      {selectedJob.requirements.map((req, i) => (
-                        <li key={i} className="flex gap-3 text-slate-600 font-medium">
-                          <span className="shrink-0 w-1.5 h-1.5 rounded-full bg-accent-400 mt-2" />
-                          {req}
-                        </li>
-                      ))}
-                    </ul>
-                  </section>
-
-                  <section className="bg-primary-50/50 p-6 rounded-3xl border border-primary-100">
-                    <h3 className="text-xl font-bold text-primary-900 mb-4">Benefits & Perks</h3>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      {selectedJob.benefits.map((ben, i) => (
-                        <div key={i} className="flex items-center gap-2 text-primary-700 font-bold text-sm">
-                          <CheckCircle2 size={16} />
-                          {ben}
-                        </div>
-                      ))}
-                    </div>
-                  </section>
-                </div>
-              </div>
-              
-              <div className="p-6 border-t border-slate-100 bg-white shrink-0">
                 <button 
-                  onClick={() => navigate('/candidate/jobs/apply')}
-                  className="w-full h-14 bg-primary-600 text-white rounded-2xl font-bold hover:bg-primary-700 transition-all shadow-xl active:scale-95 text-lg"
+                  onClick={(e) => { e.stopPropagation(); saveJob(job.id); showToast(savedIndices.includes(job.id) ? 'Position Unsaved' : 'Position Saved to Radar', 'info'); }}
+                  className={cn(
+                    "p-3 rounded-2xl transition-all shadow-sm active:scale-90 border",
+                    savedIndices.includes(job.id) ? "bg-primary-600 border-primary-600 text-white" : "bg-slate-50 border-slate-100 text-slate-300 hover:text-primary-600"
+                  )}
                 >
-                  Submit Application
+                  {savedIndices.includes(job.id) ? <BookmarkCheck size={22} /> : <Bookmark size={22} />}
+                </button>
+              </div>
+
+              <div className="grid grid-cols-2 gap-y-4 gap-x-2 mb-8 relative z-10">
+                {[
+                  { icon: MapPin, text: job.location },
+                  { icon: DollarSign, text: job.salary },
+                  { icon: Clock, text: job.type },
+                  { icon: Users, text: job.department },
+                ].map((info, i) => (
+                  <div key={i} className="flex items-center gap-3 text-slate-500 bg-slate-50/50 p-2.5 rounded-xl border border-slate-50 group-hover:bg-white transition-colors">
+                    <info.icon size={16} className="text-slate-400 shrink-0" />
+                    <span className="text-[10px] font-black uppercase tracking-widest truncate">{info.text}</span>
+                  </div>
+                ))}
+              </div>
+
+              <p className="text-sm font-bold text-slate-600 mb-8 leading-relaxed line-clamp-2 italic">
+                "{job.desc}"
+              </p>
+
+              <div className="flex items-center gap-4 relative z-10">
+                <button 
+                  onClick={() => setSelectedJob(job)}
+                  className="flex-1 py-4 bg-slate-50 text-slate-400 border border-slate-100 rounded-2xl text-[10px] font-black uppercase tracking-[0.3em] hover:bg-white hover:text-primary-600 hover:border-primary-100 transition-all active:scale-95 shadow-sm"
+                >
+                  Log Details
+                </button>
+                <button 
+                  onClick={() => { setSelectedJob(job); setIsApplyModalOpen(true); }}
+                  className="flex-1 py-4 bg-slate-900 text-white rounded-2xl text-[10px] font-black uppercase tracking-[0.3em] hover:bg-black transition-all active:scale-95 shadow-xl shadow-slate-200 flex items-center justify-center gap-3"
+                >
+                  Apply Phase <ArrowRight size={16} />
                 </button>
               </div>
             </motion.div>
-          </>
-        )}
-      </AnimatePresence>
+          )) : (
+            <div className="col-span-full py-40 flex flex-col items-center justify-center card border-dashed border-2 bg-slate-50/50 text-slate-300">
+               <Search size={64} className="mb-6 opacity-40 animate-pulse" />
+               <p className="text-xl font-black uppercase tracking-[0.3em]">No Signal Detected</p>
+               <p className="text-[10px] font-bold uppercase tracking-widest mt-2">Adjust your filter parameters to find matches</p>
+            </div>
+          )}
+        </AnimatePresence>
+      </div>
+
+      {/* Job Record Detail Modal */}
+      <CenterModal isOpen={!!selectedJob && !isApplyModalOpen} onClose={() => setSelectedJob(null)} title="Position Strategic Log">
+         {selectedJob && (
+            <div className="p-10 space-y-12 text-left">
+               <div className="flex items-start gap-8 border-b border-slate-50 pb-10">
+                  <div className="w-24 h-24 rounded-[2rem] bg-slate-900 text-white flex items-center justify-center font-black text-4xl italic shadow-2xl">
+                    {selectedJob.company[0]}
+                  </div>
+                  <div className="flex-1">
+                    <h2 className="text-4xl font-black text-slate-900 tracking-tighter italic italic uppercase leading-none">{selectedJob.title}</h2>
+                    <p className="text-lg font-black text-primary-600 mt-4 uppercase tracking-widest flex items-center gap-3">
+                       {selectedJob.company} <Globe size={18} />
+                    </p>
+                    <div className="flex flex-wrap gap-4 mt-6">
+                      <div className="px-4 py-1.5 bg-slate-100 rounded-xl text-[10px] font-black uppercase tracking-widest text-slate-500 whitespace-nowrap">{selectedJob.location}</div>
+                      <div className="px-4 py-1.5 bg-primary-50 rounded-xl text-[10px] font-black uppercase tracking-widest text-primary-600 whitespace-nowrap">{selectedJob.salary}</div>
+                      <div className="px-4 py-1.5 bg-slate-900 rounded-xl text-[10px] font-black uppercase tracking-widest text-white whitespace-nowrap">{selectedJob.type}</div>
+                    </div>
+                  </div>
+               </div>
+
+               <div className="grid grid-cols-1 md:grid-cols-12 gap-12">
+                  <div className="md:col-span-8 space-y-12">
+                     <section>
+                        <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.4em] mb-6 flex items-center gap-3">
+                           <Info size={16} className="text-primary-600" /> Objective
+                        </h3>
+                        <p className="text-base font-bold text-slate-600 leading-relaxed italic">{selectedJob.desc}</p>
+                     </section>
+
+                     <section>
+                        <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.4em] mb-6">Strategic Requirements</h3>
+                        <div className="grid grid-cols-1 gap-4">
+                           {selectedJob.requirements.map((req, i) => (
+                              <div key={i} className="p-5 rounded-2xl bg-slate-50 border border-slate-100 flex items-center gap-5 group hover:bg-white hover:shadow-lg transition-all">
+                                 <div className="w-8 h-8 rounded-lg bg-white flex items-center justify-center text-primary-600 shadow-sm font-black italic">{i+1}</div>
+                                 <p className="text-sm font-black text-slate-700 tracking-tight">{req}</p>
+                              </div>
+                           ))}
+                        </div>
+                     </section>
+                  </div>
+
+                  <div className="md:col-span-4 space-y-8">
+                     <div className="card p-8 bg-slate-900 border-none shadow-premium relative overflow-hidden group">
+                        <div className="absolute -right-5 -top-5 opacity-10 rotate-12 group-hover:scale-125 transition-transform duration-1000">
+                           <Zap size={150} className="text-white" />
+                        </div>
+                        <h3 className="text-[10px] font-black text-primary-400 uppercase tracking-[0.3em] mb-8 leading-none">Ecosystem Perks</h3>
+                        <div className="space-y-4 relative z-10">
+                           {selectedJob.benefits.map((ben, i) => (
+                              <div key={i} className="flex items-center gap-3 text-white font-black text-[9px] uppercase tracking-widest opacity-80">
+                                 <CheckCircle2 size={12} className="text-primary-400" />
+                                 {ben}
+                              </div>
+                           ))}
+                        </div>
+                        <button 
+                           onClick={() => { setIsApplyModalOpen(true); }}
+                           className="w-full mt-10 py-4 bg-white text-slate-900 rounded-2xl text-[10px] font-black uppercase tracking-[0.3em] shadow-2xl hover:bg-primary-50 transition-all"
+                        >
+                           Submit Dossier
+                        </button>
+                     </div>
+                     
+                     <div className="p-8 bg-slate-50 rounded-[2.5rem] border border-slate-100">
+                        <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-4">Talent Lead</p>
+                        <div className="flex items-center gap-4">
+                           <img src="https://i.pravatar.cc/100?img=12" className="w-12 h-12 rounded-2xl border-2 border-white shadow-lg" alt="" />
+                           <div>
+                              <p className="text-xs font-black text-slate-900 uppercase tracking-widest">Sarah Jenks</p>
+                              <p className="text-[8px] font-black text-primary-600 uppercase tracking-widest mt-1">Hiring Strategy Lead</p>
+                           </div>
+                        </div>
+                     </div>
+                  </div>
+               </div>
+            </div>
+         )}
+      </CenterModal>
+
+      {/* Application Submision Modal */}
+      <CenterModal isOpen={isApplyModalOpen} onClose={() => {setIsApplyModalOpen(false); setSelectedJob(null);}} title="Submit Application Dossier">
+         {selectedJob && (
+            <form onSubmit={handleApplySubmit} className="p-10 space-y-8 text-left">
+               <div className="flex items-center gap-6 p-6 bg-slate-900 rounded-[2rem] text-white italic">
+                  <div className="w-14 h-14 bg-white/10 rounded-2xl flex items-center justify-center font-black text-2xl uppercase">
+                    {selectedJob.company[0]}
+                  </div>
+                  <div>
+                    <p className="text-[9px] font-black text-primary-400 uppercase tracking-widest leading-none mb-2 italic">Target Vector</p>
+                    <p className="text-xl font-black leading-none">{selectedJob.title}</p>
+                    <p className="text-[10px] font-bold opacity-60 uppercase tracking-widest mt-2">{selectedJob.company}</p>
+                  </div>
+               </div>
+
+               <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                  <div className="space-y-2">
+                     <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest px-1 italic">Internal Artifact (Resume)</label>
+                     <select className="input-field h-14 bg-slate-50 border-transparent font-black appearance-none cursor-pointer">
+                        <option>Current_Master_CV_2026.pdf</option>
+                        <option>Product_Design_Specific.pdf</option>
+                        <option>Upload New Registry...</option>
+                     </select>
+                  </div>
+                  <div className="space-y-2">
+                     <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest px-1 italic">Deployment Window</label>
+                     <select name="availability" className="input-field h-14 bg-slate-50 border-transparent font-black appearance-none cursor-pointer">
+                        <option>Immediate Activation</option>
+                        <option>15 Day Transition</option>
+                        <option>30 Day Transition</option>
+                        <option>Negotiable Window</option>
+                     </select>
+                  </div>
+                  <div className="space-y-2">
+                     <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest px-1 italic">Comp Expectations (Annual)</label>
+                     <input name="expectedSalary" type="text" placeholder="e.g. $165,000" className="input-field h-14 bg-slate-50 border-transparent font-black" required />
+                  </div>
+                  <div className="space-y-2">
+                     <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest px-1 italic">Portfolio Evidence (URL)</label>
+                     <input type="url" placeholder="https://registry.design/..." className="input-field h-14 bg-slate-50 border-transparent font-black" />
+                  </div>
+               </div>
+
+               <div className="space-y-2">
+                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest px-1 italic">Engagement Narrative (Cover Message)</label>
+                  <textarea name="coverLetter" rows="5" required className="input-field py-5 bg-slate-50 border-transparent font-black resize-none" placeholder="Provide strategic context for your application..."></textarea>
+               </div>
+
+               <div className="pt-4 flex gap-4">
+                  <button type="button" onClick={() => setIsApplyModalOpen(false)} className="flex-1 py-4 bg-slate-100 text-slate-600 rounded-2xl font-black uppercase tracking-widest text-[10px]">Abort</button>
+                  <button type="submit" className="flex-2 py-4 bg-slate-900 text-white rounded-2xl font-black uppercase tracking-widest text-[10px] shadow-xl shadow-slate-200 active:scale-95 flex items-center justify-center gap-3">
+                     Finalize Deployment <Send size={16} />
+                  </button>
+               </div>
+            </form>
+         )}
+      </CenterModal>
     </div>
   );
 };

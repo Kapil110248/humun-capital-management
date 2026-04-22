@@ -1,320 +1,277 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
-  Upload, 
-  FileText, 
-  Cpu, 
-  Search, 
-  Plus, 
-  RotateCcw, 
-  Copy, 
-  CheckCircle2, 
-  AlertCircle, 
-  Zap, 
-  TrendingUp, 
-  Target, 
-  Award,
-  ChevronDown,
-  X,
-  Sparkles,
-  ArrowRight,
-  ShieldCheck,
-  Type,
-  Layout,
-  Briefcase
+  Upload, FileText, Cpu, Search, Plus, RotateCcw, Copy, CheckCircle2, 
+  AlertCircle, Zap, TrendingUp, Target, Award, ChevronDown, X, Sparkles, 
+  ArrowRight, ShieldCheck, Type, Layout, Briefcase, Info, Download, Microscope
 } from 'lucide-react';
 import { cn } from '../../utils/cn';
+import { useCandidate } from '../../context/CandidateContext';
+import CenterModal from '../../components/layout/CenterModal';
 
 const AIResumeScore = () => {
-  const [resumeUploaded, setResumeUploaded] = useState(true);
+  const { showToast } = useCandidate();
+  const [isUploaded, setIsUploaded] = useState(false);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
-  const [selectedFile, setSelectedFile] = useState(null);
+  const [analysisPhase, setAnalysisPhase] = useState(0);
+  const [score, setScore] = useState(0);
 
-  const handleAnalyze = () => {
-    setIsAnalyzing(true);
-    setTimeout(() => setIsAnalyzing(false), 3000);
-  };
+  const analysisSteps = [
+    "Parsing semantic structure...",
+    "Extracting competency vectors...",
+    "Cross-referencing industry benchmarks...",
+    "Calculating ATS compatibility matrix...",
+    "Finalizing strategic report..."
+  ];
 
-  const atsScore = 82;
-
-  const missingKeywords = [
-    'Leadership', 'Project Management', 'Excel', 'CRM', 'Communication', 'Sales Strategy'
+  const metrics = [
+    { label: 'Keyword Density', score: 88, color: 'text-emerald-500', bg: 'bg-emerald-50' },
+    { label: 'Readability Index', score: 92, color: 'text-blue-500', bg: 'bg-blue-50' },
+    { label: 'Impact Statements', score: 74, color: 'text-purple-500', bg: 'bg-purple-50' },
+    { label: 'Contact Integrity', score: 100, color: 'text-amber-500', bg: 'bg-amber-50' },
   ];
 
   const suggestions = [
-    'Add measurable achievements',
-    'Improve headline summary',
-    'Use stronger action verbs',
-    'Add relevant certifications',
-    'Keep formatting consistent'
+    { type: 'Critical', text: 'Missing "Cloud Architecture" keyword for target Senior roles.', icon: AlertCircle, color: 'text-rose-500' },
+    { type: 'Strategic', text: 'Quantify impact in TechFlow role (e.g. % growth).', icon: Target, color: 'text-primary-500' },
+    { type: 'Formatting', text: 'Ensure date consistency across Experience nodes.', icon: Layout, color: 'text-slate-400' },
   ];
 
-  const improvementTips = [
-    { title: 'Keep resume under 2 pages', desc: 'Recruiters spend less than 10 seconds on their first pass.' },
-    { title: 'Tailor resume to each role', desc: 'Customizing your summary for specific jobs increases match rate.' },
-    { title: 'Highlight recent experience', desc: 'Focus on your accomplishments in the last 3-5 years.' },
-    { title: 'Use keywords naturally', desc: 'Avoid keyword stuffing; ensure they flow within your sentences.' },
-    { title: 'Remove outdated skills', desc: 'Clean up old technologies that are no longer industry standard.' }
-  ];
+  const handleStartAnalysis = () => {
+    setIsAnalyzing(true);
+    setAnalysisPhase(0);
+    setScore(0);
+  };
 
-  const sectionBreakdowns = [
-    { label: 'Contact Info', score: 100, color: 'bg-emerald-500' },
-    { label: 'Experience', score: 75, color: 'bg-primary-500' },
-    { label: 'Skills', score: 60, color: 'bg-amber-500' },
-    { label: 'Education', score: 90, color: 'bg-indigo-500' },
-    { label: 'Formatting', score: 95, color: 'bg-purple-500' },
-    { label: 'Keywords Match', score: 68, color: 'bg-accent-500' },
-  ];
+  useEffect(() => {
+    if (isAnalyzing) {
+      const interval = setInterval(() => {
+        setAnalysisPhase(prev => {
+          if (prev >= analysisSteps.length - 1) {
+            clearInterval(interval);
+            setIsAnalyzing(false);
+            setIsUploaded(true);
+            // Animate score to 84%
+            let s = 0;
+            const scoreInterval = setInterval(() => {
+              if (s >= 84) clearInterval(scoreInterval);
+              else { s += 1; setScore(s); }
+            }, 20);
+            return prev;
+          }
+          return prev + 1;
+        });
+      }, 800);
+      return () => clearInterval(interval);
+    }
+  }, [isAnalyzing]);
 
-  if (!resumeUploaded) {
+  if (!isUploaded && !isAnalyzing) {
     return (
-      <div className="space-y-8 animate-fade-in">
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-          <div>
-            <h1 className="text-3xl font-extrabold text-slate-900 tracking-tight">AI Resume Score</h1>
-            <p className="text-slate-500 font-medium">Analyze your resume and improve your chances of getting hired</p>
-          </div>
+      <div className="space-y-8 animate-fade-in max-w-5xl mx-auto text-left">
+        <div className="text-center space-y-4 mb-16">
+          <h1 className="text-5xl font-black text-slate-900 tracking-tighter italic uppercase leading-none">STRATEGIC AUDIT BRAIN</h1>
+          <p className="text-slate-400 font-bold tracking-widest uppercase text-xs">Deploy AI to optimize your professional dossier</p>
         </div>
 
-        <div className="min-h-[60vh] flex flex-col items-center justify-center p-8 bg-white border-2 border-dashed border-slate-200 rounded-3xl">
-           <div className="w-24 h-24 bg-primary-50 rounded-full flex items-center justify-center text-primary-600 mb-6">
-              <Sparkles size={48} />
+        <div className="min-h-[500px] flex flex-col items-center justify-center p-16 bg-white border-2 border-dashed border-slate-100 rounded-[4rem] group hover:border-primary-100 hover:bg-slate-50 transition-all duration-700 shadow-soft">
+           <div className="w-32 h-32 bg-primary-50 rounded-[3rem] flex items-center justify-center text-primary-600 mb-10 group-hover:scale-110 transition-transform duration-700 shadow-inner group-hover:rotate-6">
+              <Sparkles size={64} className="animate-pulse" />
            </div>
-           <h2 className="text-2xl font-extrabold text-slate-900 mb-2">Unlock Your Hiring Potential</h2>
-           <p className="text-slate-500 font-medium mb-8 text-center max-w-sm">
-             Upload your resume to get instant AI-powered feedback on your ATS score, missing keywords, and improvement tips.
+           <h2 className="text-3xl font-black text-slate-900 mb-4 italic tracking-tight uppercase">Unleash Competitive Metrics</h2>
+           <p className="text-slate-500 font-bold mb-12 text-center max-w-md uppercase tracking-tight text-sm leading-relaxed">
+             Submit your resume registry for deep-scan analysis of ATS compatibility, keyword coverage, and strategic impact.
            </p>
-           <button 
-            onClick={() => setResumeUploaded(true)}
-            className="btn-primary h-14 px-8 text-lg font-bold flex items-center gap-3 shadow-2xl shadow-primary-200"
-          >
-             <Upload size={22} />
-             <span>Upload Your Resume</span>
-           </button>
-           <p className="mt-4 text-xs font-bold text-slate-400 uppercase tracking-widest">Support: PDF, DOCX (Max 5MB)</p>
+           <label className="cursor-pointer">
+              <input type="file" className="hidden" onChange={handleStartAnalysis} />
+              <div className="flex items-center gap-4 px-12 py-5 bg-slate-900 text-white rounded-[2rem] text-[10px] font-black uppercase tracking-[0.3em] shadow-2xl shadow-slate-200 hover:bg-black transition-all active:scale-95">
+                 <Upload size={22} />
+                 <span>Upload Dossier</span>
+              </div>
+           </label>
+           <p className="mt-8 text-[9px] font-black text-slate-300 uppercase tracking-widest">Supports: PDF / DOCX / JSON (MAX 5MB)</p>
         </div>
       </div>
     );
   }
 
+  if (isAnalyzing) {
+    return (
+      <div className="min-h-[70vh] flex flex-col items-center justify-center space-y-12 animate-fade-in">
+         <div className="relative w-40 h-40">
+            <div className="absolute inset-0 border-8 border-slate-100 rounded-[3rem] animate-pulse"></div>
+            <div className="absolute inset-x-0 top-0 h-2 bg-primary-600 rounded-full animate-progress-flow"></div>
+            <div className="absolute inset-0 flex items-center justify-center text-primary-600">
+               <Cpu size={64} className="animate-spin-slow" />
+            </div>
+         </div>
+         <div className="text-center space-y-4">
+            <h3 className="text-2xl font-black text-slate-900 italic tracking-tight uppercase">{analysisSteps[analysisPhase]}</h3>
+            <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.4em] animate-pulse">Processing Vector: HCM_BRAIN_V4</p>
+         </div>
+      </div>
+    );
+  }
+
   return (
-    <div className="space-y-8 pb-12 animate-fade-in">
+    <div className="space-y-10 pb-12 animate-fade-in max-w-7xl mx-auto text-left">
       {/* Header Section */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-8 bg-white p-10 rounded-[3.5rem] border border-slate-50 shadow-soft">
         <div>
-          <h1 className="text-3xl font-extrabold text-slate-900 tracking-tight">AI Resume Score</h1>
-          <p className="text-slate-500 font-medium">Analyze your resume and improve your chances of getting hired</p>
+          <h1 className="text-4xl font-black text-slate-900 tracking-tighter italic uppercase leading-none mb-2">AUDIT PAYLOAD ANALYSIS</h1>
+          <p className="text-slate-400 font-bold tracking-tight uppercase text-xs">Artifact: <span className="text-slate-900 font-black">MASTER_CV_STRAT_2026.PDF</span></p>
         </div>
-        <button className="btn-secondary h-11 px-5 font-bold flex items-center justify-center gap-2">
-          <Upload size={18} />
-          <span>Upload New Resume</span>
-        </button>
-      </div>
-
-      {/* Summary Section / Hero Card */}
-      <div className="card bg-slate-900 text-white p-8 overflow-hidden relative border-none">
-        <div className="absolute top-0 right-0 p-8 opacity-10 pointer-events-none">
-           <Cpu size={180} />
-        </div>
-        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6 relative z-10">
-          <div className="flex items-center gap-6">
-            <div className="w-20 h-20 rounded-3xl bg-white/10 backdrop-blur-md flex items-center justify-center text-primary-400 shadow-xl border border-white/10">
-              <FileText size={40} />
-            </div>
-            <div>
-              <h2 className="text-2xl font-extrabold tracking-tight">Marketing_Lead_Resume_2026.pdf</h2>
-              <p className="text-slate-400 font-medium mt-1">Last analyzed on Oct 24, 2026 • 10:42 AM</p>
-            </div>
-          </div>
-          <div className="flex items-center gap-3">
-             <button 
-              onClick={handleAnalyze}
-              disabled={isAnalyzing}
-              className="px-6 h-12 bg-primary-600 hover:bg-primary-500 text-white rounded-xl font-bold transition-all shadow-xl shadow-primary-600/20 active:scale-95 flex items-center gap-2"
-            >
-              <RotateCcw size={18} className={cn(isAnalyzing && "animate-spin")} />
-              <span>{isAnalyzing ? "Analyzing..." : "Analyze Again"}</span>
-            </button>
-          </div>
-        </div>
-      </div>
-
-      {/* Main Analytics Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        
-        {/* ATS Score Card */}
-        <div className="card flex flex-col items-center justify-center py-12 relative">
-          <h3 className="absolute top-6 left-6 text-sm font-bold text-slate-500 uppercase tracking-widest flex items-center gap-2">
-             <ShieldCheck size={18} className="text-primary-600" />
-             ATS Score
-          </h3>
-          
-          <div className="relative w-48 h-48 flex items-center justify-center mb-6 mt-4">
-             {/* Circular Progress (Simplified SVG) */}
-             <svg className="w-full h-full transform -rotate-90">
-               <circle 
-                cx="96" cy="96" r="88" 
-                stroke="currentColor" strokeWidth="12" fill="transparent" 
-                className="text-slate-100"
-               />
-               <circle 
-                cx="96" cy="96" r="88" 
-                stroke="currentColor" strokeWidth="12" fill="transparent" 
-                strokeDasharray={552}
-                strokeDashoffset={552 - (552 * atsScore) / 100}
-                className="text-primary-600 transition-all duration-1000 ease-out"
-               />
-             </svg>
-             <div className="absolute inset-0 flex flex-col items-center justify-center">
-                <span className="text-5xl font-extrabold text-slate-900 tracking-tighter">{atsScore}</span>
-                <span className="text-xs font-bold text-slate-400 uppercase tracking-widest mt-1">Out of 100</span>
-             </div>
-          </div>
-
-          <div className="text-center">
-             <div className="inline-flex items-center gap-1.5 px-3 py-1 bg-emerald-50 text-emerald-600 rounded-full text-xs font-bold mb-4">
-                <CheckCircle2 size={14} />
-                Excellent Optimization
-             </div>
-             <p className="text-slate-500 font-medium px-8 leading-relaxed">
-               Your resume is well optimized but can improve further. Most candidate scores range between 40-60.
-             </p>
-          </div>
-        </div>
-
-        {/* Missing Keywords Card */}
-        <div className="card">
-          <div className="flex items-center justify-between mb-8">
-            <h3 className="text-sm font-bold text-slate-500 uppercase tracking-widest flex items-center gap-2">
-              <Zap size={18} className="text-orange-500" />
-              Missing Keywords
-            </h3>
-            <button className="p-2 text-slate-400 hover:text-primary-600 hover:bg-slate-50 rounded-lg transition-all">
-              <Copy size={18} />
-            </button>
-          </div>
-          
-          <div className="flex flex-wrap gap-3">
-             {missingKeywords.map((keyword, i) => (
-               <div key={i} className="flex items-center gap-2 px-4 py-2.5 bg-orange-50/50 border border-orange-100/50 text-orange-700 rounded-xl font-bold text-sm hover:bg-orange-50 transition-all cursor-default">
-                  <Plus size={14} strokeWidth={3} />
-                  {keyword}
-               </div>
-             ))}
-          </div>
-          
-          <div className="mt-8 p-4 bg-slate-50 rounded-2xl border border-slate-100 border-dashed">
-             <p className="text-xs text-slate-500 font-medium leading-relaxed">
-               <span className="font-bold text-orange-600">Pro Tip:</span> These keywords are frequently found in job descriptions matching your profile. Adding them can boost your score by up to 15%.
-             </p>
-          </div>
-        </div>
-
-        {/* AI Suggestions Card */}
-        <div className="card">
-           <h3 className="text-sm font-bold text-slate-500 uppercase tracking-widest flex items-center gap-2 mb-8">
-              <Sparkles size={18} className="text-emerald-500" />
-              AI Suggestions
-           </h3>
-           
-           <div className="space-y-4">
-              {suggestions.map((sug, i) => (
-                <div key={i} className="flex items-start gap-4 p-4 rounded-2xl bg-slate-50/50 group border border-transparent hover:border-emerald-100 hover:bg-emerald-50/20 transition-all">
-                  <div className="w-6 h-6 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0 mt-0.5">
-                    <CheckCircle2 size={14} />
-                  </div>
-                  <span className="text-sm font-bold text-slate-700 group-hover:text-emerald-950 transition-colors">{sug}</span>
-                </div>
-              ))}
-           </div>
-        </div>
-
-        {/* Improvement Tips Card */}
-        <div className="card">
-           <h3 className="text-sm font-bold text-slate-500 uppercase tracking-widest flex items-center gap-2 mb-8">
-              <AlertCircle size={18} className="text-purple-500" />
-              Improvement Tips
-           </h3>
-           
-           <div className="space-y-6">
-              {improvementTips.map((tip, i) => (
-                <div key={i} className="relative pl-6">
-                   <div className="absolute left-0 top-1.5 w-1.5 h-1.5 rounded-full bg-purple-400 ring-4 ring-purple-100" />
-                   <h4 className="text-sm font-bold text-slate-900 mb-1">{tip.title}</h4>
-                   <p className="text-xs text-slate-500 font-medium leading-relaxed">{tip.desc}</p>
-                </div>
-              ))}
-           </div>
-           
-           <button className="w-full mt-8 py-3 bg-slate-50 text-slate-600 font-bold rounded-xl text-sm hover:bg-slate-100 transition-all flex items-center justify-center gap-2">
-              <span>View All Tips</span>
-              <ChevronDown size={16} />
+        <div className="flex gap-4">
+           <button onClick={() => { setIsUploaded(false); handleStartAnalysis(); }} className="w-14 h-14 bg-slate-50 text-slate-400 border border-slate-100 hover:text-primary-600 rounded-2xl flex items-center justify-center transition-all shadow-sm">
+             <RotateCcw size={24} />
+           </button>
+           <button onClick={() => { showToast('Audit artifact saved'); }} className="h-14 px-8 bg-slate-900 text-white rounded-2xl text-[10px] font-black uppercase tracking-[0.2em] shadow-xl flex items-center gap-3 active:scale-95 transition-all">
+             <Download size={20} /> Save Report
            </button>
         </div>
       </div>
 
-      {/* Section Score Breakdown */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        <div className="lg:col-span-2 card">
-          <h3 className="text-lg font-bold text-slate-900 mb-8 flex items-center gap-2">
-             <Layout size={20} className="text-primary-600" />
-             Section Score Breakdown
-          </h3>
+      {/* Main Analytics Hub */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
+        
+        {/* Core Score Meter */}
+        <div className="lg:col-span-5 card p-12 flex flex-col items-center justify-center bg-white border-none shadow-soft relative overflow-hidden rounded-[4rem]">
+          <div className="absolute top-10 left-10 text-[9px] font-black text-slate-300 uppercase tracking-[0.4em] flex items-center gap-3">
+             <Microscope size={14} className="text-primary-600" /> Competency Yield
+          </div>
           
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-8">
-             {sectionBreakdowns.map((sec, i) => (
-               <div key={i} className="space-y-3">
-                  <div className="flex justify-between items-center px-1">
-                     <span className="text-sm font-bold text-slate-700">{sec.label}</span>
-                     <span className="text-sm font-extrabold text-slate-900">{sec.score}%</span>
-                  </div>
-                  <div className="w-full h-2 bg-slate-100 rounded-full overflow-hidden">
-                     <motion.div 
-                      initial={{ width: 0 }}
-                      animate={{ width: `${sec.score}%` }}
-                      transition={{ duration: 1, delay: i * 0.1 }}
-                      className={cn("h-full rounded-full shadow-lg h-full", sec.color)}
-                     />
-                  </div>
-               </div>
-             ))}
+          <div className="relative w-64 h-64 flex items-center justify-center mb-10 mt-6">
+             <svg className="w-full h-full transform -rotate-90 scale-110">
+                <circle cx="128" cy="128" r="110" stroke="currentColor" strokeWidth="18" fill="transparent" className="text-slate-50" />
+                <motion.circle 
+                  cx="128" cy="128" r="110" stroke="currentColor" strokeWidth="18" fill="transparent" 
+                  strokeDasharray={691}
+                  initial={{ strokeDashoffset: 691 }}
+                  animate={{ strokeDashoffset: 691 - (691 * score) / 100 }}
+                  transition={{ duration: 2, ease: "easeOut" }}
+                  className="text-primary-600"
+                  strokeLinecap="round"
+                />
+             </svg>
+             <div className="absolute inset-0 flex flex-col items-center justify-center">
+                <span className="text-7xl font-black text-slate-900 tracking-tighter italic">{score}</span>
+                <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest mt-2">Aggregate Score</span>
+             </div>
+          </div>
+
+          <div className="text-center space-y-6">
+             <div className="px-6 py-2 bg-emerald-50 text-emerald-600 rounded-2xl text-[10px] font-black uppercase tracking-[0.3em] inline-block border border-emerald-100 italic">
+                Strategic Fit Protocol: ACTIVE
+             </div>
+             <p className="text-sm font-bold text-slate-500 px-8 leading-relaxed italic">
+               Your dossier significantly outperforms the industry baseline of 62%. Key competency voids detected in "Leadership Scale".
+             </p>
           </div>
         </div>
 
-        {/* Job Match Preview Card */}
-        <div className="card bg-gradient-to-br from-indigo-600 to-primary-700 text-white overflow-hidden relative group">
-           <div className="absolute top-0 right-0 p-8 opacity-10 blur-xl">
-              <Briefcase size={120} />
-           </div>
-           <h3 className="text-xs font-bold uppercase tracking-widest text-primary-200 mb-8">Job Match Analytics</h3>
-           
-           <div className="space-y-6 relative z-10">
-              <div>
-                 <p className="text-xs uppercase font-bold text-primary-300 tracking-tighter mb-1">Target Role</p>
-                 <h4 className="text-2xl font-extrabold tracking-tight">Marketing Executive</h4>
-              </div>
-              
-              <div className="flex items-center gap-6">
-                 <div className="flex flex-col">
-                    <span className="text-3xl font-extrabold">78%</span>
-                    <span className="text-[10px] font-bold uppercase tracking-widest text-primary-300">Match Score</span>
-                 </div>
-                 <div className="w-px h-10 bg-white/20" />
-                 <div className="flex flex-col">
-                    <span className="text-3xl font-extrabold">3</span>
-                    <span className="text-[10px] font-bold uppercase tracking-widest text-primary-300">Improvements</span>
-                 </div>
-              </div>
-              
-              <div className="space-y-3 pt-4">
-                 <button className="w-full py-3 bg-white text-primary-700 rounded-xl font-bold hover:bg-slate-50 transition-all shadow-xl active:scale-95 flex items-center justify-center gap-2">
-                    <span>Apply to Matching Jobs</span>
-                    <ArrowRight size={18} />
-                 </button>
-                 <p className="text-center text-[10px] font-bold text-primary-300 tracking-widest uppercase">AI recommendations updated 1h ago</p>
-              </div>
-           </div>
+        {/* Tactical Breakdown and Suggestions */}
+        <div className="lg:col-span-7 space-y-10">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            {metrics.map((m, i) => (
+              <motion.div 
+                key={i} 
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ delay: i * 0.1 }}
+                className="p-8 bg-white rounded-[2.5rem] border border-slate-50 shadow-soft group hover:border-primary-100 transition-all"
+              >
+                <div className="flex justify-between items-center mb-6">
+                  <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">{m.label}</p>
+                  <span className={cn("text-sm font-black italic", m.color)}>{m.score}%</span>
+                </div>
+                <div className="relative h-2 bg-slate-50 rounded-full overflow-hidden">
+                   <motion.div 
+                    initial={{ width: 0 }}
+                    animate={{ width: `${m.score}%` }}
+                    transition={{ duration: 1.5, delay: 0.5 + (i * 0.1) }}
+                    className={cn("h-full rounded-full", m.bg.replace('bg-', 'bg-').replace('50', '500') || 'bg-primary-600')}
+                   />
+                </div>
+              </motion.div>
+            ))}
+          </div>
+
+          <div className="card p-10 bg-slate-900 border-none shadow-premium relative overflow-hidden rounded-[3rem]">
+             <div className="absolute top-0 right-0 p-8 opacity-10">
+                <AlertCircle size={120} className="text-white" />
+             </div>
+             <h3 className="text-[10px] font-black text-primary-400 uppercase tracking-[0.4em] mb-10 leading-none">Strategic Optimization Required</h3>
+             <div className="space-y-6 relative z-10">
+                {suggestions.map((s, i) => (
+                   <div key={i} className="flex items-start gap-6 p-6 bg-white/5 rounded-3xl group hover:bg-white/10 transition-all cursor-pointer border border-white/5">
+                      <div className={cn("p-3 rounded-xl bg-white/10 shrink-0", s.color)}>
+                         <s.icon size={20} />
+                      </div>
+                      <div>
+                         <p className={cn("text-[9px] font-black uppercase tracking-widest mb-1", s.color)}>{s.type} Warning</p>
+                         <p className="text-sm font-black text-white italic tracking-tight">{s.text}</p>
+                      </div>
+                   </div>
+                ))}
+             </div>
+          </div>
         </div>
+      </div>
+
+      {/* Tertiary Metrics */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
+         <div className="card p-10 bg-white border-none shadow-soft rounded-[3rem]">
+            <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.4em] mb-10 flex items-center gap-3">
+               <Target size={14} className="text-primary-600" /> Sector Benchmarking
+            </h4>
+            <div className="space-y-8">
+               {[
+                  { sector: 'Product Design', match: 84 },
+                  { sector: 'Software Arch', match: 62 },
+                  { sector: 'Product Mgmt', match: 71 },
+               ].map((sec, i) => (
+                  <div key={i} className="flex items-center justify-between group">
+                     <span className="text-xs font-black text-slate-800 uppercase tracking-widest italic">{sec.sector}</span>
+                     <div className="flex items-center gap-4">
+                        <div className="w-32 h-1.5 bg-slate-50 rounded-full overflow-hidden">
+                           <div className="h-full bg-slate-900 group-hover:bg-primary-600 transition-colors" style={{ width: `${sec.match}%` }} />
+                        </div>
+                        <span className="text-[10px] font-black text-slate-400">{sec.match}%</span>
+                     </div>
+                  </div>
+               ))}
+            </div>
+         </div>
+
+         <div className="card p-10 bg-slate-50 border-none shadow-soft rounded-[3rem] relative overflow-hidden group">
+            <div className="absolute -bottom-10 -right-10 opacity-5 group-hover:scale-110 transition-transform duration-1000">
+               <ShieldCheck size={180} />
+            </div>
+            <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.4em] mb-10 flex items-center gap-3">
+               <CheckCircle2 size={14} className="text-emerald-500" /> Protocol Integrity
+            </h4>
+            <ul className="space-y-6">
+               {[
+                  'Secure PII Redaction Active',
+                  'ATS Metadata Optimization',
+                  'PDF Structural Integrity',
+                  'Semantic Keyword Mapping'
+               ].map((item, i) => (
+                  <li key={i} className="flex items-center gap-4 text-[10px] font-black text-slate-600 uppercase tracking-widest">
+                     <Check size={14} className="text-emerald-500" strokeWidth={4} /> {item}
+                  </li>
+               ))}
+            </ul>
+         </div>
+
+         <div className="card p-10 bg-primary-600 border-none shadow-premium rounded-[3rem] text-white relative overflow-hidden group">
+             <div className="absolute -top-6 -right-6 p-4 opacity-20 group-hover:rotate-12 transition-transform duration-1000">
+                <Zap size={150} fill="#fff" />
+             </div>
+             <p className="text-[9px] font-black text-primary-200 uppercase tracking-[0.4em] mb-6 italic leading-none">Automated Optimization</p>
+             <h4 className="text-2xl font-black italic tracking-tighter mb-10 leading-tight">Apply suggested vector fixes in one cycle.</h4>
+             <button onClick={() => { showToast('Syncing with Resume Builder...'); navigate('/candidate/resume'); }} className="w-full py-5 bg-white text-primary-600 rounded-2xl text-[10px] font-black uppercase tracking-[0.3em] shadow-2xl hover:scale-105 active:scale-95 transition-all">Launch Fix Suite</button>
+         </div>
       </div>
     </div>
   );

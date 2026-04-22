@@ -4,6 +4,9 @@ import { ThemeProvider } from './hooks/ThemeContext';
 import { AuthProvider } from './hooks/useAuth';
 import { AdminProvider } from './context/AdminContext';
 import { HRProvider } from './context/HRContext';
+import { ManagerProvider } from './context/ManagerContext';
+import { EmployeeProvider } from './context/EmployeeContext';
+import { CandidateProvider } from './context/CandidateContext';
 
 // Layout & Auth
 import LoginPage from './pages/auth/LoginPage';
@@ -19,7 +22,8 @@ import ResumeBuilder from './pages/candidate/ResumeBuilder';
 import AIResumeScore from './pages/candidate/AIResumeScore';
 import InterviewSchedule from './pages/candidate/InterviewSchedule';
 import Notifications from './pages/candidate/Notifications';
-import ProfileSettings from './pages/candidate/ProfileSettings';
+import CandidateProfile from './pages/candidate/CandidateProfile';
+import CandidateSettings from './pages/candidate/CandidateSettings';
 
 // HR Pages
 import HRDashboard from './pages/hr/HRDashboard';
@@ -31,6 +35,8 @@ import OfferManagement from './pages/hr/OfferManagement';
 import Onboarding from './pages/hr/Onboarding';
 import HRReports from './pages/hr/Reports';
 import Messages from './pages/hr/Messages';
+import HRProfile from './pages/hr/HRProfile';
+import HRSettings from './pages/hr/HRSettings';
 
 // Employee Pages
 import EmployeeDashboard from './pages/employee/EmployeeDashboard';
@@ -42,6 +48,7 @@ import EmployeeBenefits from './pages/employee/EmployeeBenefits';
 import EmployeeDocuments from './pages/employee/EmployeeDocuments';
 import EmployeePerformance from './pages/employee/EmployeePerformance';
 import EmployeeHelpDesk from './pages/employee/EmployeeHelpDesk';
+import EmployeeSettings from './pages/employee/EmployeeSettings';
 
 // Manager Pages
 import ManagerDashboard from './pages/manager/ManagerDashboard';
@@ -52,6 +59,8 @@ import KPITracking from './pages/manager/KPITracking';
 import Tasks from './pages/manager/Tasks';
 import Reviews from './pages/manager/Reviews';
 import ManagerReports from './pages/manager/Reports';
+import ManagerProfile from './pages/manager/ManagerProfile';
+import ManagerSettings from './pages/manager/ManagerSettings';
 
 // Admin Pages
 import AdminDashboard from './pages/admin/AdminDashboard';
@@ -81,7 +90,11 @@ function App() {
               <Route path="/login" element={<LoginPage />} />
             
             {/* Candidate Routes */}
-            <Route path="/candidate" element={<AppLayout />}>
+            <Route path="/candidate" element={
+              <CandidateProvider>
+                <AppLayout />
+              </CandidateProvider>
+            }>
               <Route index element={<Navigate to="/candidate/dashboard" replace />} />
               <Route path="dashboard" element={<CandidateDashboard />} />
               <Route path="jobs" element={<BrowseJobs />} />
@@ -91,7 +104,8 @@ function App() {
               <Route path="ai-score" element={<AIResumeScore />} />
               <Route path="interviews" element={<InterviewSchedule />} />
               <Route path="notifications" element={<Notifications />} />
-              <Route path="settings" element={<ProfileSettings />} />
+              <Route path="profile" element={<CandidateProfile />} />
+              <Route path="settings" element={<CandidateSettings />} />
             </Route>
 
             {/* HR Routes */}
@@ -110,10 +124,16 @@ function App() {
               <Route path="onboarding" element={<Onboarding />} />
               <Route path="reports" element={<HRReports />} />
               <Route path="messages" element={<Messages />} />
+              <Route path="profile" element={<HRProfile />} />
+              <Route path="settings" element={<HRSettings />} />
             </Route>
 
             {/* Employee Routes */}
-            <Route path="/employee" element={<AppLayout />}>
+            <Route path="/employee" element={
+              <EmployeeProvider>
+                <AppLayout />
+              </EmployeeProvider>
+            }>
               <Route index element={<Navigate to="/employee/dashboard" replace />} />
               <Route path="dashboard" element={<EmployeeDashboard />} />
               <Route path="profile" element={<EmployeeProfile />} />
@@ -124,10 +144,15 @@ function App() {
               <Route path="documents" element={<EmployeeDocuments />} />
               <Route path="performance" element={<EmployeePerformance />} />
               <Route path="help" element={<EmployeeHelpDesk />} />
+              <Route path="settings" element={<EmployeeSettings />} />
             </Route>
 
             {/* Manager Routes */}
-            <Route path="/manager" element={<AppLayout />}>
+            <Route path="/manager" element={
+              <ManagerProvider>
+                <AppLayout />
+              </ManagerProvider>
+            }>
               <Route index element={<Navigate to="/manager/dashboard" replace />} />
               <Route path="dashboard" element={<ManagerDashboard />} />
               <Route path="team" element={<TeamMembers />} />
@@ -137,6 +162,8 @@ function App() {
               <Route path="tasks" element={<Tasks />} />
               <Route path="reviews" element={<Reviews />} />
               <Route path="reports" element={<ManagerReports />} />
+              <Route path="profile" element={<ManagerProfile />} />
+              <Route path="settings" element={<ManagerSettings />} />
             </Route>
 
             {/* Admin Routes */}

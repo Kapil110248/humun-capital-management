@@ -35,7 +35,8 @@ export const sidebarConfig = {
     { label: 'AI Resume Score', icon: Award, path: '/candidate/ai-score' },
     { label: 'Interview Schedule', icon: Calendar, path: '/candidate/interviews' },
     { label: 'Notifications', icon: Bell, path: '/candidate/notifications' },
-    { label: 'Profile Settings', icon: Settings, path: '/candidate/settings' },
+    { label: 'My Profile', icon: UserCheck, path: '/candidate/profile' },
+    { label: 'Settings', icon: Settings, path: '/candidate/settings' },
   ],
   hr: [
     { label: 'Dashboard', icon: LayoutDashboard, path: '/hr/dashboard' },
@@ -47,6 +48,8 @@ export const sidebarConfig = {
     { label: 'Onboarding', icon: UserPlus, path: '/hr/onboarding' },
     { label: 'Reports', icon: BarChart3, path: '/hr/reports' },
     { label: 'Messages', icon: MessageSquare, path: '/hr/messages' },
+    { label: 'My Profile', icon: UserCheck, path: '/hr/profile' },
+    { label: 'Settings', icon: Settings, path: '/hr/settings' },
   ],
   employee: [
     { label: 'Dashboard', icon: LayoutDashboard, path: '/employee/dashboard' },
@@ -67,6 +70,8 @@ export const sidebarConfig = {
     { label: 'KPI Tracking', icon: BarChart3, path: '/manager/kpi' },
     { label: 'Reviews', icon: Award, path: '/manager/reviews' },
     { label: 'Reports', icon: BarChart3, path: '/manager/reports' },
+    { label: 'My Profile', icon: UserCheck, path: '/manager/profile' },
+    { label: 'Settings', icon: Settings, path: '/manager/settings' },
   ],
   admin: [
     { 

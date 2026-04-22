@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { 
   Bell, 
   Search, 
@@ -20,13 +20,34 @@ import { useNavigate } from 'react-router-dom';
 const Navbar = ({ toggleMobileSidebar }) => {
   const { user, logout } = useAuth();
   const [showProfileDropdown, setShowProfileDropdown] = useState(false);
+  const [showLogoutModal, setShowLogoutModal] = useState(false);
+  const dropdownRef = useRef(null);
   const navigate = useNavigate();
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setShowProfileDropdown(false);
+      }
+    };
+    const handleEsc = (event) => {
+      if (event.key === 'Escape') {
+        setShowProfileDropdown(false);
+        setShowLogoutModal(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    document.addEventListener('keydown', handleEsc);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener('keydown', handleEsc);
+    };
+  }, []);
 
   const handleProfileClick = () => {
     setShowProfileDropdown(false);
     if (user?.role === 'employee') navigate('/employee/profile');
-    else if (user?.role === 'admin') navigate('/admin/profile');
-    else navigate(`/${user?.role}/dashboard`);
+    else navigate(`/${user?.role || 'admin'}/profile`);
   };
 
   const handleSettingsClick = () => {
@@ -60,7 +81,7 @@ const Navbar = ({ toggleMobileSidebar }) => {
           <div className="h-6 w-px bg-slate-200 dark:bg-slate-800 mx-1"></div>
 
           {/* User Profile */}
-          <div className="relative">
+          <div className="relative" ref={dropdownRef}>
             <button 
               onClick={() => setShowProfileDropdown(!showProfileDropdown)}
               className="flex items-center gap-3 p-1.5 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl transition-all"
@@ -86,8 +107,8 @@ const Navbar = ({ toggleMobileSidebar }) => {
                   className="absolute right-0 mt-2 w-56 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-premium py-2 z-50 overflow-hidden"
                 >
                   <div className="px-4 py-3 border-b border-slate-50 dark:border-slate-800">
-                    <p className="text-sm font-bold text-slate-800 dark:text-slate-100">{user?.name}</p>
-                    <p className="text-xs text-slate-500 truncate">{user?.email}</p>
+                     <p className="text-sm font-bold text-slate-800 dark:text-slate-100">{user?.name}</p>
+                     <p className="text-xs text-slate-500 truncate">{user?.email}</p>
                   </div>
                   
                   <div className="p-1">
@@ -105,7 +126,7 @@ const Navbar = ({ toggleMobileSidebar }) => {
                     <button 
                       onClick={() => {
                         setShowProfileDropdown(false);
-                        logout();
+                        setShowLogoutModal(true);
                       }}
                       className="flex items-center gap-3 w-full px-3 py-2 text-sm text-red-600 hover:bg-red-50 dark:hover:bg-red-900/10 rounded-lg transition-all"
                     >
@@ -119,6 +140,29 @@ const Navbar = ({ toggleMobileSidebar }) => {
           </div>
         </div>
       </div>
+
+      {/* Logout Confirmation Modal */}
+      <AnimatePresence>
+         {showLogoutModal && (
+            <div className="fixed inset-0 z-[200] flex items-center justify-center p-4">
+               <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setShowLogoutModal(false)} className="absolute inset-0 bg-slate-900/50 backdrop-blur-sm" />
+               <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }} className="relative w-full max-w-sm bg-white dark:bg-slate-900 rounded-3xl shadow-2xl p-6 text-center border border-slate-100 dark:border-slate-800">
+                  <div className="w-16 h-16 bg-red-50 dark:bg-red-900/20 text-red-500 rounded-full flex items-center justify-center mx-auto mb-4 border-4 border-white dark:border-slate-900 shadow-sm">
+                     <LogOut size={28} className="translate-x-0.5" />
+                  </div>
+                  <h3 className="text-xl font-black text-slate-900 dark:text-white mb-2">Sign Out</h3>
+                  <p className="text-sm font-medium text-slate-500 dark:text-slate-400 mb-8 px-4">Are you sure you want to sign out of your account?</p>
+                  <div className="flex items-center gap-3">
+                     <button onClick={() => setShowLogoutModal(false)} className="flex-1 py-3 px-4 bg-slate-50 dark:bg-slate-800 text-slate-700 dark:text-slate-300 rounded-xl font-bold hover:bg-slate-100 dark:hover:bg-slate-700 transition-all">Cancel</button>
+                     <button onClick={() => {
+                        setShowLogoutModal(false);
+                        logout();
+                     }} className="flex-1 py-3 px-4 bg-red-500 text-white rounded-xl font-bold hover:bg-red-600 transition-all shadow-lg shadow-red-200 dark:shadow-none">Sign Out</button>
+                  </div>
+               </motion.div>
+            </div>
+         )}
+      </AnimatePresence>
     </header>
   );
 };

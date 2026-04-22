@@ -1,63 +1,57 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
-  User, 
-  Mail, 
-  Phone, 
-  Upload, 
-  FileText, 
-  Link as LinkIcon, 
-  MapPin, 
-  DollarSign, 
-  Calendar, 
-  Globe,
-  Plus,
-  X,
-  ArrowLeft,
-  CheckCircle2,
-  AlertCircle,
-  Briefcase,
-  ChevronDown
+  User, Mail, Phone, Upload, FileText, Link as LinkIcon, MapPin, DollarSign, 
+  Calendar, Globe, Plus, X, ArrowLeft, CheckCircle2, AlertCircle, Briefcase, 
+  ChevronDown, Zap, ShieldCheck, Info, RotateCcw, Cloud, Trash2, ArrowRight
 } from 'lucide-react';
 import { cn } from '../../utils/cn';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
+import { useCandidate } from '../../context/CandidateContext';
 
 const ApplicationForm = () => {
   const navigate = useNavigate();
+  const location = useLocation();
+  const { applyForJob, jobs, profile, showToast } = useCandidate();
+  
+  // Extract job from location state or fallback to default
+  const jobInfo = location.state?.job || jobs.allJobs[0];
+
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [resume, setResume] = useState(null);
-  const [skills, setSkills] = useState(['React', 'Tailwind CSS']);
+  const [formData, setFormData] = useState({
+    fullName: profile.fullName,
+    email: profile.email,
+    phone: profile.phone,
+    location: profile.location,
+    experience: '3-5 Years',
+    expectedSalary: profile.expectedSalary,
+    noticePeriod: profile.noticePeriod,
+    coverLetter: '',
+    linkedin: profile.linkedin,
+    portfolio: profile.portfolio
+  });
+  const [resume, setResume] = useState({ name: 'Alex_Rivera_CV_2026.pdf', size: '2.4 MB' });
+  const [skills, setSkills] = useState(profile.skills || []);
   const [skillInput, setSkillInput] = useState('');
-
-  const jobInfo = {
-    title: 'Senior Product Designer',
-    department: 'Design & Creative',
-    location: 'Remote, US',
-    salary: '$120k - $160k',
-    type: 'Full Time',
-    deadline: 'Nov 15, 2026'
-  };
 
   const handleAddSkill = (e) => {
     if (e.key === 'Enter' && skillInput.trim()) {
       e.preventDefault();
-      if (!skills.includes(skillInput.trim())) {
-        setSkills([...skills, skillInput.trim()]);
-      }
+      if (!skills.includes(skillInput.trim())) setSkills([...skills, skillInput.trim()]);
       setSkillInput('');
     }
   };
 
-  const removeSkill = (skill) => {
-    setSkills(skills.filter(s => s !== skill));
-  };
+  const removeSkill = (skill) => setSkills(skills.filter(s => s !== skill));
 
   const handleSubmit = (e) => {
     e.preventDefault();
     setIsSubmitting(true);
-    // Simulate API call
+    
+    // Simulate tactical submission
     setTimeout(() => {
+      applyForJob(jobInfo.id, formData);
       setIsSubmitting(false);
       setIsSubmitted(true);
     }, 2000);
@@ -65,31 +59,31 @@ const ApplicationForm = () => {
 
   if (isSubmitted) {
     return (
-      <div className="min-h-[80vh] flex items-center justify-center p-4">
+      <div className="min-h-[80vh] flex items-center justify-center p-4 animate-fade-in">
         <motion.div 
           initial={{ opacity: 0, scale: 0.9 }}
           animate={{ opacity: 1, scale: 1 }}
-          className="max-w-md w-full bg-white rounded-3xl p-8 text-center shadow-premium border border-slate-100"
+          className="max-w-xl w-full bg-white rounded-[4rem] p-16 text-center shadow-premium border border-slate-50"
         >
-          <div className="w-20 h-20 bg-emerald-50 rounded-full flex items-center justify-center mx-auto mb-6 text-emerald-600">
-            <CheckCircle2 size={40} />
+          <div className="w-24 h-24 bg-emerald-50 rounded-[2.5rem] flex items-center justify-center mx-auto mb-10 text-emerald-600 shadow-inner group grow">
+            <CheckCircle2 size={48} className="animate-bounce" />
           </div>
-          <h2 className="text-3xl font-extrabold text-slate-900 mb-2">Success!</h2>
-          <p className="text-slate-500 font-medium mb-8 leading-relaxed">
-            Your application for <span className="font-bold text-slate-800">{jobInfo.title}</span> has been submitted successfully. We'll be in touch soon.
+          <h2 className="text-4xl font-black text-slate-900 mb-4 tracking-tighter italic uppercase leading-none">PAYLOAD DISPATCHED</h2>
+          <p className="text-lg font-bold text-slate-400 mb-12 uppercase tracking-tight leading-relaxed px-8 italic">
+            Your career artifact for <span className="text-slate-900">{jobInfo.title}</span> has entered the recruitment buffer at <span className="text-primary-600">{jobInfo.company}</span>.
           </p>
-          <div className="space-y-4">
+          <div className="space-y-4 max-w-sm mx-auto">
             <button 
               onClick={() => navigate('/candidate/applications')}
-              className="btn-primary w-full h-12 font-bold"
+              className="w-full h-16 bg-slate-900 text-white rounded-3xl font-black uppercase tracking-[0.2em] text-[10px] shadow-2xl hover:bg-black transition-all active:scale-95 flex items-center justify-center gap-3"
             >
-              View My Applications
+              <FileText size={18} /> View Registry
             </button>
             <button 
               onClick={() => navigate('/candidate/jobs')}
-              className="btn-secondary w-full h-12 font-bold"
+              className="w-full h-16 bg-slate-50 text-slate-400 rounded-3xl font-black uppercase tracking-[0.2em] text-[10px] hover:text-slate-900 transition-all active:scale-95 flex items-center justify-center gap-3"
             >
-              Browse More Jobs
+              <RotateCcw size={18} /> Scan More Nodes
             </button>
           </div>
         </motion.div>
@@ -98,319 +92,279 @@ const ApplicationForm = () => {
   }
 
   return (
-    <div className="space-y-8 pb-12 animate-fade-in">
+    <div className="space-y-10 pb-12 animate-fade-in max-w-7xl mx-auto text-left">
       {/* Header Section */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <div className="flex items-center gap-4">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-8 bg-white p-10 rounded-[3.5rem] border border-slate-50 shadow-soft">
+        <div className="flex items-center gap-6">
           <button 
             onClick={() => navigate(-1)}
-            className="p-2.5 rounded-xl bg-white border border-slate-200 text-slate-500 hover:text-primary-600 transition-all hover:border-primary-100 shadow-sm"
+            className="w-14 h-14 rounded-2xl bg-slate-50 border border-slate-100 text-slate-400 hover:text-primary-600 transition-all flex items-center justify-center shadow-sm"
           >
-            <ArrowLeft size={20} />
+            <ArrowLeft size={24} />
           </button>
           <div>
-            <h1 className="text-3xl font-extrabold text-slate-900 tracking-tight">Job Application</h1>
-            <p className="text-slate-500 font-medium">Complete your application for {jobInfo.title}</p>
+            <h1 className="text-4xl font-black text-slate-900 tracking-tighter italic uppercase leading-none mb-2">ENGAGEMENT PROTOCOL</h1>
+            <p className="text-slate-400 font-bold tracking-tight uppercase text-xs">Phased submission for <span className="text-slate-900 font-black">{jobInfo.title}</span></p>
           </div>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-start">
         
-        {/* Main Form Area */}
-        <div className="lg:col-span-2">
-          <form onSubmit={handleSubmit} className="card bg-white p-8 lg:p-10 border-none shadow-soft space-y-10">
+        {/* Main Configuration Engine */}
+        <div className="lg:col-span-8">
+          <form onSubmit={handleSubmit} className="card bg-white p-12 lg:p-14 border-none shadow-soft space-y-14 rounded-[4rem]">
             
-            {/* Personal Information */}
-            <section className="space-y-6">
-              <div className="flex items-center gap-3 mb-2">
-                <div className="w-8 h-8 rounded-lg bg-primary-50 text-primary-600 flex items-center justify-center">
-                  <User size={18} />
+            {/* Identity Vectors */}
+            <section className="space-y-10">
+              <div className="flex items-center gap-4 mb-2 border-b border-slate-50 pb-6">
+                <div className="w-12 h-12 rounded-2xl bg-primary-50 text-primary-600 flex items-center justify-center">
+                  <User size={24} />
                 </div>
-                <h3 className="text-xl font-bold text-slate-900 tracking-tight">Personal Information</h3>
+                <h3 className="text-2xl font-black text-slate-900 italic tracking-tight uppercase">Identity Node</h3>
               </div>
               
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
-                  <label className="block text-sm font-bold text-slate-700 mb-2">Full Name <span className="text-rose-500">*</span></label>
-                  <div className="relative group">
-                    <User className="absolute left-4 top-3 text-slate-400 group-focus-within:text-primary-500 transition-colors" size={18} />
-                    <input type="text" required placeholder="John Doe" className="input-field pl-11" />
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
+                <div className="space-y-3 group">
+                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-[0.3em] ml-1 italic group-focus-within:text-primary-600 transition-colors uppercase">Full Engagement Name</label>
+                  <div className="relative">
+                    <User className="absolute left-5 top-5 text-slate-200 group-focus-within:text-primary-500 transition-colors" size={18} />
+                    <input type="text" value={formData.fullName} onChange={e => setFormData({...formData, fullName: e.target.value})} required className="input-field pl-14 h-14 bg-slate-50 border-transparent font-black" />
                   </div>
                 </div>
-                <div>
-                  <label className="block text-sm font-bold text-slate-700 mb-2">Email Address <span className="text-rose-500">*</span></label>
-                  <div className="relative group">
-                    <Mail className="absolute left-4 top-3 text-slate-400 group-focus-within:text-primary-500 transition-colors" size={18} />
-                    <input type="email" required placeholder="john@example.com" className="input-field pl-11" />
+                <div className="space-y-3 group">
+                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-[0.3em] ml-1 italic group-focus-within:text-primary-600 transition-colors uppercase">Digital Interface (Email)</label>
+                  <div className="relative">
+                    <Mail className="absolute left-5 top-5 text-slate-200 group-focus-within:text-primary-500 transition-colors" size={18} />
+                    <input type="email" value={formData.email} onChange={e => setFormData({...formData, email: e.target.value})} required className="input-field pl-14 h-14 bg-slate-50 border-transparent font-black" />
                   </div>
                 </div>
-                <div>
-                  <label className="block text-sm font-bold text-slate-700 mb-2">Phone Number <span className="text-rose-500">*</span></label>
-                  <div className="relative group">
-                    <Phone className="absolute left-4 top-3 text-slate-400 group-focus-within:text-primary-500 transition-colors" size={18} />
-                    <input type="tel" required placeholder="+1 (555) 000-0000" className="input-field pl-11" />
+                <div className="space-y-3 group">
+                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-[0.3em] ml-1 italic group-focus-within:text-primary-600 transition-colors uppercase">Voice Comms Line</label>
+                  <div className="relative">
+                    <Phone className="absolute left-5 top-5 text-slate-200 group-focus-within:text-primary-500 transition-colors" size={18} />
+                    <input type="tel" value={formData.phone} onChange={e => setFormData({...formData, phone: e.target.value})} required className="input-field pl-14 h-14 bg-slate-50 border-transparent font-black" />
                   </div>
                 </div>
-                <div>
-                  <label className="block text-sm font-bold text-slate-700 mb-2">Current Location</label>
-                  <div className="relative group">
-                    <MapPin className="absolute left-4 top-3 text-slate-400 group-focus-within:text-primary-500 transition-colors" size={18} />
-                    <input type="text" placeholder="San Francisco, CA" className="input-field pl-11" />
+                <div className="space-y-3 group">
+                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-[0.3em] ml-1 italic group-focus-within:text-primary-600 transition-colors uppercase">Operational Hub (Loc)</label>
+                  <div className="relative">
+                    <MapPin className="absolute left-5 top-5 text-slate-200 group-focus-within:text-primary-500 transition-colors" size={18} />
+                    <input type="text" value={formData.location} onChange={e => setFormData({...formData, location: e.target.value})} className="input-field pl-14 h-14 bg-slate-50 border-transparent font-black" />
                   </div>
                 </div>
               </div>
             </section>
 
-            <hr className="border-slate-50" />
-
-            {/* Resume & Professional Info */}
-            <section className="space-y-6">
-               <div className="flex items-center gap-3 mb-2">
-                <div className="w-8 h-8 rounded-lg bg-accent-50 text-accent-600 flex items-center justify-center">
-                  <Briefcase size={18} />
+            {/* Career Artifacts */}
+            <section className="space-y-10">
+               <div className="flex items-center gap-4 mb-2 border-b border-slate-50 pb-6">
+                <div className="w-12 h-12 rounded-2xl bg-indigo-50 text-indigo-600 flex items-center justify-center">
+                  <Briefcase size={24} />
                 </div>
-                <h3 className="text-xl font-bold text-slate-900 tracking-tight">Professional Profile</h3>
+                <h3 className="text-2xl font-black text-slate-900 italic tracking-tight uppercase">Strategic Artifacts</h3>
               </div>
 
-              <div>
-                <label className="block text-sm font-bold text-slate-700 mb-3">Upload Resume <span className="text-rose-500">*</span></label>
+              <div className="space-y-4">
+                <label className="text-[10px] font-black text-slate-400 uppercase tracking-[0.3em] ml-1 italic uppercase">Payload Submission (Resume)</label>
                 <div 
                   className={cn(
-                    "relative group cursor-pointer border-2 border-dashed rounded-2xl p-10 text-center transition-all",
-                    resume ? "border-emerald-200 bg-emerald-50/20" : "border-slate-200 hover:border-primary-300 hover:bg-slate-50/50"
+                    "relative group cursor-pointer border-4 border-dashed rounded-[2.5rem] p-12 text-center transition-all duration-700",
+                    resume ? "border-emerald-100 bg-emerald-50/20" : "border-slate-50 hover:border-primary-100 hover:bg-slate-50/50"
                   )}
-                  onDragOver={(e) => e.preventDefault()}
-                  onDrop={(e) => {
-                    e.preventDefault();
-                    setResume(e.dataTransfer.files[0]);
-                  }}
-                  onClick={() => document.getElementById('resume-upload').click()}
+                  onClick={() => !resume && document.getElementById('resume-upload').click()}
                 >
-                  <input 
-                    id="resume-upload" 
-                    type="file" 
-                    className="hidden" 
-                    accept=".pdf,.doc,.docx" 
-                    onChange={(e) => setResume(e.target.files[0])}
-                  />
+                  <input id="resume-upload" type="file" className="hidden" accept=".pdf,.doc,.docx" onChange={(e) => setResume(e.target.files[0])} />
                   {resume ? (
-                    <div className="flex flex-col items-center">
-                      <div className="w-14 h-14 rounded-2xl bg-emerald-100 flex items-center justify-center text-emerald-600 mb-4">
-                        <CheckCircle2 size={32} />
+                    <div className="flex items-center justify-between group-hover:px-4 transition-all">
+                      <div className="flex items-center gap-6">
+                        <div className="w-20 h-20 rounded-3xl bg-white flex items-center justify-center text-emerald-600 shadow-xl group-hover:rotate-6 transition-transform">
+                          <FileText size={36} />
+                        </div>
+                        <div className="text-left">
+                          <p className="text-lg font-black text-slate-900 uppercase italic tracking-tight">{resume.name}</p>
+                          <p className="text-[10px] font-black text-slate-400 mt-2 uppercase tracking-[0.3em]">{resume.size} • SYNC READY</p>
+                        </div>
                       </div>
-                      <p className="text-slate-900 font-bold">{resume.name}</p>
-                      <p className="text-xs text-slate-400 mt-1 uppercase font-bold">{(resume.size / 1024 / 1024).toFixed(2)} MB • Ready to upload</p>
-                      <button 
-                        type="button" 
-                        onClick={(e) => { e.stopPropagation(); setResume(null); }}
-                        className="mt-4 text-xs font-bold text-rose-500 hover:text-rose-600"
-                      >
-                        Remove file
-                      </button>
+                      <button type="button" onClick={(e) => { e.stopPropagation(); setResume(null); }} className="w-12 h-12 bg-white text-rose-500 rounded-xl flex items-center justify-center shadow-lg hover:bg-rose-50 group-hover:scale-110 transition-all"><Trash2 size={24} /></button>
                     </div>
                   ) : (
-                    <>
-                      <div className="w-16 h-16 rounded-3xl bg-slate-100 flex items-center justify-center text-slate-400 mx-auto mb-4 group-hover:bg-primary-50 group-hover:text-primary-500 transition-all">
-                        <Upload size={32} />
+                    <div className="py-10">
+                      <div className="w-20 h-20 rounded-[1.75rem] bg-slate-50 flex items-center justify-center text-slate-200 mx-auto mb-8 group-hover:bg-primary-50 group-hover:text-primary-500 transition-all duration-700 shadow-inner group-hover:-rotate-6">
+                        <Upload size={36} />
                       </div>
-                      <p className="text-slate-900 font-bold text-lg mb-1">Click or drag & drop to upload</p>
-                      <p className="text-slate-500 font-medium">Support: PDF, DOC, DOCX (Max 5MB)</p>
-                    </>
+                      <p className="text-2xl font-black text-slate-900 uppercase italic tracking-tighter mb-2">Transmit Registry Artifact</p>
+                      <p className="text-[10px] font-black text-slate-300 uppercase tracking-[0.4em]">PDF / DOCX (MAX 5MB)</p>
+                    </div>
                   )}
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-4">
-                <div>
-                  <label className="block text-sm font-bold text-slate-700 mb-2">Total Experience <span className="text-rose-500">*</span></label>
-                  <div className="relative group">
-                    <select required className="input-field appearance-none pl-4 pr-10">
-                      <option value="">Select years</option>
-                      <option value="fresher">Fresher</option>
-                      <option value="1-2">1-2 Years</option>
-                      <option value="3-5">3-5 Years</option>
-                      <option value="5+">5+ Years</option>
-                      <option value="10+">10+ Years</option>
-                    </select>
-                    <ChevronDown className="absolute right-4 top-3 text-slate-400 pointer-events-none" size={18} />
-                  </div>
-                </div>
-                <div>
-                  <label className="block text-sm font-bold text-slate-700 mb-2">Expected Salary</label>
-                  <div className="relative group">
-                    <DollarSign className="absolute left-4 top-3 text-slate-400 group-focus-within:text-primary-500 transition-colors" size={18} />
-                    <input type="text" placeholder="$120,000" className="input-field pl-11" />
-                  </div>
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-sm font-bold text-slate-700 mb-2">Skills & Expertise <span className="text-rose-500">*</span></label>
-                <div className="input-field min-h-[50px] p-2 flex flex-wrap gap-2">
-                  {skills.map(skill => (
-                    <span key={skill} className="flex items-center gap-1.5 px-2.5 py-1 bg-primary-50 text-primary-600 rounded-lg text-xs font-bold ring-1 ring-primary-100">
-                      {skill}
-                      <button type="button" onClick={() => removeSkill(skill)}><X size={12} /></button>
-                    </span>
-                  ))}
-                  <input 
-                    type="text" 
-                    value={skillInput}
-                    onChange={(e) => setSkillInput(e.target.value)}
-                    onKeyDown={handleAddSkill}
-                    placeholder={skills.length === 0 ? "e.g. React, Figma, UI Design" : "Add more..."}
-                    className="flex-1 bg-transparent border-none outline-none text-sm font-medium min-w-[120px]"
-                  />
-                </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
+                 <div className="space-y-3 group">
+                   <label className="text-[10px] font-black text-slate-400 uppercase tracking-[0.3em] ml-1 italic group-focus-within:text-primary-600 transition-colors uppercase">Skill Matrix Coverage</label>
+                   <div className="input-field min-h-[64px] p-4 flex flex-wrap gap-2 bg-slate-50 border-transparent transition-all group-focus-within:bg-white group-focus-within:ring-2 group-focus-within:ring-primary-100">
+                     {skills.map(skill => (
+                       <span key={skill} className="flex items-center gap-3 px-4 py-2 bg-slate-900 text-white rounded-xl text-[10px] font-black uppercase tracking-widest italic group grow shadow-xl">
+                         {skill}
+                         <button type="button" onClick={() => removeSkill(skill)} className="text-white/30 hover:text-white transition-colors"><X size={14} strokeWidth={4} /></button>
+                       </span>
+                     ))}
+                     <input 
+                       type="text" 
+                       value={skillInput}
+                       onChange={(e) => setSkillInput(e.target.value)}
+                       onKeyDown={handleAddSkill}
+                       placeholder={skills.length === 0 ? "QUERY SKILLS..." : "ADD VECTOR..."}
+                       className="flex-1 bg-transparent border-none outline-none text-sm font-black text-slate-900 uppercase italic"
+                     />
+                   </div>
+                 </div>
+                 <div className="space-y-3 group">
+                   <label className="text-[10px] font-black text-slate-400 uppercase tracking-[0.3em] ml-1 italic group-focus-within:text-primary-600 transition-colors uppercase">Comp. Expectation</label>
+                   <div className="relative">
+                     <DollarSign className="absolute left-5 top-5 text-slate-200 group-focus-within:text-primary-500 transition-colors" size={18} />
+                     <input type="text" value={formData.expectedSalary} onChange={e => setFormData({...formData, expectedSalary: e.target.value})} placeholder="$145,000" className="input-field pl-14 h-14 bg-slate-50 border-transparent font-black" />
+                   </div>
+                 </div>
               </div>
             </section>
 
-            <hr className="border-slate-50" />
-
-            {/* Links and Additional Info */}
-            <section className="space-y-6">
-              <div className="flex items-center gap-3 mb-2">
-                <div className="w-8 h-8 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center">
-                  <Globe size={18} />
+            {/* Strategic Comms */}
+            <section className="space-y-10">
+              <div className="flex items-center gap-4 mb-2 border-b border-slate-50 pb-6">
+                <div className="w-12 h-12 rounded-2xl bg-amber-50 text-amber-600 flex items-center justify-center">
+                  <Zap size={24} />
                 </div>
-                <h3 className="text-xl font-bold text-slate-900 tracking-tight">Social & Portfolio</h3>
+                <h3 className="text-2xl font-black text-slate-900 italic tracking-tight uppercase">Strategic Comms</h3>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
-                  <label className="block text-sm font-bold text-slate-700 mb-2">LinkedIn Profile</label>
-                  <div className="relative group">
-                    <Globe className="absolute left-4 top-3 text-slate-400 group-focus-within:text-primary-500 transition-colors" size={18} />
-                    <input type="url" placeholder="https://linkedin.com/in/username" className="input-field pl-11" />
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
+                <div className="space-y-3 group">
+                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-[0.3em] ml-1 italic uppercase">LinkedIn Node</label>
+                  <div className="relative">
+                    <Globe className="absolute left-5 top-5 text-slate-200" size={18} />
+                    <input type="url" value={formData.linkedin} onChange={e => setFormData({...formData, linkedin: e.target.value})} placeholder="https://linkedin.com/..." className="input-field pl-14 h-14 bg-slate-50 border-transparent font-black" />
                   </div>
                 </div>
-                <div>
-                  <label className="block text-sm font-bold text-slate-700 mb-2">Portfolio / Website</label>
-                  <div className="relative group">
-                    <LinkIcon className="absolute left-4 top-3 text-slate-400 group-focus-within:text-primary-500 transition-colors" size={18} />
-                    <input type="url" placeholder="https://portfolio.com" className="input-field pl-11" />
+                <div className="space-y-3 group">
+                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-[0.3em] ml-1 italic uppercase">Artifact Portfolio</label>
+                  <div className="relative">
+                    <LinkIcon className="absolute left-5 top-5 text-slate-200" size={18} />
+                    <input type="url" value={formData.portfolio} onChange={e => setFormData({...formData, portfolio: e.target.value})} placeholder="https://dossier.design" className="input-field pl-14 h-14 bg-slate-50 border-transparent font-black" />
                   </div>
                 </div>
               </div>
 
-              <div>
-                <label className="block text-sm font-bold text-slate-700 mb-2">Notice Period</label>
-                <div className="relative group">
-                  <Calendar className="absolute left-4 top-3 text-slate-400 pointer-events-none" size={18} />
-                  <select className="input-field appearance-none pl-11 pr-10">
-                    <option value="immediate">Immediate</option>
-                    <option value="15">15 Days</option>
-                    <option value="30">30 Days</option>
-                    <option value="60">60 Days</option>
-                  </select>
-                  <ChevronDown className="absolute right-4 top-3 text-slate-400 pointer-events-none" size={18} />
-                </div>
-              </div>
-
-              <div>
+              <div className="space-y-3">
                 <div className="flex items-center justify-between mb-2">
-                  <label className="text-sm font-bold text-slate-700">Cover Letter</label>
-                  <span className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Recommended</span>
+                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-[0.3em] italic uppercase">Operational Intent (Cover Letter)</label>
+                  <span className="text-[9px] font-black text-slate-300 uppercase tracking-widest italic">Phase Buffer: 2000 Units</span>
                 </div>
                 <textarea 
-                  rows={5} 
-                  placeholder="Tell us why you're a great fit for this role..." 
-                  className="input-field py-4 resize-none"
-                ></textarea>
-                <div className="flex justify-end mt-2">
-                  <span className="text-xs font-bold text-slate-400 tracking-wider uppercase">0 / 2000 Characters</span>
-                </div>
+                  rows={8} 
+                  value={formData.coverLetter}
+                  onChange={e => setFormData({...formData, coverLetter: e.target.value})}
+                  placeholder="Outline your strategic alignment with this role and the HCM ecosystem..." 
+                  className="input-field py-8 px-10 bg-slate-50 border-transparent resize-none font-bold text-sm leading-relaxed"
+                />
               </div>
             </section>
 
-            <div className="pt-6 flex flex-col md:flex-row gap-4">
+            <div className="pt-10 flex flex-col md:flex-row gap-6">
               <button 
                 type="submit" 
                 disabled={isSubmitting}
-                className="flex-1 btn-primary h-14 text-lg font-bold flex items-center justify-center gap-3 disabled:opacity-70 disabled:cursor-not-allowed shadow-2xl"
+                className="flex-3 h-20 bg-slate-900 text-white rounded-[2rem] text-sm font-black uppercase tracking-[0.4em] shadow-2xl hover:bg-black transition-all active:scale-95 disabled:opacity-50 overflow-hidden relative group"
               >
-                {isSubmitting ? (
-                  <div className="w-6 h-6 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
-                ) : (
-                  <>
-                    <span>Submit Application</span>
-                    <Plus size={22} />
-                  </>
-                )}
+                <AnimatePresence mode="wait">
+                  {isSubmitting ? (
+                    <motion.div initial={{ y: 20 }} animate={{ y: 0 }} key="submitting" className="flex items-center justify-center gap-4">
+                       <div className="w-5 h-5 border-4 border-white/20 border-t-white rounded-full animate-spin"></div>
+                       <span>TRANSMITTING...</span>
+                    </motion.div>
+                  ) : (
+                    <motion.div initial={{ y: 20 }} animate={{ y: 0 }} key="static" className="flex items-center justify-center gap-4">
+                       <span>DISPATCH PAYLOAD</span>
+                       <ArrowRight size={24} className="group-hover:translate-x-4 transition-transform" />
+                    </motion.div>
+                  )}
+                </AnimatePresence>
               </button>
               <button 
                 type="button" 
-                className="btn-secondary h-14 px-8 font-bold text-slate-600 hover:text-primary-600 shadow-sm"
+                onClick={() => { showToast('Payload buffered to persistence engine'); navigate(-1); }}
+                className="flex-1 h-20 bg-slate-50 text-slate-400 rounded-[2rem] font-black uppercase tracking-[0.2em] text-[10px] hover:text-slate-900 transition-all border border-slate-100 italic"
               >
-                Save Draft
-              </button>
-               <button 
-                type="button" 
-                onClick={() => navigate(-1)}
-                className="h-14 px-8 font-bold text-rose-500 hover:bg-rose-50 rounded-xl transition-all"
-              >
-                Cancel
+                Buffer Draft
               </button>
             </div>
           </form>
         </div>
 
-        {/* Right Sticky Column: Summary & Tips */}
-        <div className="lg:sticky lg:top-24 space-y-6">
-          <div className="card border-none bg-slate-900 text-white p-8">
-            <h3 className="text-xs font-bold uppercase tracking-widest text-primary-400 mb-6">Job Snapshot</h3>
-            <div className="space-y-6">
-              <div>
-                <h4 className="text-xl font-bold leading-tight">{jobInfo.title}</h4>
-                <p className="text-sm font-medium text-slate-400 mt-1">{jobInfo.department}</p>
+        {/* Tactical Support Column */}
+        <div className="lg:col-span-4 lg:sticky lg:top-24 space-y-10">
+          <div className="card p-10 bg-slate-900 text-white border-none shadow-premium rounded-[3.5rem] relative overflow-hidden group">
+            <div className="absolute top-0 right-0 p-8 opacity-10 blur-xl group-hover:scale-110 transition-transform duration-1000">
+               <ShieldCheck size={140} fill="#fff" />
+            </div>
+            <h3 className="text-[10px] font-black uppercase tracking-[0.4em] text-primary-400 mb-10 leading-none italic">Target Snapshot</h3>
+            <div className="space-y-10 relative z-10">
+              <div className="space-y-3">
+                 <h4 className="text-3xl font-black italic tracking-tighter uppercase leading-none">{jobInfo.title}</h4>
+                 <p className="text-sm font-black text-slate-400 uppercase tracking-widest italic">{jobInfo.department} Operational Unit</p>
               </div>
               
-              <div className="space-y-3">
+              <div className="grid grid-cols-1 gap-6">
                 {[
-                  { icon: MapPin, text: jobInfo.location },
-                  { icon: DollarSign, text: jobInfo.salary },
-                  { icon: Clock, text: jobInfo.type },
-                  { icon: Calendar, text: `Apply by: ${jobInfo.deadline}` },
+                  { icon: MapPin, text: jobInfo.location, label: 'HUB' },
+                  { icon: DollarSign, text: jobInfo.salary, label: 'COMP' },
+                  { icon: Briefcase, text: jobInfo.type, label: 'ALLOC' },
+                  { icon: Clock, text: `Audit Ends: ${jobInfo.deadline || '12d ago'}`, label: 'TTL' },
                 ].map((item, i) => (
-                  <div key={i} className="flex items-center gap-3 text-slate-400">
-                    <item.icon size={16} className="text-slate-500" />
-                    <span className="text-sm font-medium leading-none">{item.text}</span>
+                  <div key={i} className="flex items-center gap-5 group/item">
+                    <div className="w-10 h-10 bg-white/5 rounded-xl flex items-center justify-center text-primary-400 group-hover/item:bg-white group-hover/item:text-slate-900 transition-all">
+                       <item.icon size={18} />
+                    </div>
+                    <div>
+                       <p className="text-[8px] font-black uppercase tracking-[0.4em] text-slate-500 mb-1 leading-none">{item.label}</p>
+                       <span className="text-xs font-black uppercase italic tracking-widest">{item.text}</span>
+                    </div>
                   </div>
                 ))}
               </div>
               
-              <div className="pt-6 border-t border-white/10">
-                 <div className="p-4 bg-white/5 rounded-2xl border border-white/10">
-                    <p className="text-[10px] font-bold uppercase tracking-widest text-slate-500 mb-2">Recruitment Stage</p>
-                    <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-xl bg-primary-600 flex items-center justify-center">
-                        <CheckCircle2 size={20} className="text-white" />
+              <div className="pt-10 border-t border-white/5">
+                 <div className="p-8 bg-white text-slate-900 rounded-[2.5rem] shadow-2xl group grow">
+                    <p className="text-[9px] font-black uppercase tracking-[0.4em] text-slate-400 mb-4 leading-none">Security Clearance</p>
+                    <div className="flex items-center gap-4">
+                      <div className="w-12 h-12 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center shadow-inner">
+                        <ShieldCheck size={28} />
                       </div>
-                      <span className="text-sm font-bold">Actively Hiring</span>
+                      <span className="text-sm font-black italic uppercase tracking-tighter">Active Protocol</span>
                     </div>
                  </div>
               </div>
             </div>
           </div>
 
-          <div className="card bg-white p-6 border-none shadow-soft">
-            <h3 className="text-lg font-bold text-slate-900 mb-6 flex items-center gap-2">
-              <AlertCircle className="text-amber-500" size={20} />
-               Submission Tips
+          <div className="card bg-white p-10 border-none shadow-soft rounded-[3rem] text-left">
+            <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.4em] mb-10 flex items-center gap-3 italic">
+              <Zap className="text-amber-500" size={14} /> Optimization Insights
             </h3>
-            <ul className="space-y-4">
+            <div className="space-y-8">
               {[
-                { title: 'Resume Quality', desc: 'Ensure your resume is updated and reflects your latest achievements.' },
-                { title: 'Relevant Skills', desc: 'Adding 5+ top skills improves your ranking across AI screenings.' },
-                { title: 'Cover Letter', desc: 'Personalized cover letters increase engagement by 40%.' }
+                { title: 'Resume Yield', desc: 'Higher semantic overlap detected with 2026 templates.' },
+                { title: 'Vector Coverage', desc: 'Deploying 5+ skill nodes elevates audit visibility by 48%.' },
+                { title: 'Strategic Comms', desc: 'Personalized intent logs drive higher officer engagement.' }
               ].map((tip, i) => (
-                <li key={i} className="space-y-1">
-                  <p className="text-sm font-bold text-slate-800">{tip.title}</p>
-                  <p className="text-xs text-slate-500 font-medium leading-relaxed">{tip.desc}</p>
-                </li>
+                <div key={i} className="space-y-2 group">
+                  <p className="text-[11px] font-black text-slate-900 uppercase italic tracking-tight group-hover:text-primary-600 transition-colors uppercase">{tip.title}</p>
+                  <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest leading-relaxed opacity-80">{tip.desc}</p>
+                </div>
               ))}
-            </ul>
+            </div>
+            <button className="w-full mt-12 py-4 bg-slate-50 text-slate-400 text-[9px] font-black uppercase tracking-widest rounded-2xl hover:bg-primary-50 hover:text-primary-600 transition-all">Retrieve Full Guide</button>
           </div>
         </div>
       </div>

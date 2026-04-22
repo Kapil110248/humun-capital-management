@@ -17,39 +17,82 @@ import {
   X, 
   ChevronRight,
   ShieldCheck,
-  Zap
+  Zap,
+  Filter,
+  Download
 } from 'lucide-react';
 import { cn } from '../../utils/cn';
+import { useEmployee } from '../../context/EmployeeContext';
+import CenterModal from '../../components/layout/CenterModal';
 
 const EmployeeLeave = () => {
+  const { leaves, requestLeave, cancelLeave, showToast } = useEmployee();
   const [isRequestModalOpen, setIsRequestModalOpen] = useState(false);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [filterStatus, setFilterStatus] = useState('All');
 
   const balances = [
-    { label: 'Casual Leave', value: 8, total: 12, icon: Sun, color: 'text-amber-600', bg: 'bg-amber-50' },
-    { label: 'Sick Leave', value: 5, total: 10, icon: Stethoscope, color: 'text-rose-600', bg: 'bg-rose-50' },
-    { label: 'Earned Leave', value: 15, total: 20, icon: Briefcase, color: 'text-primary-600', bg: 'bg-primary-50' },
-    { label: 'Pending Request', value: 1, total: null, icon: Clock, color: 'text-indigo-600', bg: 'bg-indigo-50' },
+    { label: 'Sick Leave', value: leaves.balance.sick, total: 12, icon: Stethoscope, color: 'text-rose-600', bg: 'bg-rose-50' },
+    { label: 'Annual Leave', value: leaves.balance.annual, total: 20, icon: Briefcase, color: 'text-primary-600', bg: 'bg-primary-50' },
+    { label: 'Casual Leave', value: leaves.balance.casual, total: 10, icon: Sun, color: 'text-amber-600', bg: 'bg-amber-50' },
+    { label: 'Total Used', value: (12+20+10) - (leaves.balance.sick + leaves.balance.annual + leaves.balance.casual), total: 42, icon: CheckCircle2, color: 'text-emerald-600', bg: 'bg-emerald-50' },
   ];
 
-  const history = [
-    { type: 'Sick Leave', from: 'Oct 20, 2026', to: 'Oct 21, 2026', days: 2, status: 'Approved', manager: 'Sarah J.', note: 'Recovering from flu.' },
-    { type: 'Casual Leave', from: 'Nov 04, 2026', to: 'Nov 04, 2026', days: 1, status: 'Pending', manager: 'Sarah J.', note: 'Family event.' },
-    { type: 'Earned Leave', from: 'Sep 10, 2026', to: 'Sep 15, 2026', days: 5, status: 'Approved', manager: 'Sarah J.', note: 'Summer vacation.' },
-    { type: 'Sick Leave', from: 'Aug 12, 2026', to: 'Aug 12, 2026', days: 0.5, status: 'Rejected', manager: 'Sarah J.', note: 'Half day rest.' },
-  ];
+  const filteredHistory = leaves.requests.filter(item => {
+    const matchesSearch = item.type.toLowerCase().includes(searchTerm.toLowerCase()) || 
+                          item.reason.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesFilter = filterStatus === 'All' || item.status === filterStatus;
+    return matchesSearch && matchesFilter;
+  });
+
+  const handleRequestSubmit = (e) => {
+    e.preventDefault();
+    const formData = new FormData(e.target);
+    const startDate = new Date(formData.get('startDate'));
+    const endDate = new Date(formData.get('endDate'));
+    const days = Math.ceil((endDate - startDate) / (1000 * 60 * 60 * 24)) + 1;
+    
+    if (days <= 0) {
+      showToast('End date must be after start date', 'error');
+      return;
+    }
+
+    const type = formData.get('type').split(' ')[0];
+    const balanceKey = type.toLowerCase().replace(' leave', '');
+    if (leaves.balance[balanceKey] < days) {
+      showToast(`Insufficient balance for ${type}`, 'error');
+      return;
+    }
+
+    requestLeave({
+      type: formData.get('type'),
+      startDate: formData.get('startDate'),
+      endDate: formData.get('endDate'),
+      reason: formData.get('reason'),
+      emergencyContact: formData.get('emergency'),
+      days
+    });
+    
+    setIsRequestModalOpen(false);
+    showToast('Leave request submitted for approval');
+  };
 
   return (
-    <div className="space-y-8 pb-12 animate-fade-in relative">
+    <div className="space-y-8 pb-12 animate-fade-in relative max-w-7xl mx-auto">
       {/* Header Section */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-extrabold text-slate-900 tracking-tight">Leave Management</h1>
-          <p className="text-slate-500 font-medium tracking-tight">Track your leave balances and request time off</p>
+          <h1 className="text-3xl font-black text-slate-900 tracking-tight">Time Off Management</h1>
+          <p className="text-slate-500 font-bold tracking-tight">Manage your leave balance, history, and requests</p>
         </div>
         <div className="flex items-center gap-3">
+          <button onClick={() => showToast('Report exported as PDF')} className="btn-secondary px-6 py-2.5 font-black uppercase tracking-widest flex items-center gap-2">
+            <Download size={18} />
+            <span>Report</span>
+          </button>
           <button 
             onClick={() => setIsRequestModalOpen(true)}
-            className="btn-primary px-8 py-3 font-bold flex items-center justify-center gap-2 shadow-lg shadow-primary-100 active:scale-95 transition-all"
+            className="btn-primary px-8 py-2.5 font-black uppercase tracking-widest flex items-center justify-center gap-2 shadow-xl shadow-primary-200 active:scale-95 transition-all"
           >
              <Plus size={18} />
              <span>Request Time Off</span>
@@ -63,186 +106,165 @@ const EmployeeLeave = () => {
           <motion.div
             key={idx}
             whileHover={{ y: -5 }}
-            className="card p-6 bg-white border border-slate-100 shadow-soft overflow-hidden group"
+            className="card p-6 bg-white border border-slate-100 shadow-soft group"
           >
-            <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center justify-between mb-6">
                <div className={cn("p-3 rounded-2xl group-hover:scale-110 transition-transform", bal.bg, bal.color)}>
-                  <bal.icon size={24} />
+                  <bal.icon size={26} />
                </div>
-               {bal.total && (
-                  <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest px-2 py-0.5 bg-slate-50 rounded-lg">
-                     {bal.total} Total
-                  </span>
-               )}
+               <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest px-3 py-1 bg-slate-50 rounded-lg border border-slate-100">
+                  {bal.total} Total
+               </span>
             </div>
             <div>
-              <p className="text-sm font-bold text-slate-400 uppercase tracking-widest leading-none mb-1.5">{bal.label}</p>
-              <h3 className="text-3xl font-extrabold text-slate-900 tracking-tight">{bal.value} <span className="text-sm font-medium text-slate-300">Days</span></h3>
+              <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] leading-none mb-2">{bal.label}</p>
+              <h3 className="text-3xl font-black text-slate-900 tracking-tight">{bal.value} <span className="text-sm font-bold text-slate-300">Available</span></h3>
             </div>
-            {bal.total && (
-              <div className="mt-6 w-full h-1.5 bg-slate-50 rounded-full overflow-hidden border border-slate-100 p-[1px]">
-                 <motion.div 
-                   initial={{ width: 0 }}
-                   animate={{ width: `${(bal.value / bal.total) * 100}%` }}
-                   className={cn("h-full rounded-full", bal.color.replace('text', 'bg'))} 
-                 />
-              </div>
-            )}
+            <div className="mt-6 w-full h-2 bg-slate-50 rounded-full overflow-hidden border border-slate-100 p-[1px]">
+               <motion.div 
+                 initial={{ width: 0 }}
+                 animate={{ width: `${(bal.value / bal.total) * 100}%` }}
+                 className={cn("h-full rounded-full transition-all", bal.color.replace('text', 'bg'))} 
+               />
+            </div>
           </motion.div>
         ))}
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-         {/* History Area */}
-         <div className="lg:col-span-12 space-y-8">
-            <div className="flex items-center justify-between">
-               <h3 className="text-xl font-bold text-slate-900 tracking-tight">My Leave History</h3>
-               <div className="relative w-full max-w-xs">
-                  <Search className="absolute left-3 top-3 text-slate-400" size={18} />
-                  <input type="text" placeholder="Search requests..." className="input-field pl-10 h-11" />
+      {/* History Area */}
+      <div className="space-y-8">
+         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <h3 className="text-2xl font-black text-slate-900 tracking-tight italic">My Leave History</h3>
+            <div className="flex items-center gap-3">
+               <div className="relative">
+                  <Search className="absolute left-3 top-2.5 text-slate-400" size={16} />
+                  <input 
+                    type="text" 
+                    placeholder="Search history..." 
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="bg-white border border-slate-100 rounded-xl pl-10 pr-4 py-2 text-xs font-bold w-48 focus:ring-2 focus:ring-primary-100 outline-none transition-all" 
+                  />
                </div>
-            </div>
-
-            <div className="card p-0 border-none bg-white shadow-soft overflow-hidden">
-               <div className="overflow-x-auto">
-                  <table className="w-full text-left">
-                     <thead>
-                        <tr className="bg-slate-50/50">
-                           <th className="px-8 py-5 text-[10px] uppercase font-bold text-slate-400 tracking-[0.15em]">Leave Type</th>
-                           <th className="px-8 py-5 text-[10px] uppercase font-bold text-slate-400 tracking-[0.15em]">Duration</th>
-                           <th className="px-8 py-5 text-[10px] uppercase font-bold text-slate-400 tracking-[0.15em] text-center">Days</th>
-                           <th className="px-8 py-5 text-[10px] uppercase font-bold text-slate-400 tracking-[0.15em] text-center">Status</th>
-                           <th className="px-8 py-5 text-[10px] uppercase font-bold text-slate-400 tracking-[0.15em] text-right">Reason / Manager</th>
-                        </tr>
-                     </thead>
-                     <tbody className="divide-y divide-slate-50 text-sm">
-                        {history.map((item, i) => (
-                           <tr key={i} className="group hover:bg-slate-50/30 transition-colors">
-                              <td className="px-8 py-6">
-                                 <p className="font-bold text-slate-900 truncate max-w-[150px]">{item.type}</p>
-                              </td>
-                              <td className="px-8 py-6">
-                                 <div className="flex items-center gap-3">
-                                    <Calendar size={14} className="text-slate-300" />
-                                    <p className="font-bold text-slate-600 whitespace-nowrap">{item.from} — {item.to}</p>
-                                 </div>
-                              </td>
-                              <td className="px-8 py-6 text-center">
-                                 <span className="font-extrabold text-slate-900">{item.days}</span>
-                              </td>
-                              <td className="px-8 py-6 text-center">
-                                 <span className={cn(
-                                    "px-3 py-1.5 rounded-xl text-[10px] font-extrabold uppercase tracking-widest border",
-                                    item.status === 'Approved' ? "bg-emerald-50 text-emerald-600 border-emerald-100" :
-                                    item.status === 'Pending' ? "bg-amber-50 text-amber-600 border-amber-100" :
-                                    "bg-rose-50 text-rose-500 border-rose-100"
-                                 )}>
-                                    {item.status}
-                                 </span>
-                              </td>
-                              <td className="px-8 py-6 text-right">
-                                 <div className="space-y-1">
-                                    <p className="text-xs font-bold text-slate-400 italic">"{item.note}"</p>
-                                    <p className="text-[10px] font-bold text-primary-600 uppercase tracking-widest">{item.manager}</p>
-                                 </div>
-                              </td>
-                           </tr>
-                        ))}
-                     </tbody>
-                  </table>
+               <div className="flex items-center gap-2 bg-white p-1 rounded-xl shadow-sm border border-slate-100">
+                  {['All', 'Approved', 'Pending'].map(status => (
+                    <button 
+                      key={status} 
+                      onClick={() => setFilterStatus(status)} 
+                      className={cn(
+                        "px-3 py-1.5 text-[10px] font-black uppercase tracking-widest rounded-lg transition-all",
+                        filterStatus === status ? "bg-slate-900 text-white" : "text-slate-400 hover:text-slate-600"
+                      )}
+                    >
+                      {status}
+                    </button>
+                  ))}
                </div>
             </div>
          </div>
+
+         <div className="card p-0 border-none bg-white shadow-soft overflow-hidden">
+            <table className="w-full text-left">
+               <thead>
+                  <tr className="bg-slate-50/50">
+                     <th className="px-8 py-5 text-[10px] uppercase font-black text-slate-400 tracking-[0.2em]">Leave Type</th>
+                     <th className="px-8 py-5 text-[10px] uppercase font-black text-slate-400 tracking-[0.2em]">Duration</th>
+                     <th className="px-8 py-5 text-[10px] uppercase font-black text-slate-400 tracking-[0.2em] text-center">Calculated Days</th>
+                     <th className="px-8 py-5 text-[10px] uppercase font-black text-slate-400 tracking-[0.2em] text-center">Status</th>
+                     <th className="px-8 py-5 text-[10px] uppercase font-black text-slate-400 tracking-[0.2em] text-right">Reason / Logic</th>
+                  </tr>
+               </thead>
+               <tbody className="divide-y divide-slate-50">
+                  {filteredHistory.length > 0 ? filteredHistory.map((item, i) => (
+                     <tr key={i} className="group hover:bg-slate-50/50 transition-colors">
+                        <td className="px-8 py-7">
+                           <p className="font-black text-slate-800 text-sm">{item.type}</p>
+                           <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1.5">UID: #LV-{item.id.toString().slice(-4)}</p>
+                        </td>
+                        <td className="px-8 py-7">
+                           <div className="flex items-center gap-4">
+                              <Calendar size={16} className="text-primary-400" />
+                              <p className="font-black text-slate-700 text-xs tabular-nums text-left leading-none">
+                                {item.startDate} <span className="text-slate-200 mx-2">—</span> {item.endDate}
+                              </p>
+                           </div>
+                        </td>
+                        <td className="px-8 py-7 text-center">
+                           <span className="font-black text-slate-900 text-lg tabular-nums">{item.days}</span>
+                        </td>
+                        <td className="px-8 py-7 text-center">
+                           <span className={cn(
+                              "px-3 py-1.5 rounded-xl text-[9px] font-black uppercase tracking-[0.15em] border italic",
+                              item.status === 'Approved' ? "bg-emerald-50 text-emerald-600 border-emerald-100" :
+                              item.status === 'Pending' ? "bg-amber-50 text-amber-600 border-amber-100" :
+                              "bg-rose-50 text-rose-500 border-rose-100"
+                           )}>
+                              {item.status}
+                           </span>
+                        </td>
+                        <td className="px-8 py-7 text-right">
+                           <div className="space-y-1.5">
+                              <p className="text-xs font-black text-slate-500 italic">"{item.reason}"</p>
+                              <div className="flex items-center justify-end gap-2">
+                                 {item.status === 'Pending' && (
+                                   <button onClick={() => { cancelLeave(item.id); showToast('Request cancelled'); }} className="text-[9px] font-black text-rose-500 uppercase tracking-[0.2em] hover:underline">Cancel</button>
+                                 )}
+                                 <p className="text-[10px] font-black text-primary-600 uppercase tracking-widest">{item.managerComment ? 'Reviewed' : 'Awaiting Review'}</p>
+                              </div>
+                           </div>
+                        </td>
+                     </tr>
+                  )) : (
+                    <tr>
+                      <td colSpan="5" className="py-20 text-center">
+                        <div className="flex flex-col items-center gap-4 text-slate-300">
+                           <Calendar size={48} className="animate-pulse" />
+                           <p className="text-[10px] font-black uppercase tracking-[0.2em]">No leave records found</p>
+                        </div>
+                      </td>
+                    </tr>
+                  )}
+               </tbody>
+            </table>
+         </div>
       </div>
 
-      {/* Leave Request Sidebar Drawer */}
-      <AnimatePresence>
-        {isRequestModalOpen && (
-          <>
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              onClick={() => setIsRequestModalOpen(false)}
-              className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-[110]"
-            />
-            <motion.div
-              initial={{ x: '100%' }}
-              animate={{ x: 0 }}
-              exit={{ x: '100%' }}
-              transition={{ type: 'spring', damping: 30, stiffness: 300 }}
-              className="fixed inset-y-0 right-0 w-full max-w-xl bg-white shadow-2xl z-[120] flex flex-col"
-            >
-               <div className="p-8 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
-                  <div className="flex items-center gap-4">
-                     <div className="w-12 h-12 rounded-2xl bg-primary-600 flex items-center justify-center text-white shadow-lg">
-                        <Zap size={24} />
-                     </div>
-                     <div>
-                        <h2 className="text-xl font-extrabold text-slate-900 leading-none">New Leave Request</h2>
-                        <p className="text-xs font-bold text-primary-600 uppercase tracking-widest mt-1.5 font-primary">Annual Quota Available</p>
-                     </div>
-                  </div>
-                  <button onClick={() => setIsRequestModalOpen(false)} className="p-2.5 hover:bg-slate-100 rounded-xl transition-all text-slate-400">
-                     <X size={24} />
-                  </button>
+      {/* Leave Request Modal */}
+      <CenterModal isOpen={isRequestModalOpen} onClose={() => setIsRequestModalOpen(false)} title="New Time Off Request">
+         <form onSubmit={handleRequestSubmit} className="p-8 space-y-8">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+               <div className="space-y-2 text-left">
+                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest px-1">Select Leave Type</label>
+                  <select name="type" required className="input-field h-14 bg-slate-50 border-transparent font-black">
+                     <option>Sick Leave (Available: {leaves.balance.sick})</option>
+                     <option>Annual Leave (Available: {leaves.balance.annual})</option>
+                     <option>Casual Leave (Available: {leaves.balance.casual})</option>
+                  </select>
                </div>
-               
-               <div className="flex-1 overflow-y-auto p-10 space-y-10">
-                  <div className="grid grid-cols-1 gap-8">
-                     <div className="space-y-2">
-                        <label className="text-[10px] font-extrabold text-slate-400 uppercase tracking-widest">Select Leave Type</label>
-                        <select className="input-field h-14 bg-slate-50 border-transparent font-bold text-slate-700">
-                           <option>Casual Leave (Balance: 8)</option>
-                           <option>Sick Leave (Balance: 5)</option>
-                           <option>Earned Leave (Balance: 15)</option>
-                           <option>Emergency Leave</option>
-                        </select>
-                     </div>
-
-                     <div className="grid grid-cols-2 gap-6">
-                        <div className="space-y-2">
-                           <label className="text-[10px] font-extrabold text-slate-400 uppercase tracking-widest">From Date</label>
-                           <input type="date" className="input-field h-14 bg-slate-50 border-transparent font-bold text-slate-700" />
-                        </div>
-                        <div className="space-y-2">
-                           <label className="text-[10px] font-extrabold text-slate-400 uppercase tracking-widest">To Date</label>
-                           <input type="date" className="input-field h-14 bg-slate-50 border-transparent font-bold text-slate-700" />
-                        </div>
-                     </div>
-
-                     <div className="flex items-center justify-between p-6 bg-primary-50/30 rounded-3xl border border-primary-50">
-                        <div className="flex items-center gap-3">
-                           <Clock className="text-primary-600" size={20} />
-                           <div>
-                              <p className="text-sm font-bold text-slate-900">Check as Half Day</p>
-                              <p className="text-[10px] font-bold text-primary-600 uppercase tracking-widest">Only for single day requests</p>
-                           </div>
-                        </div>
-                        <button className="w-12 h-6 bg-slate-200 rounded-full relative transition-all group hover:bg-primary-500">
-                           <div className="absolute left-1 top-1 w-4 h-4 bg-white rounded-full transition-all group-hover:left-7" />
-                        </button>
-                     </div>
-
-                     <div className="space-y-2">
-                        <label className="text-[10px] font-extrabold text-slate-400 uppercase tracking-widest">Reason for Leave</label>
-                        <textarea className="input-field min-h-[120px] bg-slate-50 border-transparent py-4 text-sm font-medium" placeholder="Briefly describe why you are requesting this leave..."></textarea>
-                     </div>
-                  </div>
+               <div className="space-y-2 text-left">
+                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest px-1">Emergency Contact</label>
+                  <input name="emergency" type="text" required placeholder="+1 (555) 000-0000" className="input-field h-14 bg-slate-50 border-transparent font-black" />
                </div>
-               
-               <div className="p-8 border-t border-slate-100 bg-slate-50 flex items-center gap-4 shrink-0">
-                  <button className="flex-1 py-4 bg-white border border-slate-200 text-slate-600 rounded-2xl font-bold hover:bg-slate-100 transition-all shadow-sm">
-                     Save as Draft
-                  </button>
-                  <button className="flex-1 py-4 bg-primary-600 text-white rounded-2xl font-bold hover:bg-primary-700 transition-all shadow-xl shadow-primary-100 active:scale-95">
-                     Submit Request
-                  </button>
+               <div className="space-y-2 text-left">
+                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest px-1">Start Date</label>
+                  <input name="startDate" type="date" required className="input-field h-14 bg-slate-50 border-transparent font-black" />
                </div>
-            </motion.div>
-          </>
-        )}
-      </AnimatePresence>
+               <div className="space-y-2 text-left">
+                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest px-1">End Date</label>
+                  <input name="endDate" type="date" required className="input-field h-14 bg-slate-50 border-transparent font-black" />
+               </div>
+            </div>
+            <div className="space-y-2 text-left">
+               <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest px-1">Reason for Request</label>
+               <textarea name="reason" rows="3" required className="input-field py-4 bg-slate-50 border-transparent font-black resize-none" placeholder="Provide context for your manager..."></textarea>
+            </div>
+            
+            <div className="pt-4 flex gap-4">
+               <button type="button" onClick={() => setIsRequestModalOpen(false)} className="flex-1 py-4 bg-slate-100 text-slate-600 rounded-2xl font-black uppercase tracking-widest">Discard</button>
+               <button type="submit" className="flex-2 py-4 bg-slate-900 text-white rounded-2xl font-black uppercase tracking-widest shadow-xl shadow-slate-200 active:scale-95 transition-all">Submit Request</button>
+            </div>
+         </form>
+      </CenterModal>
     </div>
   );
 };

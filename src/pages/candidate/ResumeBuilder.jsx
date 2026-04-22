@@ -1,123 +1,86 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
-  User, 
-  Briefcase, 
-  GraduationCap, 
-  Sparkles, 
-  Plus, 
-  Trash2, 
-  ChevronRight, 
-  ChevronLeft, 
-  Download, 
-  Eye, 
-  Save, 
-  Languages, 
-  Award, 
-  Settings2,
-  FileText,
-  CheckCircle2,
-  Image as ImageIcon,
-  Type,
-  Palette,
-  MapPin,
-  Mail,
-  Phone,
-  Link as LinkIcon,
-  PlusCircle,
-  XCircle,
-  Layout,
-  MousePointer2,
-  Zap
+  User, Briefcase, GraduationCap, Sparkles, Plus, Trash2, ChevronRight, ChevronLeft, 
+  Download, Eye, Save, Languages, Award, Settings2, FileText, CheckCircle2,
+  Image as ImageIcon, Type, Palette, MapPin, Mail, Phone, Link as LinkIcon,
+  PlusCircle, XCircle, Layout, MousePointer2, Zap, Trophy, Globe,
+  Check, Info, RotateCcw
 } from 'lucide-react';
 import { cn } from '../../utils/cn';
+import { useCandidate } from '../../context/CandidateContext';
+import CenterModal from '../../components/layout/CenterModal';
 
 const ResumeBuilder = () => {
+  const { resume, updateResumeStep, showToast } = useCandidate();
   const [activeStep, setActiveStep] = useState(0);
-  const [resumeData, setResumeData] = useState({
-    personal: {
-      fullName: '',
-      title: '',
-      email: '',
-      phone: '',
-      address: '',
-      city: '',
-      country: '',
-      linkedin: '',
-      portfolio: '',
-      summary: ''
-    },
-    experience: [{ id: 1, title: '', company: '', location: '', start: '', end: '', current: false, description: '', achievements: '' }],
-    education: [{ id: 1, degree: '', institution: '', field: '', startYear: '', endYear: '', gpa: '', description: '' }],
-    skills: [{ id: 1, name: '', level: 'Intermediate', category: 'Technical' }],
-    extras: {
-      certifications: [{ id: 1, name: '', issuedBy: '', date: '', url: '' }],
-      languages: [{ id: 1, language: '', proficiency: 'Fluent' }],
-      projects: [{ id: 1, name: '', description: '', url: '' }]
-    },
-    template: {
-      id: 'modern',
-      primaryColor: '#4f46e5',
-      font: 'Inter',
-      fontSize: 'medium',
-      spacing: 'compact'
-    }
-  });
+  const [localData, setLocalData] = useState(resume);
+  const [isPreviewOpen, setIsPreviewOpen] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
+
+  // Sync internal state with context on load
+  useEffect(() => {
+    setLocalData(resume);
+  }, [resume]);
+
+  // Persist to context (autosave simulator)
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setIsSaving(true);
+      // In a real app, this would be an API call
+      setTimeout(() => setIsSaving(false), 1000);
+    }, 2000);
+    return () => clearTimeout(timer);
+  }, [localData]);
 
   const steps = [
-    { title: 'Personal', icon: User, helper: 'Basic contact information' },
-    { title: 'Experience', icon: Briefcase, helper: 'Professional work history' },
-    { title: 'Education', icon: GraduationCap, helper: 'Academic background' },
-    { title: 'Skills', icon: Sparkles, helper: 'Core competencies' },
-    { title: 'Extras', icon: Award, helper: 'Certs, languages, projects' },
-    { title: 'Template', icon: Settings2, helper: 'Design and layout selection' },
+    { title: 'Personal', icon: User, helper: 'Core contact identity' },
+    { title: 'Experience', icon: Briefcase, helper: 'Professional timeline' },
+    { title: 'Education', icon: GraduationCap, helper: 'Academic credentials' },
+    { title: 'Skills', icon: Sparkles, helper: 'Strategic competencies' },
+    { title: 'Extras', icon: Award, helper: 'Strategic modifiers' },
+    { title: 'Template', icon: Layout, helper: 'Architectural design' },
   ];
 
-  const handleNext = () => setActiveStep(prev => Math.min(prev + 1, steps.length - 1));
+  const handleNext = () => {
+    // Save current step data to context before moving
+    const stepKeys = ['personal', 'experience', 'education', 'skills', 'extras', 'template'];
+    updateResumeStep(stepKeys[activeStep], localData[stepKeys[activeStep]]);
+    setActiveStep(prev => Math.min(prev + 1, steps.length - 1));
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
   const handleBack = () => setActiveStep(prev => Math.max(prev - 1, 0));
 
   const updatePersonal = (field, value) => {
-    setResumeData(prev => ({ ...prev, personal: { ...prev.personal, [field]: value } }));
+    setLocalData(prev => ({ ...prev, personal: { ...prev.personal, [field]: value } }));
   };
 
-  const addArrayItem = (section, subSection = null) => {
-    const newItem = { id: Date.now() };
-    if (subSection) {
-      setResumeData(prev => ({
-        ...prev,
-        extras: { ...prev.extras, [subSection]: [...prev.extras[subSection], newItem] }
-      }));
-    } else {
-      setResumeData(prev => ({ ...prev, [section]: [...prev[section], newItem] }));
-    }
+  const addItem = (section) => {
+    const freshItems = {
+      experience: { id: Date.now(), company: '', role: '', type: 'Full-time', start: '', end: '', current: false, desc: '' },
+      education: { id: Date.now(), school: '', degree: '', field: '', start: '', end: '', grade: '' },
+      skills: { name: '', level: 50 }
+    };
+    setLocalData(prev => ({
+      ...prev,
+      [section]: [...prev[section], freshItems[section]]
+    }));
   };
 
-  const removeArrayItem = (section, id, subSection = null) => {
-    if (subSection) {
-      setResumeData(prev => ({
-        ...prev,
-        extras: { ...prev.extras, [subSection]: prev.extras[subSection].filter(i => i.id !== id) }
-      }));
-    } else {
-      setResumeData(prev => ({ ...prev, [section]: prev[section].filter(i => i.id !== id) }));
-    }
+  const removeItem = (section, index) => {
+    setLocalData(prev => ({
+      ...prev,
+      [section]: prev[section].filter((_, i) => i !== index)
+    }));
   };
 
-  const updateArrayItem = (section, id, field, value, subSection = null) => {
-    if (subSection) {
-      setResumeData(prev => ({
-        ...prev,
-        extras: {
-          ...prev.extras,
-          [subSection]: prev.extras[subSection].map(i => i.id === id ? { ...i, [field]: value } : i)
-        }
-      }));
-    } else {
-      setResumeData(prev => ({
-        ...prev,
-        [section]: prev[section].map(i => i.id === id ? { ...i, [field]: value } : i)
-      }));
-    }
+  const updateArrayItem = (section, index, field, value) => {
+    setLocalData(prev => {
+      const newList = [...prev[section]];
+      newList[index] = { ...newList[index], [field]: value };
+      return { ...prev, [section]: newList };
+    });
   };
 
   // --------------------------------------------------------------------------
@@ -125,53 +88,55 @@ const ResumeBuilder = () => {
   // --------------------------------------------------------------------------
 
   const renderPersonal = () => (
-    <div className="space-y-8 animate-fade-in">
-      <div className="flex flex-col md:flex-row items-start md:items-center gap-8 mb-10">
+    <div className="space-y-10 animate-fade-in text-left">
+      <div className="flex flex-col md:flex-row items-start md:items-center gap-8 mb-12">
         <div className="group relative">
-          <div className="w-32 h-32 rounded-[2.5rem] bg-slate-50 dark:bg-slate-800 flex flex-col items-center justify-center text-slate-400 border-2 border-dashed border-slate-200 dark:border-slate-700 hover:border-primary-400 dark:hover:border-primary-500 hover:bg-primary-50 dark:hover:bg-primary-950/20 transition-all cursor-pointer overflow-hidden group">
-            <ImageIcon size={40} className="group-hover:scale-110 transition-transform" />
-            <span className="text-[10px] font-black uppercase tracking-widest mt-2">Upload Photo</span>
+          <div className="w-36 h-36 rounded-[2.5rem] bg-slate-50 border-2 border-dashed border-slate-200 flex flex-col items-center justify-center text-slate-400 group-hover:bg-primary-50 group-hover:border-primary-300 transition-all cursor-pointer overflow-hidden shadow-inner">
+            <ImageIcon size={40} className="group-hover:scale-110 transition-transform duration-500" />
+            <span className="text-[9px] font-black uppercase tracking-widest mt-3">Upload Identity</span>
           </div>
-          <button className="absolute -bottom-2 -right-2 w-10 h-10 bg-white dark:bg-slate-800 text-primary-600 rounded-full flex items-center justify-center shadow-lg border border-slate-100 dark:border-slate-700 hover:scale-110 transition-transform">
-            <Plus size={20} />
+          <button className="absolute -bottom-2 -right-2 w-11 h-11 bg-white text-primary-600 rounded-2xl flex items-center justify-center shadow-2xl border border-slate-100 hover:scale-110 transition-transform">
+            <Plus size={22} />
           </button>
         </div>
-        <div className="flex-1 space-y-1">
-          <h3 className="text-2xl font-black text-slate-900 dark:text-white tracking-tight">Identity & Contacts</h3>
-          <p className="text-sm font-medium text-slate-500 dark:text-slate-400 leading-relaxed">Let employers know who you are and how to reach you.</p>
+        <div className="flex-1 space-y-2">
+           <h3 className="text-2xl font-black text-slate-900 tracking-tight italic">Identity Node</h3>
+           <p className="text-sm font-bold text-slate-400 leading-relaxed max-w-md">Provide core contact vectors and professional summary for recruiter audit cycles.</p>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
         {[
-          { label: 'Full Name', key: 'fullName', type: 'text', placeholder: 'e.g. Johnathan Doe' },
-          { label: 'Professional Title', key: 'title', type: 'text', placeholder: 'e.g. Senior Software Architect' },
-          { label: 'Email Address', key: 'email', type: 'email', placeholder: 'john@example.com' },
-          { label: 'Phone Number', key: 'phone', type: 'tel', placeholder: '+1 (555) 000-0000' },
-          { label: 'Address', key: 'address', type: 'text', placeholder: '123 Tech Lane' },
-          { label: 'City & State', key: 'city', type: 'text', placeholder: 'San Francisco, CA' },
-          { label: 'LinkedIn URL', key: 'linkedin', type: 'text', placeholder: 'linkedin.com/in/username' },
-          { label: 'Portfolio URL', key: 'portfolio', type: 'text', placeholder: 'github.com/username' },
+          { label: 'First Name', key: 'firstName', icon: User },
+          { label: 'Last Name', key: 'lastName', icon: User },
+          { label: 'Professional Title', key: 'title', icon: Briefcase },
+          { label: 'Email Vector', key: 'email', icon: Mail, type: 'email' },
+          { label: 'Phone Line', key: 'phone', icon: Phone },
+          { label: 'Location Hub', key: 'city', icon: MapPin },
+          { label: 'LinkedIn Profile', key: 'linkedin', icon: Globe },
+          { label: 'Portfolio (URL)', key: 'portfolio', icon: LinkIcon },
         ].map(field => (
-          <div key={field.key} className="space-y-2">
-            <label className="text-xs font-black uppercase tracking-widest text-slate-500 dark:text-slate-400 ml-1">{field.label}</label>
-            <input 
-              type={field.type} 
-              value={resumeData.personal[field.key]}
-              onChange={(e) => updatePersonal(field.key, e.target.value)}
-              placeholder={field.placeholder} 
-              className="input-field h-14 font-bold text-slate-700 dark:text-slate-200" 
-            />
+          <div key={field.key} className="space-y-2 group">
+            <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1 italic group-focus-within:text-primary-600 transition-colors uppercase">{field.label}</label>
+            <div className="relative">
+               <field.icon size={16} className="absolute left-4 top-4.5 text-slate-300 group-focus-within:text-primary-500 transition-colors" />
+               <input 
+                 type={field.type || 'text'} 
+                 value={localData.personal[field.key]}
+                 onChange={(e) => updatePersonal(field.key, e.target.value)}
+                 className="input-field h-14 pl-12 bg-slate-50 border-transparent font-black" 
+               />
+            </div>
           </div>
         ))}
-        <div className="md:col-span-2 space-y-2">
-          <label className="text-xs font-black uppercase tracking-widest text-slate-500 dark:text-slate-400 ml-1">Professional Summary</label>
+        <div className="md:col-span-2 space-y-2 group">
+          <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1 italic group-focus-within:text-primary-600 transition-colors uppercase">Professional Directive (Summary)</label>
           <textarea 
             rows={5}
-            value={resumeData.personal.summary}
+            value={localData.personal.summary}
             onChange={(e) => updatePersonal('summary', e.target.value)}
-            className="input-field py-4 resize-none font-medium leading-relaxed dark:text-slate-200" 
-            placeholder="Summarize your professional career in 3-4 sentences..."
+            className="input-field py-6 bg-slate-50 border-transparent resize-none font-bold text-sm leading-relaxed" 
+            placeholder="Sumarize your career objectives and core competencies..."
           />
         </div>
       </div>
@@ -179,89 +144,70 @@ const ResumeBuilder = () => {
   );
 
   const renderExperience = () => (
-    <div className="space-y-10 animate-fade-in">
+    <div className="space-y-12 animate-fade-in text-left">
       <div className="flex items-center justify-between">
-        <div>
-          <h3 className="text-2xl font-black text-slate-900 dark:text-white tracking-tight">Work Experience</h3>
-          <p className="text-sm font-medium text-slate-500 dark:text-slate-400">Chronicle your professional achievements and career growth.</p>
+        <div className="space-y-1">
+          <h3 className="text-2xl font-black text-slate-900 tracking-tight italic">Work Registry</h3>
+          <p className="text-sm font-bold text-slate-400 uppercase tracking-widest text-[10px]">Chronicle your professional evolution</p>
         </div>
         <button 
-          onClick={() => addArrayItem('experience')}
-          className="flex items-center gap-2 px-5 py-2.5 bg-primary-600 text-white rounded-xl text-xs font-black uppercase tracking-widest shadow-xl shadow-primary-200 hover:bg-primary-700 transition-all active:scale-95"
+          onClick={() => addItem('experience')}
+          className="flex items-center gap-3 px-8 py-3.5 bg-slate-900 text-white rounded-2xl text-[10px] font-black uppercase tracking-widest shadow-xl shadow-slate-200 hover:bg-black transition-all active:scale-95"
         >
-          <Plus size={16} /> <span>Add Role</span>
+          <Plus size={18} /> <span>Log Entry</span>
         </button>
       </div>
 
-      <div className="space-y-8">
-        {resumeData.experience.map((exp, idx) => (
-          <div key={exp.id} className="card p-8 bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 shadow-soft relative group hover:border-primary-200 dark:hover:border-primary-900 transition-all">
+      <div className="space-y-10">
+        {localData.experience.map((exp, idx) => (
+          <div key={idx} className="p-10 rounded-[2.5rem] bg-white border border-slate-100 shadow-soft relative group hover:border-primary-100 transition-all">
             <button 
-              onClick={() => removeArrayItem('experience', exp.id)}
-              className="absolute -top-3 -right-3 w-8 h-8 bg-white dark:bg-slate-800 text-rose-500 rounded-full flex items-center justify-center shadow-md border border-slate-100 dark:border-slate-700 hover:bg-rose-50 dark:hover:bg-rose-900/10 transition-all opacity-0 group-hover:opacity-100 z-10"
+              onClick={() => removeItem('experience', idx)}
+              className="absolute -top-3 -right-3 w-10 h-10 bg-white text-rose-500 rounded-2xl flex items-center justify-center shadow-2xl border border-rose-50 hover:bg-rose-600 hover:text-white transition-all opacity-0 group-hover:opacity-100 z-10 scale-90 hover:rotate-90"
             >
-              <Trash2 size={16} />
+              <Trash2 size={20} />
             </button>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
               <div className="space-y-2">
-                <label className="text-xs font-black uppercase tracking-widest text-slate-400">Job Title</label>
+                <label className="text-[9px] font-black uppercase tracking-widest text-slate-400 italic">Position Title</label>
                 <input 
                   type="text" 
-                  value={exp.title}
-                  onChange={(e) => updateArrayItem('experience', exp.id, 'title', e.target.value)}
-                  placeholder="e.g. Frontend Developer" 
-                  className="input-field h-12 bg-slate-50/50 dark:bg-slate-900/50 border-transparent dark:text-white" 
+                  value={exp.role}
+                  onChange={(e) => updateArrayItem('experience', idx, 'role', e.target.value)}
+                  className="input-field h-14 bg-slate-50 border-transparent font-black" 
                 />
               </div>
               <div className="space-y-2">
-                <label className="text-xs font-black uppercase tracking-widest text-slate-400">Company Name</label>
+                <label className="text-[9px] font-black uppercase tracking-widest text-slate-400 italic">Company Vector</label>
                 <input 
                   type="text" 
                   value={exp.company}
-                  onChange={(e) => updateArrayItem('experience', exp.id, 'company', e.target.value)}
-                  placeholder="e.g. Acme Corp" 
-                  className="input-field h-12 bg-slate-50/50 dark:bg-slate-900/50 border-transparent dark:text-white" 
+                  onChange={(e) => updateArrayItem('experience', idx, 'company', e.target.value)}
+                  className="input-field h-14 bg-slate-50 border-transparent font-black" 
                 />
               </div>
-              <div className="grid grid-cols-2 gap-4 md:col-span-2">
+              <div className="grid grid-cols-2 gap-6 md:col-span-1">
                 <div className="space-y-2">
-                  <label className="text-xs font-black uppercase tracking-widest text-slate-400">Start Date</label>
-                  <input 
-                    type="month" 
-                    value={exp.start}
-                    onChange={(e) => updateArrayItem('experience', exp.id, 'start', e.target.value)}
-                    className="input-field h-12 bg-slate-50/50 dark:bg-slate-900/50 border-transparent dark:text-white" 
-                  />
+                  <label className="text-[9px] font-black uppercase tracking-widest text-slate-400 italic">Launch Date</label>
+                  <input type="month" value={exp.start} onChange={(e) => updateArrayItem('experience', idx, 'start', e.target.value)} className="input-field h-14 bg-slate-50 border-transparent font-black" />
                 </div>
                 <div className="space-y-2">
-                  <label className="text-xs font-black uppercase tracking-widest text-slate-400">End Date</label>
-                  <input 
-                    type="month" 
-                    disabled={exp.current}
-                    value={exp.end}
-                    onChange={(e) => updateArrayItem('experience', exp.id, 'end', e.target.value)}
-                    className="input-field h-12 bg-slate-50/50 dark:bg-slate-900/50 border-transparent dark:text-white disabled:opacity-30" 
-                  />
+                  <label className="text-[9px] font-black uppercase tracking-widest text-slate-400 italic">Cycle End</label>
+                  <input type="month" disabled={exp.current} value={exp.end} onChange={(e) => updateArrayItem('experience', idx, 'end', e.target.value)} className="input-field h-14 bg-slate-50 border-transparent font-black disabled:opacity-30" />
                 </div>
               </div>
-              <div className="md:col-span-2 flex items-center gap-3 py-2">
-                <input 
-                  type="checkbox" 
-                  id={`current-${exp.id}`}
-                  checked={exp.current}
-                  onChange={(e) => updateArrayItem('experience', exp.id, 'current', e.target.checked)}
-                  className="w-5 h-5 rounded border-slate-300 text-primary-600 focus:ring-primary-500" 
-                />
-                <label htmlFor={`current-${exp.id}`} className="text-sm font-bold text-slate-600 dark:text-slate-400">I currently work here</label>
+              <div className="md:col-span-1 flex items-center gap-4 pt-6">
+                 <input type="checkbox" checked={exp.current} onChange={(e) => updateArrayItem('experience', idx, 'current', e.target.checked)} className="w-6 h-6 rounded-lg accent-slate-900 border-2" />
+                 <label className="text-xs font-black uppercase tracking-widest text-slate-600">Active Operational Node (Current)</label>
               </div>
               <div className="md:col-span-2 space-y-2">
-                <label className="text-xs font-black uppercase tracking-widest text-slate-400">Responsibilities & Actions</label>
+                <label className="text-[9px] font-black uppercase tracking-widest text-slate-400 italic">Impact Report & Achievements</label>
                 <textarea 
                   rows={4} 
-                  value={exp.description}
-                  onChange={(e) => updateArrayItem('experience', exp.id, 'description', e.target.value)}
-                  className="input-field py-4 resize-none bg-slate-50/50 dark:bg-slate-900/50 border-transparent dark:text-white" 
-                  placeholder="Describe your role and impact..."
+                  value={exp.desc}
+                  onChange={(e) => updateArrayItem('experience', idx, 'desc', e.target.value)}
+                  className="input-field py-6 bg-slate-50 border-transparent resize-none font-bold text-sm leading-relaxed" 
+                  placeholder="Describe your strategic impact and key growth metrics..."
                 />
               </div>
             </div>
@@ -272,80 +218,47 @@ const ResumeBuilder = () => {
   );
 
   const renderEducation = () => (
-    <div className="space-y-10 animate-fade-in">
+    <div className="space-y-12 animate-fade-in text-left">
       <div className="flex items-center justify-between">
-        <div>
-          <h3 className="text-2xl font-black text-slate-900 dark:text-white tracking-tight">Academic History</h3>
-          <p className="text-sm font-medium text-slate-500 dark:text-slate-400">List your degrees, certifications, and educational milestones.</p>
+        <div className="space-y-1">
+          <h3 className="text-2xl font-black text-slate-900 tracking-tight italic">Academic Registry</h3>
+          <p className="text-sm font-bold text-slate-400 uppercase tracking-widest text-[10px]">Credentials and theoretical foundations</p>
         </div>
         <button 
-          onClick={() => addArrayItem('education')}
-          className="flex items-center gap-2 px-5 py-2.5 bg-primary-600 text-white rounded-xl text-xs font-black uppercase tracking-widest shadow-xl shadow-primary-200 hover:bg-primary-700 transition-all active:scale-95"
+          onClick={() => addItem('education')}
+          className="flex items-center gap-3 px-8 py-3.5 bg-slate-900 text-white rounded-2xl text-[10px] font-black uppercase tracking-widest shadow-xl shadow-slate-200"
         >
-          <Plus size={16} /> <span>Add Education</span>
+          <Plus size={18} /> <span>Log Degree</span>
         </button>
       </div>
 
-      <div className="space-y-8">
-        {resumeData.education.map((edu, idx) => (
-          <div key={edu.id} className="card p-8 bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 shadow-soft relative group hover:border-primary-100 dark:hover:border-primary-900 transition-all">
-            <button 
-              onClick={() => removeArrayItem('education', edu.id)}
-              className="absolute -top-3 -right-3 w-8 h-8 bg-white dark:bg-slate-800 text-rose-500 rounded-full flex items-center justify-center shadow-md border border-slate-100 dark:border-slate-700 hover:bg-rose-50 dark:hover:bg-rose-900/10 transition-all opacity-0 group-hover:opacity-100 z-10"
-            >
-              <Trash2 size={16} />
+      <div className="space-y-10">
+        {localData.education.map((edu, idx) => (
+          <div key={idx} className="p-10 rounded-[2.5rem] bg-white border border-slate-100 shadow-soft relative group hover:border-primary-100 transition-all">
+            <button onClick={() => removeItem('education', idx)} className="absolute -top-3 -right-3 w-10 h-10 bg-white text-rose-500 rounded-2xl flex items-center justify-center shadow-2xl border border-rose-50 opacity-0 group-hover:opacity-100 scale-90 hover:rotate-90 transition-all">
+              <Trash2 size={20} />
             </button>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
               <div className="space-y-2">
-                <label className="text-xs font-black uppercase tracking-widest text-slate-400">Degree / Qualification</label>
-                <input 
-                  type="text" 
-                  value={edu.degree}
-                  onChange={(e) => updateArrayItem('education', edu.id, 'degree', e.target.value)}
-                  placeholder="e.g. Master of Science" 
-                  className="input-field h-12 bg-slate-50/50 dark:bg-slate-900/50 border-transparent dark:text-white" 
-                />
+                <label className="text-[9px] font-black uppercase tracking-widest text-slate-400 italic">Institute / Academy</label>
+                <input type="text" value={edu.school} onChange={(e) => updateArrayItem('education', idx, 'school', e.target.value)} className="input-field h-14 bg-slate-50 border-transparent font-black" />
               </div>
               <div className="space-y-2">
-                <label className="text-xs font-black uppercase tracking-widest text-slate-400">Institution Name</label>
-                <input 
-                  type="text" 
-                  value={edu.institution}
-                  onChange={(e) => updateArrayItem('education', edu.id, 'institution', e.target.value)}
-                  placeholder="e.g. Stanford University" 
-                  className="input-field h-12 bg-slate-50/50 dark:bg-slate-900/50 border-transparent dark:text-white" 
-                />
+                <label className="text-[9px] font-black uppercase tracking-widest text-slate-400 italic">Credential Title (Degree)</label>
+                <input type="text" value={edu.degree} onChange={(e) => updateArrayItem('education', idx, 'degree', e.target.value)} className="input-field h-14 bg-slate-50 border-transparent font-black" />
               </div>
               <div className="space-y-2">
-                <label className="text-xs font-black uppercase tracking-widest text-slate-400">Field of Study</label>
-                <input 
-                  type="text" 
-                  value={edu.field}
-                  onChange={(e) => updateArrayItem('education', edu.id, 'field', e.target.value)}
-                  placeholder="e.g. Computing Information Systems" 
-                  className="input-field h-12 bg-slate-50/50 dark:bg-slate-900/50 border-transparent dark:text-white" 
-                />
+                <label className="text-[9px] font-black uppercase tracking-widest text-slate-400 italic">Focus / Field</label>
+                <input type="text" value={edu.field} onChange={(e) => updateArrayItem('education', idx, 'field', e.target.value)} className="input-field h-14 bg-slate-50 border-transparent font-black" />
               </div>
-              <div className="grid grid-cols-2 gap-4">
-                 <div className="space-y-2">
-                    <label className="text-xs font-black uppercase tracking-widest text-slate-400">GPA / Grade</label>
-                    <input 
-                      type="text" 
-                      value={edu.gpa}
-                      onChange={(e) => updateArrayItem('education', edu.id, 'gpa', e.target.value)}
-                      placeholder="e.g. 3.9/4.0" 
-                      className="input-field h-12 bg-slate-50/50 dark:bg-slate-900/50 border-transparent dark:text-white" 
-                    />
+              <div className="grid grid-cols-3 gap-6">
+                 <div className="col-span-1 space-y-2">
+                    <label className="text-[9px] font-black uppercase tracking-widest text-slate-400 italic">Completion Year</label>
+                    <input type="text" value={edu.end} onChange={(e) => updateArrayItem('education', idx, 'end', e.target.value)} className="input-field h-14 bg-slate-50 border-transparent font-black" />
                  </div>
-                 <div className="space-y-2">
-                    <label className="text-xs font-black uppercase tracking-widest text-slate-400">End Year</label>
-                    <input 
-                      type="text" 
-                      value={edu.endYear}
-                      onChange={(e) => updateArrayItem('education', edu.id, 'endYear', e.target.value)}
-                      placeholder="2024" 
-                      className="input-field h-12 bg-slate-50/50 dark:bg-slate-900/50 border-transparent dark:text-white" 
-                    />
+                 <div className="col-span-2 space-y-2">
+                    <label className="text-[9px] font-black uppercase tracking-widest text-slate-400 italic">Grade / GPA Vector</label>
+                    <input type="text" value={edu.grade} onChange={(e) => updateArrayItem('education', idx, 'grade', e.target.value)} className="input-field h-14 bg-slate-50 border-transparent font-black px-6" />
                  </div>
               </div>
             </div>
@@ -356,459 +269,451 @@ const ResumeBuilder = () => {
   );
 
   const renderSkills = () => (
-    <div className="space-y-10 animate-fade-in">
+    <div className="space-y-12 animate-fade-in text-left">
       <div className="flex items-center justify-between">
-        <div>
-          <h3 className="text-2xl font-black text-slate-900 dark:text-white tracking-tight">Skills & Proficiencies</h3>
-          <p className="text-sm font-medium text-slate-500 dark:text-slate-400">Add technical stack, soft skills, and industry knowledge.</p>
+        <div className="space-y-1">
+          <h3 className="text-2xl font-black text-slate-900 tracking-tight italic">Strategic Matrix</h3>
+          <p className="text-sm font-bold text-slate-400 uppercase tracking-widest text-[10px]">Quantifiable professional power units</p>
         </div>
-        <button 
-          onClick={() => addArrayItem('skills')}
-          className="flex items-center gap-2 px-5 py-2.5 bg-primary-600 text-white rounded-xl text-xs font-black uppercase tracking-widest shadow-xl shadow-primary-200 hover:bg-primary-700 transition-all active:scale-95"
-        >
-          <Plus size={16} /> <span>Add Skill</span>
+        <button onClick={() => addItem('skills')} className="flex items-center gap-3 px-8 py-3.5 bg-slate-900 text-white rounded-2xl text-[10px] font-black uppercase tracking-widest shadow-xl">
+          <Plus size={18} /> <span>Deploy Skill</span>
         </button>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {resumeData.skills.map((skill, idx) => (
-          <div key={skill.id} className="card p-6 bg-slate-50 dark:bg-slate-800/50 border-transparent dark:border-slate-800 flex items-center gap-4 group">
-            <div className="flex-1 space-y-4">
-              <div className="flex items-center gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+        {localData.skills.map((skill, idx) => (
+          <div key={idx} className="p-8 rounded-[2rem] bg-slate-50 border border-slate-100 flex items-center gap-6 group hover:bg-white hover:shadow-xl transition-all relative">
+            <div className="flex-1 space-y-5">
+              <div className="flex items-center justify-between px-1">
                  <input 
                   type="text" 
                   value={skill.name}
-                  onChange={(e) => updateArrayItem('skills', skill.id, 'name', e.target.value)}
-                  placeholder="e.g. React.js" 
-                  className="w-full bg-transparent border-none text-sm font-bold text-slate-800 dark:text-white focus:ring-0 p-0" 
+                  onChange={(e) => updateArrayItem('skills', idx, 'name', e.target.value)}
+                  placeholder="Query skill..." 
+                  className="bg-transparent border-none text-base font-black text-slate-900 focus:ring-0 p-0 uppercase italic tracking-tight" 
                 />
-                 <select 
-                  value={skill.level}
-                  onChange={(e) => updateArrayItem('skills', skill.id, 'level', e.target.value)}
-                  className="bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-lg text-[10px] font-black uppercase tracking-widest px-2 py-1 outline-none dark:text-slate-400"
-                >
-                   <option>Beginner</option>
-                   <option>Intermediate</option>
-                   <option>Advanced</option>
-                   <option>Expert</option>
-                 </select>
+                 <span className="text-[10px] font-black text-primary-600 uppercase tracking-widest">{skill.level}% Mastery</span>
               </div>
-              <div className="flex items-center gap-1">
-                 {[1,2,3,4,5].map(d => (
-                    <div 
-                      key={d} 
-                      className={cn(
-                        "h-1.5 flex-1 rounded-full",
-                        d <= (skill.level === 'Beginner' ? 1 : skill.level === 'Intermediate' ? 3 : skill.level === 'Advanced' ? 4 : 5) 
-                          ? "bg-primary-500" 
-                          : "bg-slate-200 dark:bg-slate-700"
-                      )} 
-                    />
-                 ))}
+              <div className="relative h-2 bg-slate-100 rounded-full overflow-hidden p-[1px] border border-slate-200">
+                 <motion.div 
+                   initial={{ width: 0 }}
+                   animate={{ width: `${skill.level}%` }}
+                   className="h-full bg-slate-900 rounded-full group-hover:bg-primary-600 transition-colors" 
+                 />
               </div>
+              <input 
+                 type="range" 
+                 min="0" 
+                 max="100" 
+                 value={skill.level} 
+                 onChange={(e) => updateArrayItem('skills', idx, 'level', e.target.value)}
+                 className="w-full h-1 bg-transparent appearance-none cursor-pointer accent-slate-900 opacity-50 hover:opacity-100 transition-opacity" 
+              />
             </div>
-            <button 
-              onClick={() => removeArrayItem('skills', skill.id)}
-              className="text-slate-300 hover:text-rose-500 transition-colors"
-            >
-              <Trash2 size={18} />
+            <button onClick={() => removeItem('skills', idx)} className="text-slate-300 hover:text-rose-500 transition-colors shrink-0">
+              <XCircle size={24} />
             </button>
           </div>
         ))}
       </div>
 
-      <div className="pt-10 border-t border-slate-50 dark:border-slate-800">
-         <p className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-6">Popular Skills Suggestions</p>
-         <div className="flex flex-wrap gap-2">
-            {['TypeScript', 'Tailwind CSS', 'Next.js', 'Framer Motion', 'Zustand', 'Prisma', 'REST API', 'GraphQL', 'AWS'].map(chip => (
-               <button key={chip} className="px-4 py-2 bg-slate-50 dark:bg-slate-800 text-slate-600 dark:text-slate-400 rounded-full text-xs font-bold hover:bg-primary-50 dark:hover:bg-primary-900/30 hover:text-primary-600 transition-all border border-slate-100 dark:border-slate-700">
-                  + {chip}
-               </button>
-            ))}
+      <div className="p-10 bg-slate-900 rounded-[3rem] text-left relative overflow-hidden group">
+         <div className="absolute top-0 right-0 p-8 opacity-10 group-hover:scale-110 transition-transform duration-1000">
+            <Zap size={150} fill="#fff" />
+         </div>
+         <div className="relative z-10">
+            <h4 className="text-[10px] font-black text-primary-400 uppercase tracking-[0.4em] mb-4 leading-none italic">AI Meta-Suggestions</h4>
+            <p className="text-lg font-black text-white italic tracking-tight mb-8 leading-tight max-w-[350px]">Employers in your target sector are searching for these strategic competencies.</p>
+            <div className="flex flex-wrap gap-3">
+               {['Rust Engineering', 'LLM Fine-tuning', 'Vector Databases', 'Strategic Forecasting', 'Cyber Audit'].map(s => (
+                  <button key={s} onClick={() => { setLocalData(prev => ({ ...prev, skills: [...prev.skills, { name: s, level: 75 }] })); showToast(`Skill ${s} drafted`); }} className="px-5 py-2.5 bg-white/10 hover:bg-white text-white hover:text-slate-900 rounded-full text-[9px] font-black uppercase tracking-widest transition-all border border-white/10">
+                     + {s}
+                  </button>
+               ))}
+            </div>
          </div>
       </div>
     </div>
   );
 
   const renderExtras = () => (
-    <div className="space-y-12 animate-fade-in">
-       {/* Certifications */}
-       <div className="space-y-6">
-          <div className="flex items-center justify-between">
-            <h4 className="text-xl font-bold text-slate-900 dark:text-white tracking-tight flex items-center gap-3">
-               <div className="p-2 bg-indigo-50 dark:bg-indigo-900/20 text-indigo-600 dark:text-indigo-400 rounded-lg"><Award size={20} /></div>
-               Certifications
-            </h4>
-            <button onClick={() => addArrayItem('extras', 'certifications')} className="text-xs font-black uppercase tracking-widest text-primary-600 dark:text-primary-400 flex items-center gap-1 hover:underline">
-               <Plus size={14} /> Add Certification
-            </button>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-             {resumeData.extras.certifications.map(cert => (
-               <div key={cert.id} className="p-5 bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 rounded-2xl relative group">
-                  <button onClick={() => removeArrayItem('extras', cert.id, 'certifications')} className="absolute top-2 right-2 text-slate-300 hover:text-rose-500 transition-colors opacity-0 group-hover:opacity-100"><Trash2 size={14} /></button>
-                  <input 
-                    type="text" 
-                    value={cert.name}
-                    onChange={(e) => updateArrayItem('extras', cert.id, 'name', e.target.value, 'certifications')}
-                    placeholder="Certification Name" 
-                    className="w-full bg-transparent border-none font-bold text-sm text-slate-800 dark:text-white p-0 mb-3 focus:ring-0" 
-                  />
-                  <input 
-                    type="text" 
-                    value={cert.issuedBy}
-                    onChange={(e) => updateArrayItem('extras', cert.id, 'issuedBy', e.target.value, 'certifications')}
-                    placeholder="Issued By (e.g. Google, AWS)" 
-                    className="w-full bg-transparent border-none text-[11px] text-slate-400 p-0 focus:ring-0" 
-                  />
-               </div>
-             ))}
-          </div>
-       </div>
+    <div className="space-y-12 animate-fade-in text-left">
+       <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
+          {/* Certs & Languages */}
+          <div className="space-y-10">
+             <section className="space-y-6">
+                <div className="flex justify-between items-center px-2">
+                   <h4 className="text-sm font-black text-slate-400 uppercase tracking-widest italic">Certification Vault</h4>
+                   <button onClick={() => setLocalData(prev => ({ ...prev, extras: { ...prev.extras, certs: [...prev.extras.certs, 'New Certification'] } }))} className="text-[10px] font-black text-primary-600 uppercase tracking-[0.2em]">+ ADD</button>
+                </div>
+                {localData.extras.certs.map((c, i) => (
+                   <div key={i} className="flex items-center gap-4 group">
+                      <div className="w-10 h-10 rounded-xl bg-slate-50 border border-slate-100 flex items-center justify-center text-primary-600 italic font-black shadow-sm group-hover:scale-110 transition-transform">{i+1}</div>
+                      <input 
+                        type="text" 
+                        value={c} 
+                        onChange={(e) => {
+                          const newCerts = [...localData.extras.certs];
+                          newCerts[i] = e.target.value;
+                          setLocalData(prev => ({ ...prev, extras: { ...prev.extras, certs: newCerts } }));
+                        }} 
+                        className="flex-1 bg-transparent border-none p-0 text-sm font-black text-slate-800 italic uppercase tracking-tight focus:ring-0" 
+                      />
+                      <button onClick={() => setLocalData(prev => ({ ...prev, extras: { ...prev.extras, certs: prev.extras.certs.filter((_, ci) => ci !== i) } }))} className="text-slate-200 hover:text-rose-500 opacity-0 group-hover:opacity-100"><Trash2 size={16} /></button>
+                   </div>
+                ))}
+             </section>
 
-       {/* Languages */}
-       <div className="space-y-6">
-          <div className="flex items-center justify-between">
-            <h4 className="text-xl font-bold text-slate-900 dark:text-white tracking-tight flex items-center gap-3">
-               <div className="p-2 bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600 dark:text-emerald-400 rounded-lg"><Languages size={20} /></div>
-               Languages
-            </h4>
-            <button onClick={() => addArrayItem('extras', 'languages')} className="text-xs font-black uppercase tracking-widest text-primary-600 dark:text-primary-400 flex items-center gap-1 hover:underline">
-               <Plus size={14} /> Add Language
-            </button>
+             <section className="space-y-6">
+                <div className="flex justify-between items-center px-2">
+                   <h4 className="text-sm font-black text-slate-400 uppercase tracking-widest italic">Linguistic Vectors</h4>
+                </div>
+                <div className="grid grid-cols-1 gap-4">
+                  {localData.extras.languages.map((l, i) => (
+                    <div key={i} className="p-5 bg-slate-50 border border-slate-100 rounded-2xl flex items-center justify-between">
+                       <input 
+                        className="bg-transparent border-none p-0 text-sm font-black text-slate-800 uppercase italic" 
+                        value={l.split(' (')[0]} 
+                        onChange={(e) => {
+                          const newLangs = [...localData.extras.languages];
+                          newLangs[i] = `${e.target.value} (${l.split(' (')[1] || 'Native'})`;
+                          setLocalData(prev => ({ ...prev, extras: { ...prev.extras, languages: newLangs } }));
+                        }}
+                      />
+                       <select 
+                         value={l.split(' (')[1]?.replace(')', '') || 'Native'}
+                         onChange={(e) => {
+                           const newLangs = [...localData.extras.languages];
+                           newLangs[i] = `${l.split(' (')[0]} (${e.target.value})`;
+                           setLocalData(prev => ({ ...prev, extras: { ...prev.extras, languages: newLangs } }));
+                         }}
+                         className="text-[9px] font-black text-primary-600 bg-white px-3 py-1 rounded-lg border-none shadow-sm uppercase italic"
+                       >
+                         <option>Native</option>
+                         <option>Fluent</option>
+                         <option>Intermediate</option>
+                       </select>
+                    </div>
+                  ))}
+                  <button onClick={() => setLocalData(prev => ({ ...prev, extras: { ...prev.extras, languages: [...prev.extras.languages, 'New Language (Basic)'] } }))} className="w-full py-4 border-2 border-dashed border-slate-100 rounded-[2rem] text-[9px] font-black text-slate-300 uppercase tracking-widest hover:border-primary-100 hover:text-primary-500 transition-all">Add Linguistic Entry</button>
+                </div>
+             </section>
           </div>
-          <div className="flex flex-wrap gap-4">
-             {resumeData.extras.languages.map(lang => (
-               <div key={lang.id} className="px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-100 dark:border-slate-700 rounded-xl flex items-center gap-4 group">
-                  <input 
-                    type="text" 
-                    value={lang.language}
-                    onChange={(e) => updateArrayItem('extras', lang.id, 'language', e.target.value, 'languages')}
-                    placeholder="Language" 
-                    className="w-24 bg-transparent border-none font-bold text-sm text-slate-700 dark:text-white p-0 focus:ring-0" 
-                  />
-                  <select 
-                    value={lang.proficiency}
-                    onChange={(e) => updateArrayItem('extras', lang.id, 'proficiency', e.target.value, 'languages')}
-                    className="bg-white dark:bg-slate-900 text-[10px] font-black uppercase tracking-widest px-2 py-1 rounded-md border-none outline-none dark:text-slate-400"
-                  >
-                     <option>Native</option>
-                     <option>Fluent</option>
-                     <option>Intermediate</option>
-                     <option>Basic</option>
-                  </select>
-                  <button onClick={() => removeArrayItem('extras', lang.id, 'languages')} className="text-slate-300 hover:text-rose-500 opacity-0 group-hover:opacity-100 transition-all"><Trash2 size={14} /></button>
-               </div>
-             ))}
-          </div>
-       </div>
 
-       {/* Projects */}
-       <div className="space-y-6">
-          <div className="flex items-center justify-between">
-            <h4 className="text-xl font-bold text-slate-900 dark:text-white tracking-tight flex items-center gap-3">
-               <div className="p-2 bg-amber-50 dark:bg-amber-900/20 text-amber-600 dark:text-amber-400 rounded-lg"><FileText size={20} /></div>
-               Personal Projects
-            </h4>
-            <button onClick={() => addArrayItem('extras', 'projects')} className="text-xs font-black uppercase tracking-widest text-primary-600 dark:text-primary-400 flex items-center gap-1 hover:underline">
-               <Plus size={14} /> Add Project
-            </button>
-          </div>
-          <div className="space-y-4">
-             {resumeData.extras.projects.map(proj => (
-               <div key={proj.id} className="p-6 bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 rounded-2xl group relative hover:border-primary-100 transition-all">
-                  <button onClick={() => removeArrayItem('extras', proj.id, 'projects')} className="absolute top-4 right-4 text-slate-300 hover:text-rose-500 opacity-0 group-hover:opacity-100"><Trash2 size={18} /></button>
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                     <div className="md:col-span-1 space-y-4">
-                        <input 
-                          type="text" 
-                          value={proj.name}
-                          onChange={(e) => updateArrayItem('extras', proj.id, 'name', e.target.value, 'projects')}
-                          placeholder="Project Name" 
-                          className="w-full bg-slate-50 dark:bg-slate-900 px-4 py-3 rounded-xl border-none font-bold text-sm dark:text-white" 
-                        />
-                        <input 
-                          type="text" 
-                          value={proj.url}
-                          onChange={(e) => updateArrayItem('extras', proj.id, 'url', e.target.value, 'projects')}
-                          placeholder="Project URL" 
-                          className="w-full bg-slate-50 dark:bg-slate-900 px-4 py-3 rounded-xl border-none text-xs font-medium dark:text-slate-400" 
-                        />
-                     </div>
-                     <div className="md:col-span-2">
-                        <textarea 
-                          rows={3} 
-                          value={proj.description}
-                          onChange={(e) => updateArrayItem('extras', proj.id, 'description', e.target.value, 'projects')}
-                          className="w-full bg-slate-50 dark:bg-slate-900 px-4 py-4 rounded-xl border-none resize-none font-medium text-sm leading-relaxed dark:text-slate-300" 
-                          placeholder="Briefly describe the project, tech stack used and your role..."
-                        />
-                     </div>
-                  </div>
-               </div>
-             ))}
+          {/* Awards & Projects */}
+          <div className="space-y-10">
+             <section className="p-10 bg-indigo-600 rounded-[3rem] text-white overflow-hidden relative shadow-premium">
+                <div className="absolute top-0 right-0 p-8 opacity-10">
+                   <Trophy size={140} fill="#fff" />
+                </div>
+                <div className="relative z-10">
+                   <h4 className="text-[9px] font-black text-indigo-200 uppercase tracking-[0.4em] mb-4 italic">Achievement Log</h4>
+                   <div className="space-y-6">
+                      {localData.extras.awards.map((a, i) => (
+                         <div key={i} className="flex gap-4 group">
+                            <div className="w-1.5 h-6 bg-white/20 rounded-full mt-1" />
+                            <input 
+                              type="text" 
+                              value={a} 
+                              onChange={(e) => {
+                                const newAwards = [...localData.extras.awards];
+                                newAwards[i] = e.target.value;
+                                setLocalData(prev => ({ ...prev, extras: { ...prev.extras, awards: newAwards } }));
+                              }}
+                              className="flex-1 bg-transparent border-none p-0 text-lg font-black italic tracking-tight focus:ring-0" 
+                            />
+                            <button onClick={() => setLocalData(prev => ({ ...prev, extras: { ...prev.extras, awards: prev.extras.awards.filter((_, ai) => ai !== i) } }))} className="text-white/20 hover:text-rose-400"><Trash2 size={16} /></button>
+                         </div>
+                      ))}
+                      <button onClick={() => setLocalData(prev => ({ ...prev, extras: { ...prev.extras, awards: [...prev.extras.awards, 'Strategic Award Title'] } }))} className="text-[9px] font-black uppercase tracking-widest text-indigo-300 hover:text-white transition-all">+ Add Achievement</button>
+                   </div>
+                </div>
+             </section>
+             
+             <section className="space-y-6">
+                <h4 className="text-sm font-black text-slate-400 uppercase tracking-widest italic px-2">Ecosystem Interests</h4>
+                <div className="flex flex-wrap gap-3">
+                   {localData.extras.interests.map((int, i) => (
+                      <div key={i} className="px-5 py-2.5 bg-slate-900 text-white rounded-2xl text-[10px] font-black uppercase tracking-widest flex items-center gap-3">
+                         {int}
+                         <button onClick={() => setLocalData(prev => ({ ...prev, extras: { ...prev.extras, interests: prev.extras.interests.filter((_, ii) => ii !== i) } }))} className="text-white/30 hover:text-white"><XCircle size={14} /></button>
+                      </div>
+                   ))}
+                   <button onClick={() => { const val = prompt('Interest Name:'); if(val) setLocalData(prev => ({ ...prev, extras: { ...prev.extras, interests: [...prev.extras.interests, val] } })); }} className="px-5 py-2.5 border-2 border-dashed border-slate-100 rounded-2xl text-[10px] font-black text-primary-600 uppercase tracking-widest">+ ADD</button>
+                </div>
+             </section>
           </div>
        </div>
     </div>
   );
 
   const renderTemplate = () => (
-    <div className="space-y-12 animate-fade-in">
-       <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
-          {/* Customization Options */}
+    <div className="space-y-12 animate-fade-in text-left">
+       <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
+          {/* Customizer */}
           <div className="col-span-1 space-y-10">
              <div className="space-y-6">
-                <p className="text-xs font-black uppercase tracking-[0.2em] text-slate-400">Branding Color</p>
-                <div className="grid grid-cols-4 gap-3">
-                   {['#4f46e5', '#3b82f6', '#10b981', '#f43f5e', '#8b5cf6', '#f59e0b', '#06b6d4', '#18181b'].map(color => (
-                      <button 
-                         key={color} 
-                         onClick={() => setResumeData(prev => ({ ...prev, template: { ...prev.template, primaryColor: color } }))}
-                         style={{ backgroundColor: color }}
-                         className={cn(
-                           "w-10 h-10 rounded-full border-2 transition-all",
-                           resumeData.template.primaryColor === color ? "border-slate-900 dark:border-white scale-110 shadow-lg" : "border-transparent"
-                         )}
-                      />
+                <p className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-400 italic">Palette Strategy</p>
+                <div className="grid grid-cols-5 gap-4">
+                   {['#0f172a', '#4f46e5', '#10b981', '#f43f5e', '#8b5cf6', '#d946ef', '#f97316', '#22c55e', '#ec4899', '#14b8a6'].map(c => (
+                      <button key={c} style={{ backgroundColor: c }} className="w-12 h-12 rounded-2xl border-4 border-white shadow-xl hover:scale-110 transition-transform active:rotate-12" />
                    ))}
                 </div>
              </div>
-
+             
              <div className="space-y-6">
-                <p className="text-xs font-black uppercase tracking-[0.2em] text-slate-400">Typography</p>
-                <div className="space-y-4 text-left">
-                   {['Inter', 'Roboto', 'Outfit', 'Merriweather'].map(font => (
-                      <button 
-                        key={font}
-                        onClick={() => setResumeData(prev => ({ ...prev, template: { ...prev.template, font: font } }))}
-                        className={cn(
-                          "w-full px-4 py-3 rounded-xl border text-sm font-bold transition-all flex items-center justify-between",
-                          resumeData.template.font === font 
-                            ? "bg-slate-900 dark:bg-white text-white dark:text-slate-900 border-transparent shadow-xl" 
-                            : "bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-400 border-slate-100 dark:border-slate-700"
-                        )}
-                        style={{ fontFamily: font }}
-                      >
-                         {font}
-                         {resumeData.template.font === font && <CheckCircle2 size={16} />}
+                <p className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-400 italic">Architecture Settings</p>
+                <div className="grid grid-cols-1 gap-3">
+                   {['Modern Adaptive', 'Strict Industrial', 'Strategic Clean', 'High-Impact Grid'].map((t, i) => (
+                      <button key={t} className={cn("p-5 rounded-2xl border text-[10px] font-black uppercase tracking-widest text-left transition-all", i === 0 ? "bg-slate-900 text-white border-transparent shadow-xl translate-x-4" : "bg-slate-50 text-slate-400 border-slate-100")}>
+                         {t}
                       </button>
                    ))}
-                </div>
-             </div>
-
-             <div className="space-y-6">
-                <p className="text-xs font-black uppercase tracking-[0.2em] text-slate-400">Configuration</p>
-                <div className="space-y-3">
-                   <div className="flex items-center justify-between p-3 bg-slate-50 dark:bg-slate-800 rounded-xl">
-                      <span className="text-xs font-bold text-slate-600 dark:text-slate-400">Spacing</span>
-                      <button onClick={() => setResumeData(prev => ({ ...prev, template: { ...prev.template, spacing: prev.template.spacing === 'compact' ? 'relaxed' : 'compact' } }))} className="w-10 h-6 bg-slate-200 dark:bg-slate-700 rounded-full relative p-1 transition-all">
-                         <div className={cn("w-4 h-4 bg-white rounded-full shadow-sm transition-all", resumeData.template.spacing === 'relaxed' ? "translate-x-4" : "translate-x-0")} />
-                      </button>
-                   </div>
-                   <div className="flex items-center justify-between p-3 bg-slate-50 dark:bg-slate-800 rounded-xl">
-                      <span className="text-xs font-bold text-slate-600 dark:text-slate-400">Font Size</span>
-                       <div className="flex gap-1">
-                          {['S', 'M', 'L'].map(size => (
-                             <button key={size} className="w-8 h-8 rounded-lg bg-white dark:bg-slate-900 text-[10px] font-black border border-slate-100 dark:border-slate-700 hover:bg-primary-50 hover:text-primary-600 transition-all">{size}</button>
-                          ))}
-                       </div>
-                   </div>
                 </div>
              </div>
           </div>
 
-          {/* Template Gallery */}
-          <div className="col-span-3 space-y-10">
-             <div className="grid grid-cols-1 sm:grid-cols-2 gap-8">
-                {[
-                   { id: 'modern', name: 'Modern Professional', desc: 'Minimalist with dynamic header', img: 'https://images.unsplash.com/photo-1586281380349-632531db7ed4?w=500&q=80' },
-                   { id: 'executive', name: 'Executive Premium', desc: 'Structured and bold typography', img: 'https://images.unsplash.com/photo-1544027993-37dbfe43562a?w=500&q=80' },
-                   { id: 'creative', name: 'Creative Portfolio', desc: 'Grid based content layout', img: 'https://images.unsplash.com/photo-1512486130939-2c4f79935e4f?w=500&q=80' },
-                   { id: 'minimal', name: 'Minimalist Clean', desc: 'Classic single column list', img: 'https://images.unsplash.com/photo-1506784919141-177b442721dc?w=500&q=80' },
-                ].map((tpl) => (
-                   <div 
-                      key={tpl.id} 
-                      onClick={() => setResumeData(prev => ({ ...prev, template: { ...prev.template, id: tpl.id } }))}
-                      className={cn(
-                        "group cursor-pointer space-y-4 rounded-3xl overflow-hidden p-3 transition-all",
-                        resumeData.template.id === tpl.id ? "bg-primary-50 dark:bg-primary-950/20 ring-2 ring-primary-500" : "hover:bg-slate-50 dark:hover:bg-slate-800"
-                      )}
-                   >
-                      <div className="aspect-[4/5] bg-white dark:bg-slate-900 rounded-2xl overflow-hidden relative border border-slate-100 dark:border-slate-800 shadow-soft group-hover:shadow-xl transition-all">
-                         <img src={tpl.img} alt={tpl.name} className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-700" />
-                         <div className="absolute inset-0 bg-slate-900/0 group-hover:bg-slate-900/40 transition-colors flex items-center justify-center">
-                            <button className="px-6 py-2 bg-white text-slate-900 rounded-full text-xs font-black opacity-0 group-hover:opacity-100 scale-90 group-hover:scale-100 transition-all">Select</button>
+          {/* Template Preview Grid */}
+          <div className="col-span-2 grid grid-cols-1 sm:grid-cols-2 gap-8">
+             {[1,2,3,4].map(idx => (
+                <div key={idx} className="group relative overflow-hidden rounded-[3rem] border border-slate-100 shadow-soft cursor-pointer">
+                   <div className="aspect-[4/5] bg-slate-50 flex items-center justify-center p-8 overflow-hidden group-hover:scale-105 transition-transform duration-1000">
+                      <div className="w-full h-full bg-white shadow-2xl rounded-sm transform translate-y-8 group-hover:translate-y-0 transition-transform duration-700">
+                         {/* Mock Canvas Content */}
+                         <div className="p-6 space-y-4">
+                            <div className="w-1/2 h-4 bg-slate-900 rounded-sm" />
+                            <div className="w-3/4 h-2 bg-slate-100 rounded-sm" />
+                            <div className="grid grid-cols-2 gap-4 pt-4">
+                               <div className="h-20 bg-slate-50 rounded-lg" />
+                               <div className="h-20 bg-slate-50 rounded-lg" />
+                            </div>
                          </div>
-                         {resumeData.template.id === tpl.id && (
-                            <div className="absolute top-4 right-4 w-8 h-8 bg-primary-600 text-white rounded-full flex items-center justify-center shadow-lg"><CheckCircle2 size={16} /></div>
-                         )}
-                      </div>
-                      <div className="px-2 pb-2">
-                         <h5 className="font-bold text-slate-800 dark:text-white leading-none mb-1">{tpl.name}</h5>
-                         <p className="text-[10px] font-medium text-slate-400 uppercase tracking-widest">{tpl.desc}</p>
                       </div>
                    </div>
-                ))}
-             </div>
+                   <div className="absolute inset-0 bg-gradient-to-t from-slate-900/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex flex-col justify-end p-8 text-left">
+                      <p className="text-white font-black italic text-xl">V{idx}.0 Tactical Layout</p>
+                      <button className="mt-4 py-3 bg-white text-slate-900 rounded-2xl text-[10px] font-black uppercase tracking-widest">Select Architecture</button>
+                   </div>
+                   {idx === 1 && (
+                      <div className="absolute top-6 left-6 p-2 bg-primary-600 text-white rounded-lg shadow-xl animate-bounce">
+                        <Check size={16} strokeWidth={4} />
+                      </div>
+                   )}
+                </div>
+             ))}
           </div>
        </div>
     </div>
   );
 
   return (
-    <div className="space-y-8 pb-12 animate-fade-in flex flex-col min-h-screen lg:min-h-0 lg:h-auto">
+    <div className="space-y-8 pb-12 animate-fade-in max-w-7xl mx-auto flex flex-col min-h-screen lg:min-h-0">
       {/* Header Section */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 shrink-0 bg-white/50 dark:bg-slate-900/50 backdrop-blur-md p-6 rounded-[2.5rem] border border-slate-100 dark:border-slate-800">
-        <div>
-          <h1 className="text-3xl font-black text-slate-900 dark:text-white tracking-tighter">AI Resume Builder</h1>
-          <p className="text-slate-500 dark:text-slate-400 font-medium tracking-tight">Step <span className="text-primary-600 font-black">{activeStep + 1}</span> of 6 • {steps[activeStep].title}</p>
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 bg-white p-8 rounded-[3rem] border border-slate-50 shadow-soft">
+        <div className="text-left">
+          <h1 className="text-4xl font-black text-slate-900 tracking-tighter italic uppercase leading-none mb-2">Resume Engine</h1>
+          <p className="text-slate-400 font-bold tracking-tight uppercase text-xs">Phased Configuration: <span className="text-slate-900 font-black">{steps[activeStep].title}</span></p>
         </div>
-        <div className="flex items-center gap-3">
-          <button className="btn-secondary px-5 py-2.5 text-xs font-black uppercase tracking-widest flex items-center gap-2">
-            <Eye size={16} />
-            <span className="hidden sm:inline">Live Preview</span>
-          </button>
-          <button className="btn-secondary px-5 py-2.5 text-xs font-black uppercase tracking-widest flex items-center gap-2">
-            <Save size={16} />
-            <span className="hidden sm:inline">Save Draft</span>
-          </button>
-          <button className="btn-primary px-6 py-3 text-xs font-black uppercase tracking-[0.2em] flex items-center gap-2 shadow-2xl shadow-primary-200">
-            <Download size={18} />
-            <span>Export CV</span>
-          </button>
+        <div className="flex items-center gap-4">
+           {isSaving && (
+             <div className="flex items-center gap-3 px-5 py-2.5 bg-emerald-50 text-emerald-600 rounded-2xl text-[10px] font-black uppercase tracking-widest animate-pulse border border-emerald-100 h-14">
+               <Zap size={16} /> Syncing...
+             </div>
+           )}
+           <button onClick={() => setIsPreviewOpen(true)} className="w-14 h-14 bg-slate-50 text-slate-400 border border-slate-100 hover:text-primary-600 rounded-2xl flex items-center justify-center transition-all shadow-sm">
+             <Eye size={24} />
+           </button>
+           <button onClick={() => { showToast('Artifact exported to PDF vault'); }} className="h-14 px-8 bg-slate-900 text-white rounded-2xl text-[10px] font-black uppercase tracking-[0.2em] shadow-xl shadow-slate-100 flex items-center justify-center gap-3 active:scale-95 transition-all">
+             <Download size={20} /> Export CV 2026
+           </button>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 flex-1 items-start">
-        {/* Left: Navigation Steps */}
-        <div className="lg:col-span-3 sticky top-24 space-y-6">
-           <div className="card border-none bg-white dark:bg-slate-900 p-4 shadow-soft">
-              <nav className="space-y-2 relative">
-                {/* Vertical Progress Line */}
-                <div className="absolute left-[31px] top-6 bottom-6 w-0.5 bg-slate-100 dark:bg-slate-800" />
-                
-                {steps.map((step, idx) => (
-                  <button
-                    key={idx}
-                    onClick={() => setActiveStep(idx)}
-                    className={cn(
-                      "w-full flex items-center gap-4 px-4 py-4 rounded-2xl transition-all duration-300 group relative z-10",
-                      activeStep === idx 
-                        ? "bg-primary-600 text-white shadow-xl shadow-primary-200 dark:shadow-primary-900/20" 
-                        : activeStep > idx 
-                          ? "text-primary-600 dark:text-primary-400 bg-white dark:bg-slate-900 opacity-100"
-                          : "text-slate-400 dark:text-slate-500 hover:bg-slate-50 dark:hover:bg-slate-800"
-                    )}
-                  >
-                    <div className={cn(
-                      "w-10 h-10 rounded-xl flex items-center justify-center transition-all duration-500",
-                      activeStep === idx 
-                        ? "bg-white/20 rotate-0" 
-                        : activeStep > idx 
-                          ? "bg-primary-50 dark:bg-primary-900/20 rotate-0"
-                          : "bg-slate-50 dark:bg-slate-800 group-hover:bg-primary-50 dark:group-hover:bg-primary-900/10"
-                    )}>
-                      {activeStep > idx ? <CheckCircle2 size={20} /> : <step.icon size={20} />}
-                    </div>
-                    <div className="text-left flex-1">
-                      <span className="font-black text-xs uppercase tracking-widest block">{step.title}</span>
-                    </div>
-                    {activeStep === idx && (
-                       <motion.div layoutId="pointer" className="w-1.5 h-6 bg-white rounded-full ml-auto" />
-                    )}
-                  </button>
-                ))}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 flex-1">
+        {/* Navigation */}
+        <div className="lg:col-span-3 space-y-8">
+           <div className="card p-4 border-none bg-white shadow-soft rounded-[2.5rem]">
+              <nav className="flex flex-col gap-3 relative">
+                 <div className="absolute left-6 top-10 bottom-10 w-0.5 bg-slate-50" />
+                 {steps.map((s, i) => (
+                    <button 
+                      key={i} 
+                      onClick={() => { updateResumeStep(steps[activeStep].title.toLowerCase(), localData[steps[activeStep].title.toLowerCase()]); setActiveStep(i); }}
+                      className={cn(
+                        "w-full flex items-center gap-5 p-5 rounded-[1.75rem] transition-all relative z-10",
+                        activeStep === i ? "bg-slate-900 text-white shadow-premium scale-105" : "text-slate-300 hover:bg-slate-50 hover:text-slate-500"
+                      )}
+                    >
+                       <div className={cn("p-2 rounded-xl transition-all duration-700", activeStep === i ? "bg-white/20 rotate-12 scale-110" : "bg-slate-50")}>
+                          <s.icon size={20} className={cn(activeStep === i ? "text-white" : "text-slate-200")} />
+                       </div>
+                       <span className="text-[10px] font-black uppercase tracking-[0.2em] text-left">{s.title}</span>
+                       {i < activeStep && <CheckCircle2 size={14} className="ml-auto text-emerald-500" />}
+                    </button>
+                 ))}
               </nav>
            </div>
            
-           <div className="card bg-slate-900 text-white p-8 overflow-hidden relative border-none shadow-2xl group">
-              <div className="absolute -top-6 -right-6 p-4 opacity-5 pointer-events-none group-hover:rotate-12 transition-transform duration-700">
-                 <Zap size={140} fill="currentColor" />
+           <div className="card p-10 bg-indigo-600 rounded-[3rem] text-white overflow-hidden relative shadow-premium border-none text-left">
+              <div className="absolute top-0 right-0 p-8 opacity-20 animate-pulse">
+                 <Sparkles size={120} />
               </div>
-              <div className="relative z-10 space-y-6">
-                <div className="flex items-center gap-3">
-                   <div className="w-10 h-10 rounded-xl bg-primary-600 flex items-center justify-center shadow-lg animate-pulse">
-                      <Sparkles size={20} />
-                   </div>
-                   <span className="text-[10px] font-black uppercase tracking-[0.3em] text-primary-400">AI Enhancement</span>
-                </div>
-                <h4 className="text-xl font-black tracking-tight leading-tight">Generate Summary with AI Writer</h4>
-                <p className="text-xs text-slate-400 font-medium leading-relaxed">Let our proprietary AI models craft a compelling professional narrative based on your unique experiences.</p>
-                <button className="w-full py-4 bg-primary-600 text-white rounded-2xl text-[10px] font-black uppercase tracking-[0.2em] hover:bg-primary-700 transition-all shadow-xl active:scale-95 group/btn overflow-hidden relative">
-                   <span className="relative z-10">Use AI Writer</span>
-                   <div className="absolute inset-0 bg-white/20 -translate-x-full group-hover/btn:translate-x-0 transition-transform duration-500" />
-                </button>
-              </div>
+              <p className="text-[9px] font-black text-indigo-200 uppercase tracking-[0.4em] mb-6 italic leading-none">AI Generative Mode</p>
+              <h4 className="text-xl font-black italic tracking-tight mb-8 leading-tight">Elevate your summary with AI insights.</h4>
+              <button className="w-full py-4 bg-white text-indigo-600 rounded-2xl text-[10px] font-black uppercase tracking-[0.3em] shadow-2xl hover:bg-slate-50 transition-all active:scale-95">Initiate AI Write</button>
            </div>
         </div>
 
-        {/* Right: Form Content */}
-        <div className="lg:col-span-9 space-y-8">
-           <div className="card min-h-[700px] flex flex-col p-8 lg:p-12 border-none bg-white dark:bg-slate-900 shadow-soft relative transition-colors duration-300">
-              {/* Progress Indicator */}
-              <div className="absolute top-0 inset-x-0 h-1 bg-slate-100 dark:bg-slate-800 rounded-t-2xl overflow-hidden">
-                 <motion.div 
-                   initial={{ width: 0 }}
-                   animate={{ width: `${((activeStep + 1) / steps.length) * 100}%` }}
-                   className="h-full bg-primary-600 shadow-[0_0_20px_rgba(79,70,229,0.5)]" 
-                 />
+        {/* Content Viewport */}
+        <div className="lg:col-span-9 flex flex-col h-full">
+           <div className="card h-full p-12 bg-white border-none shadow-soft flex flex-col relative rounded-[3.5rem] min-h-[750px]">
+              <div className="flex-1">
+                 <div className="mb-12 text-left">
+                    <h2 className="text-4xl font-black text-slate-900 tracking-tighter italic uppercase mb-2">{steps[activeStep].title} Integration</h2>
+                    <p className="text-slate-400 font-bold text-sm tracking-tight">{steps[activeStep].helper}</p>
+                 </div>
+                 
+                 <AnimatePresence mode="wait">
+                    <motion.div
+                      key={activeStep}
+                      initial={{ opacity: 0, x: 10 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      exit={{ opacity: 0, x: -10 }}
+                      transition={{ duration: 0.3 }}
+                    >
+                       {activeStep === 0 && renderPersonal()}
+                       {activeStep === 1 && renderExperience()}
+                       {activeStep === 2 && renderEducation()}
+                       {activeStep === 3 && renderSkills()}
+                       {activeStep === 4 && renderExtras()}
+                       {activeStep === 5 && renderTemplate()}
+                    </motion.div>
+                 </AnimatePresence>
               </div>
 
-              {/* Step Header */}
-              <div className="mb-12">
-                 <h2 className="text-3xl font-black text-slate-900 dark:text-white tracking-tighter mb-2">{steps[activeStep].title}</h2>
-                 <p className="text-slate-400 font-medium">{steps[activeStep].helper}</p>
-              </div>
-
-              <div className="flex-1 overflow-x-hidden">
-                <AnimatePresence mode="wait">
-                   <motion.div
-                     key={activeStep}
-                     initial={{ opacity: 0, x: 20 }}
-                     animate={{ opacity: 1, x: 0 }}
-                     exit={{ opacity: 0, x: -20 }}
-                     transition={{ duration: 0.4, ease: "easeOut" }}
-                     className="h-full"
-                   >
-                     {activeStep === 0 && renderPersonal()}
-                     {activeStep === 1 && renderExperience()}
-                     {activeStep === 2 && renderEducation()}
-                     {activeStep === 3 && renderSkills()}
-                     {activeStep === 4 && renderExtras()}
-                     {activeStep === 5 && renderTemplate()}
-                   </motion.div>
-                </AnimatePresence>
-              </div>
-              
-              {/* Navigation Actions */}
-              <div className="pt-12 border-t border-slate-50 dark:border-slate-800 mt-12 flex items-center justify-between">
+              {/* Viewport Actions */}
+              <div className="pt-10 border-t border-slate-50 mt-12 flex items-center justify-between">
                  <button 
                   onClick={handleBack}
                   disabled={activeStep === 0}
-                  className="flex items-center gap-3 px-8 py-4 text-slate-500 dark:text-slate-400 text-xs font-black uppercase tracking-widest hover:bg-slate-50 dark:hover:bg-slate-800 rounded-2xl transition-all disabled:opacity-0"
+                  className="flex items-center gap-3 px-8 py-4 text-slate-400 hover:text-slate-900 text-xs font-black uppercase tracking-widest disabled:opacity-0 transition-all"
                 >
-                    <ChevronLeft size={20} />
-                    <span>Previous</span>
+                    <ChevronLeft size={20} /> Previous Phase
                  </button>
-
-                 <div className="flex items-center gap-4">
-                    <div className="hidden sm:flex items-center gap-2 px-4 py-2 bg-emerald-50 dark:bg-emerald-950/20 text-emerald-600 dark:text-emerald-400 rounded-full animate-fade-in">
-                       <CheckCircle2 size={14} />
-                       <span className="text-[10px] font-black uppercase tracking-widest">Autosaving...</span>
-                    </div>
-
+                 <div className="flex gap-4">
+                    <button className="hidden sm:flex items-center gap-3 px-6 py-4 bg-slate-50 text-slate-400 rounded-2xl text-[9px] font-black uppercase tracking-[0.2em] border border-slate-50 hover:bg-white hover:border-slate-100 transition-all">
+                       <RotateCcw size={16} /> Reset Node
+                    </button>
                     <button 
-                      onClick={handleNext}
-                      className="flex items-center gap-3 px-10 py-4 bg-primary-600 text-white rounded-[1.5rem] text-xs font-black uppercase tracking-[0.2em] hover:bg-primary-700 transition-all shadow-2xl shadow-primary-200 dark:shadow-primary-900/30 active:scale-95 group"
+                      onClick={() => activeStep === steps.length - 1 ? setIsPreviewOpen(true) : handleNext()}
+                      className="px-10 py-4 bg-slate-900 text-white rounded-2xl text-[10px] font-black uppercase tracking-[0.3em] shadow-xl shadow-slate-200 flex items-center gap-3 hover:bg-black transition-all group"
                     >
-                        <span>{activeStep === steps.length - 1 ? 'Finish & Download' : 'Next Step'}</span>
-                        <ChevronRight size={20} className="group-hover:translate-x-1 transition-transform" />
+                       <span>{activeStep === steps.length - 1 ? 'Review Deployment' : 'Proceed to Next Cycle'}</span>
+                       <ChevronRight size={18} className="group-hover:translate-x-2 transition-transform" />
                     </button>
                  </div>
               </div>
            </div>
         </div>
       </div>
+
+      {/* Artifact Preview Modal */}
+      <CenterModal isOpen={isPreviewOpen} onClose={() => setIsPreviewOpen(false)} title="Resume Artifact Preview" maxWidth="max-w-5xl">
+         <div className="p-12 text-left bg-slate-50">
+            <div className="bg-white shadow-[0_30px_100px_rgba(0,0,0,0.1)] rounded-sm min-h-[1100px] flex flex-col mx-auto max-w-[800px] overflow-hidden">
+               {/* Document Header */}
+               <div className="bg-slate-900 p-16 text-white grid grid-cols-12 gap-8 relative overflow-hidden">
+                  <div className="absolute top-0 right-0 w-64 h-64 bg-white/5 -mr-32 -mt-32 rounded-full" />
+                  <div className="col-span-8 space-y-6 relative z-10">
+                     <h2 className="text-5xl font-black tracking-tighter uppercase italic italic">{localData.personal.firstName} {localData.personal.lastName}</h2>
+                     <p className="text-xl font-black text-primary-400 uppercase tracking-[0.3em] leading-none mb-10">{localData.personal.title}</p>
+                     <p className="text-sm font-medium opacity-80 leading-relaxed max-w-lg italic">"{localData.personal.summary}"</p>
+                  </div>
+                  <div className="col-span-4 flex flex-col justify-end items-end space-y-3 relative z-10">
+                     <div className="flex items-center gap-3 text-xs font-black uppercase tracking-widest text-slate-400">
+                        {localData.personal.city} <MapPin size={14} />
+                     </div>
+                     <div className="flex items-center gap-3 text-xs font-black uppercase tracking-widest text-white">
+                        {localData.personal.email} <Mail size={14} />
+                     </div>
+                     <div className="flex items-center gap-3 text-xs font-black uppercase tracking-widest text-slate-400">
+                        {localData.personal.portfolio} <Globe size={14} />
+                     </div>
+                  </div>
+               </div>
+
+               {/* Document Body */}
+               <div className="p-16 grid grid-cols-12 gap-16 flex-1">
+                  <div className="col-span-8 space-y-12">
+                     <section className="space-y-8">
+                        <h3 className="text-sm font-black uppercase tracking-[0.4em] text-slate-300 border-b-2 border-slate-50 pb-2">Experience Portfolio</h3>
+                        <div className="space-y-12">
+                           {localData.experience.map((e, i) => (
+                              <div key={i} className="relative pl-8">
+                                 <div className="absolute left-0 top-2 bottom-0 w-1 bg-slate-900/5" />
+                                 <div className="flex justify-between items-start mb-4">
+                                    <div>
+                                       <h4 className="text-xl font-black text-slate-900 italic tracking-tight">{e.role}</h4>
+                                       <p className="text-[10px] font-black text-primary-600 uppercase tracking-[0.3em] mt-2">{e.company}</p>
+                                    </div>
+                                    <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest bg-slate-50 px-3 py-1 rounded-md">{e.start} — {e.current ? 'PRESENT' : e.end}</span>
+                                 </div>
+                                 <p className="text-xs font-medium text-slate-500 leading-relaxed italic">"{e.desc}"</p>
+                              </div>
+                           ))}
+                        </div>
+                     </section>
+                  </div>
+
+                  <div className="col-span-4 space-y-12">
+                     <section className="space-y-6">
+                        <h3 className="text-[9px] font-black uppercase tracking-[0.5em] text-slate-300">Strategic Matrix</h3>
+                        <div className="space-y-6">
+                           {localData.skills.map((s, i) => (
+                              <div key={i} className="space-y-2">
+                                 <div className="flex justify-between text-[9px] font-black uppercase tracking-widest text-slate-900">
+                                    <span>{s.name}</span>
+                                    <span>{s.level}%</span>
+                                 </div>
+                                 <div className="h-1 bg-slate-100 w-full rounded-full">
+                                    <div className="h-full bg-slate-900 rounded-full" style={{ width: `${s.level}%` }} />
+                                 </div>
+                              </div>
+                           ))}
+                        </div>
+                     </section>
+
+                     <section className="space-y-6">
+                        <h3 className="text-[9px] font-black uppercase tracking-[0.5em] text-slate-300">Education Registry</h3>
+                        <div className="space-y-6">
+                           {localData.education.map((edu, i) => (
+                              <div key={i}>
+                                 <h4 className="text-xs font-black text-slate-900 uppercase tracking-tight leading-tight mb-2">{edu.degree}</h4>
+                                 <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{edu.school}</p>
+                              </div>
+                           ))}
+                        </div>
+                     </section>
+                     
+                     <section className="space-y-6">
+                        <h3 className="text-[9px] font-black uppercase tracking-[0.5em] text-slate-300">Certifications</h3>
+                        <ul className="space-y-3">
+                           {localData.extras.certs.map((c, i) => (
+                              <li key={i} className="text-[10px] font-black text-slate-600 uppercase tracking-widest flex items-center gap-3 italic">
+                                 <div className="w-1 h-1 bg-primary-600 rounded-full" /> {c}
+                              </li>
+                           ))}
+                        </ul>
+                     </section>
+                  </div>
+               </div>
+            </div>
+            
+            <div className="mt-12 flex justify-center">
+               <button onClick={() => setIsPreviewOpen(false)} className="px-12 py-5 bg-slate-900 text-white rounded-3xl text-[10px] font-black uppercase tracking-widest shadow-2xl hover:scale-105 active:scale-95 transition-all">Abort Preview Mode</button>
+            </div>
+         </div>
+      </CenterModal>
     </div>
   );
 };

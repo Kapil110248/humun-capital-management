@@ -1,44 +1,37 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { 
-  Briefcase, 
-  Calendar, 
-  Award, 
-  UserCircle, 
-  TrendingUp, 
-  Search, 
-  Plus, 
-  ExternalLink, 
-  ChevronRight,
-  MoreHorizontal,
-  Clock,
-  Video,
-  FileText,
-  CheckCircle2
+  Briefcase, Calendar, Award, UserCircle, TrendingUp, Search, Plus, ExternalLink, 
+  ChevronRight, MoreHorizontal, Clock, Video, FileText, CheckCircle2, MapPin, DollarSign, X, ArrowRight, Zap
 } from 'lucide-react';
 import { cn } from '../../utils/cn';
+import { useCandidate } from '../../context/CandidateContext';
+import { useNavigate } from 'react-router-dom';
+import CenterModal from '../../components/layout/CenterModal';
 
 const CandidateDashboard = () => {
+  const { profile, applications, interviews, notifications, showToast } = useCandidate();
+  const navigate = useNavigate();
+  const [selectedApp, setSelectedApp] = useState(null);
+
   const stats = [
     {
       title: 'Applied Jobs',
-      value: '12',
-      trend: '+3 this week',
+      value: applications.length,
+      trend: '+2 this week',
       icon: Briefcase,
       color: 'blue',
       bg: 'bg-blue-50',
       iconColor: 'text-blue-600',
-      borderColor: 'border-blue-100'
     },
     {
       title: 'Interviews Scheduled',
-      value: '4',
-      trend: 'Next: Tomorrow',
+      value: interviews.length,
+      trend: interviews.length > 0 ? `Next: ${interviews[0].date}` : 'None scheduled',
       icon: Calendar,
       color: 'purple',
       bg: 'bg-purple-50',
       iconColor: 'text-purple-600',
-      borderColor: 'border-purple-100'
     },
     {
       title: 'Offers Received',
@@ -48,44 +41,38 @@ const CandidateDashboard = () => {
       color: 'green',
       bg: 'bg-emerald-50',
       iconColor: 'text-emerald-600',
-      borderColor: 'border-emerald-100'
     },
     {
       title: 'Profile Completion',
       value: '85%',
-      trend: 'Complete to reach 100%',
+      trend: 'Complete skills to reach 100%',
       icon: UserCircle,
       color: 'orange',
       bg: 'bg-orange-50',
       iconColor: 'text-orange-600',
-      borderColor: 'border-orange-100',
       isProgress: true
     }
   ];
 
-  const recentApplications = [
-    { id: 1, title: 'Senior UX Designer', company: 'Google Inc.', date: 'Oct 24, 2026', status: 'Under Review', logo: 'G' },
-    { id: 2, title: 'Product Manager', company: 'Stripe', date: 'Oct 22, 2026', status: 'Shortlisted', logo: 'S' },
-    { id: 3, title: 'Frontend Developer', company: 'Vercel', date: 'Oct 20, 2026', status: 'Interview', logo: 'V' },
-    { id: 4, title: 'Marketing Lead', company: 'Meta', date: 'Oct 18, 2026', status: 'Rejected', logo: 'M' },
-  ];
-
-  const upcomingInterviews = [
-    { id: 1, company: 'Stripe', role: 'Product Manager', time: '10:30 AM', date: 'Tomorrow', type: 'Video Call' },
-    { id: 2, company: 'Google Inc.', role: 'Senior UX Designer', time: '02:00 PM', date: 'Oct 28', type: 'Technical Round' },
-  ];
+  const handleJoinMeeting = (link) => {
+    showToast('Joining secure meeting session...');
+    window.open(link, '_blank');
+  };
 
   return (
-    <div className="space-y-8 pb-12 animate-fade-in">
+    <div className="space-y-8 pb-12 animate-fade-in max-w-7xl mx-auto">
       {/* Header Section */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <div>
-          <h1 className="text-3xl font-extrabold text-slate-900 tracking-tight">Dashboard</h1>
-          <p className="text-slate-500 font-medium">Welcome back, track your job journey and progress</p>
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+        <div className="text-left">
+          <h1 className="text-4xl font-black text-slate-900 tracking-tighter italic">CANDIDATE PORTAL</h1>
+          <p className="text-slate-500 font-bold tracking-tight uppercase text-xs mt-1">Strategic Overview • {profile.fullName}</p>
         </div>
-        <button className="flex items-center justify-center gap-2 px-5 py-2.5 bg-primary-600 text-white rounded-xl font-bold hover:bg-primary-700 transition-all shadow-lg shadow-primary-200 active:scale-95">
+        <button 
+          onClick={() => navigate('/candidate/jobs')}
+          className="flex items-center justify-center gap-3 px-8 py-3.5 bg-slate-900 text-white rounded-2xl font-black uppercase tracking-[0.2em] text-xs hover:bg-black transition-all shadow-xl shadow-slate-200 active:scale-95"
+        >
           <Search size={18} />
-          <span>Browse Jobs</span>
+          <span>Explore Opportunities</span>
         </button>
       </div>
 
@@ -96,44 +83,46 @@ const CandidateDashboard = () => {
             key={idx}
             whileHover={{ y: -5 }}
             className={cn(
-              "p-6 rounded-2xl bg-white border border-slate-100 shadow-soft transition-all group hover:border-primary-100",
-              stat.color === 'blue' && "hover:shadow-blue-100/50",
-              stat.color === 'purple' && "hover:shadow-purple-100/50",
-              stat.color === 'green' && "hover:shadow-emerald-100/50",
-              stat.color === 'orange' && "hover:shadow-orange-100/50"
+               "p-8 rounded-[2rem] bg-white border border-slate-100 shadow-soft transition-all group",
+               stat.color === 'blue' && "hover:border-blue-100",
+               stat.color === 'purple' && "hover:border-purple-100",
+               stat.color === 'green' && "hover:border-emerald-100",
+               stat.color === 'orange' && "hover:border-orange-100"
             )}
           >
-            <div className="flex items-start justify-between mb-4">
-              <div className={cn("p-3 rounded-xl", stat.bg, stat.iconColor)}>
-                <stat.icon size={22} />
+            <div className="flex items-start justify-between mb-6">
+              <div className={cn("p-4 rounded-2xl", stat.bg, stat.iconColor)}>
+                <stat.icon size={26} />
               </div>
-              <div className="p-1 px-2 rounded-lg bg-slate-50 text-[10px] font-bold text-slate-400 uppercase tracking-wider">
-                {stat.isProgress ? "Progress" : "Stat"}
+              <div className="p-1.5 px-3 rounded-xl bg-slate-50 text-[9px] font-black text-slate-400 uppercase tracking-widest border border-slate-100">
+                Live Data
               </div>
             </div>
             
-            <div>
-              <p className="text-sm font-bold text-slate-500 mb-1">{stat.title}</p>
-              <div className="flex items-baseline gap-2">
-                <h3 className="text-3xl font-extrabold text-slate-900 tracking-tight">{stat.value}</h3>
+            <div className="text-left">
+              <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-2">{stat.title}</p>
+              <div className="flex items-baseline gap-3">
+                <h3 className="text-4xl font-black text-slate-900 tracking-tighter tabular-nums">{stat.value}</h3>
               </div>
               
               {stat.isProgress ? (
-                <div className="mt-4">
-                  <div className="w-full h-1.5 bg-slate-100 rounded-full overflow-hidden">
+                <div className="mt-5">
+                  <div className="w-full h-2 bg-slate-50 rounded-full overflow-hidden border border-slate-100 p-[1px]">
                     <motion.div 
                       initial={{ width: 0 }}
                       animate={{ width: stat.value }}
                       className="h-full bg-orange-500 rounded-full"
-                      transition={{ duration: 1, delay: 0.5 }}
+                      transition={{ duration: 1.5, ease: "easeOut" }}
                     />
                   </div>
-                  <p className="text-xs font-medium text-slate-400 mt-2">{stat.trend}</p>
+                  <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mt-3 flex items-center gap-2">
+                    <CheckCircle2 size={10} className="text-orange-500" /> {stat.trend}
+                  </p>
                 </div>
               ) : (
-                <div className="flex items-center gap-1 mt-2">
-                  <TrendingUp size={12} className={cn(stat.iconColor)} />
-                  <p className="text-xs font-bold text-slate-400">{stat.trend}</p>
+                <div className="flex items-center gap-2 mt-3">
+                  <TrendingUp size={14} className={cn(stat.iconColor)} />
+                  <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{stat.trend}</p>
                 </div>
               )}
             </div>
@@ -142,54 +131,61 @@ const CandidateDashboard = () => {
       </div>
 
       {/* Main Content Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
         
         {/* Left: Recent Applications */}
-        <div className="lg:col-span-2 space-y-6">
-          <div className="card border-none bg-white p-0">
-            <div className="flex items-center justify-between p-6 border-b border-slate-50">
-              <h2 className="text-xl font-extrabold text-slate-900">Recent Applications</h2>
-              <button className="text-sm font-bold text-primary-600 hover:text-primary-700">View All</button>
+        <div className="lg:col-span-8 space-y-8">
+          <div className="card p-0 border-none bg-white shadow-soft overflow-hidden">
+            <div className="flex items-center justify-between p-8 border-b border-slate-50 bg-slate-50/20">
+               <div>
+                  <h2 className="text-2xl font-black text-slate-900 italic tracking-tight leading-none mb-2">Application Registry</h2>
+                  <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Tracking your strategic movements</p>
+               </div>
+               <button onClick={() => navigate('/candidate/applications')} className="text-[10px] font-black text-primary-600 uppercase tracking-[0.2em] hover:gap-3 transition-all flex items-center gap-2">
+                  View Full History <ArrowRight size={14} />
+               </button>
             </div>
             
-            <div className="overflow-x-auto">
+            <div className="overflow-x-auto text-left">
               <table className="w-full text-left">
                 <thead>
                   <tr className="bg-slate-50/50">
-                    <th className="px-6 py-4 text-xs font-bold text-slate-400 uppercase tracking-widest">Department / Role</th>
-                    <th className="px-6 py-4 text-xs font-bold text-slate-400 uppercase tracking-widest">Date Applied</th>
-                    <th className="px-6 py-4 text-xs font-bold text-slate-400 uppercase tracking-widest">Status</th>
-                    <th className="px-6 py-4 text-xs font-bold text-slate-400 uppercase tracking-widest">Action</th>
+                    <th className="px-8 py-5 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Objective / Role</th>
+                    <th className="px-8 py-5 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] text-center">Applied On</th>
+                    <th className="px-8 py-5 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] text-center">Current Phase</th>
+                    <th className="px-8 py-5 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] text-right">Action</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-50">
-                  {recentApplications.map((app) => (
-                    <tr key={app.id} className="group hover:bg-slate-50/50 transition-colors">
-                      <td className="px-6 py-4">
-                        <div className="flex items-center gap-4">
-                          <div className="w-10 h-10 rounded-xl bg-slate-900 text-white flex items-center justify-center font-bold text-sm shadow-lg">
-                            {app.logo}
+                  {applications.slice(0, 4).map((app) => (
+                    <tr key={app.id} className="group hover:bg-slate-50/50 transition-colors cursor-pointer" onClick={() => setSelectedApp(app)}>
+                      <td className="px-8 py-7">
+                        <div className="flex items-center gap-5">
+                          <div className="w-12 h-12 rounded-2xl bg-slate-900 text-white flex items-center justify-center font-black text-sm shadow-xl group-hover:scale-110 transition-transform">
+                            {app.company.charAt(0)}
                           </div>
                           <div>
-                            <p className="text-sm font-bold text-slate-900 leading-none">{app.title}</p>
-                            <p className="text-xs text-slate-500 mt-1">{app.company}</p>
+                            <p className="text-sm font-black text-slate-900 leading-none italic tracking-tight">{app.role}</p>
+                            <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mt-2">{app.company}</p>
                           </div>
                         </div>
                       </td>
-                      <td className="px-6 py-4 text-sm font-medium text-slate-500">{app.date}</td>
-                      <td className="px-6 py-4">
+                      <td className="px-8 py-7 text-center">
+                        <p className="text-xs font-black text-slate-500 tabular-nums uppercase">{app.date}</p>
+                      </td>
+                      <td className="px-8 py-7 text-center">
                         <span className={cn(
-                          "px-2.5 py-1 rounded-full text-[10px] font-bold uppercase",
-                          app.status === 'Shortlisted' ? "bg-blue-50 text-blue-600" :
-                          app.status === 'Interview' ? "bg-purple-50 text-purple-600" :
-                          app.status === 'Under Review' ? "bg-amber-50 text-amber-600" : "bg-rose-50 text-rose-600"
+                          "px-4 py-1.5 rounded-xl text-[9px] font-black uppercase tracking-widest border italic",
+                          app.status === 'Shortlisted' ? "bg-emerald-50 text-emerald-600 border-emerald-100" :
+                          app.status === 'Interview' ? "bg-purple-50 text-purple-600 border-purple-100" :
+                          app.status === 'Under Review' ? "bg-amber-50 text-amber-600 border-amber-100" : "bg-slate-50 text-slate-400 border-slate-100"
                         )}>
                           {app.status}
                         </span>
                       </td>
-                      <td className="px-6 py-4">
-                        <button className="p-2 text-slate-400 hover:text-primary-600 hover:bg-primary-50 rounded-lg transition-all">
-                          <ExternalLink size={18} />
+                      <td className="px-8 py-7 text-right">
+                        <button className="p-3 bg-slate-50 text-slate-400 hover:text-primary-600 hover:scale-110 border border-slate-100 rounded-2xl shadow-sm transition-all">
+                          <ExternalLink size={20} />
                         </button>
                       </td>
                     </tr>
@@ -199,99 +195,183 @@ const CandidateDashboard = () => {
             </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="card bg-gradient-to-br from-primary-600 to-indigo-700 text-white p-8 overflow-hidden relative group">
-              <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
-                <Plus size={120} />
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <div className="card border-none bg-slate-900 p-10 overflow-hidden relative group shadow-premium flex flex-col justify-end min-h-[250px] text-left">
+              <div className="absolute top-0 right-0 p-8 opacity-[0.05] group-hover:scale-110 transition-transform duration-1000 pointer-events-none">
+                <FileText size={250} />
               </div>
-              <h3 className="text-2xl font-bold mb-2">Build your AI-Resume</h3>
-              <p className="text-primary-50 text-sm mb-6 opacity-80 leading-relaxed font-medium">Use our smart editor to generate an industry-ready resume in minutes.</p>
-              <button className="px-4 py-2 bg-white text-primary-600 rounded-lg text-sm font-bold shadow-xl hover:bg-slate-50 transition-all active:scale-95">Start Building</button>
+              <div className="relative z-10 transition-transform duration-500 group-hover:-translate-y-2">
+                 <h3 className="text-3xl font-black text-white italic tracking-tighter leading-none mb-4">Strategic Resume Engine</h3>
+                 <p className="text-primary-400 text-[10px] font-black uppercase tracking-[0.3em] mb-10 leading-relaxed max-w-[250px]">Deploy our AI-driven builder to maximize ATS scores.</p>
+                 <button onClick={() => navigate('/candidate/resume')} className="w-full py-4 bg-white text-slate-900 rounded-[1.5rem] text-[10px] font-black uppercase tracking-[0.3em] shadow-2xl hover:bg-primary-50 transition-all active:scale-95 flex items-center justify-center gap-3">
+                    Start Optimization <Plus size={16} />
+                 </button>
+              </div>
             </div>
-            <div className="card bg-white p-6 justify-between flex flex-col">
+
+            <div className="card bg-white p-10 flex flex-col justify-between shadow-soft group border-none text-left">
               <div>
-                <h3 className="text-lg font-bold text-slate-900 mb-2">Profile Insights</h3>
-                <p className="text-slate-500 text-sm mb-4 font-medium">Your profile was viewed by <span className="text-primary-600 font-bold">14 recruiters</span> this week.</p>
+                 <div className="flex items-center justify-between mb-8">
+                    <h3 className="text-xl font-black text-slate-900 italic tracking-tight leading-none">Audience Intel</h3>
+                    <div className="p-3 bg-primary-50 text-primary-600 rounded-2xl">
+                       <TrendingUp size={22} />
+                    </div>
+                 </div>
+                 <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Weekly Metric</p>
+                 <p className="text-sm font-bold text-slate-600 italic leading-relaxed">Your professional profile has been evaluated by <span className="text-slate-900 font-black">28 Strategic Leads</span> in this cycle.</p>
               </div>
-              <div className="bg-slate-50 rounded-xl p-4 flex items-center justify-between">
-                <div className="flex -space-x-2">
-                  {[1,2,3,4].map(i => (
-                    <div key={i} className="w-8 h-8 rounded-full border-2 border-white overflow-hidden">
-                      <img src={`https://i.pravatar.cc/100?img=${i+10}`} alt="recruiter" />
+              <div className="mt-10 p-5 bg-slate-50 rounded-[2rem] flex items-center justify-between border border-slate-100 group-hover:bg-white transition-all group-hover:shadow-xl group-hover:border-transparent">
+                <div className="flex -space-x-3">
+                  {[1,2,3,4,5].map(i => (
+                    <div key={i} className="w-10 h-10 rounded-2xl border-4 border-white dark:border-slate-800 overflow-hidden shadow-lg transform hover:scale-110 transition-transform cursor-pointer relative z-[10]">
+                      <img src={`https://i.pravatar.cc/100?img=${i+20}`} alt="lead" />
                     </div>
                   ))}
                 </div>
-                <button className="text-xs font-bold text-primary-600">See Details</button>
+                <button onClick={() => showToast('Analytics dashboard unlocked at Gold level', 'info')} className="text-[10px] font-black text-primary-600 uppercase tracking-[0.2em] hover:underline">Full Report</button>
               </div>
             </div>
           </div>
         </div>
 
         {/* Right: Sidebar content */}
-        <div className="space-y-6">
+        <div className="lg:col-span-4 space-y-8">
           {/* Upcoming Interviews */}
-          <div className="card">
-            <h3 className="text-lg font-bold text-slate-900 mb-6 flex items-center gap-2">
-              <Calendar className="text-primary-600" size={20} />
-              Upcoming Interviews
-            </h3>
-            <div className="space-y-4">
-              {upcomingInterviews.map((interview) => (
-                <div key={interview.id} className="p-4 rounded-2xl bg-slate-50 border border-slate-100 group hover:border-primary-200 transition-all">
-                  <div className="flex justify-between items-start mb-3">
+          <div className="card p-8 border-none bg-white shadow-soft text-left">
+            <div className="flex items-center justify-between mb-8">
+               <h3 className="text-xl font-black text-slate-900 italic tracking-tight leading-none">Interview Hub</h3>
+               <div className="p-2.5 bg-primary-50 text-primary-600 rounded-xl">
+                  <Calendar size={20} />
+               </div>
+            </div>
+            
+            <div className="space-y-6">
+              {interviews.length > 0 ? interviews.map((interview) => (
+                <div key={interview.id} className="p-6 rounded-[2rem] bg-slate-50 border border-slate-100 group/item hover:bg-white hover:border-transparent hover:shadow-xl transition-all duration-300">
+                  <div className="flex justify-between items-start mb-6">
                     <div>
-                      <p className="text-xs font-bold text-primary-600 uppercase tracking-widest leading-none mb-1">{interview.date} • {interview.time}</p>
-                      <h4 className="font-bold text-slate-900">{interview.company}</h4>
-                      <p className="text-xs text-slate-500 font-medium">{interview.role}</p>
+                      <p className="text-[10px] font-black text-primary-600 uppercase tracking-[0.3em] leading-none mb-3 italic">{interview.date} @ {interview.time}</p>
+                      <h4 className="text-lg font-black text-slate-900 italic tracking-tight leading-none">{interview.company}</h4>
+                      <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mt-2 px-2 py-0.5 bg-white border border-slate-100 rounded-md inline-block">{interview.round}</p>
                     </div>
-                    <div className="w-10 h-10 rounded-xl bg-white border border-slate-200 flex items-center justify-center text-slate-400 group-hover:text-primary-600 transition-colors">
-                      <Video size={18} />
+                    <div className="w-12 h-12 rounded-[1.25rem] bg-white border border-slate-100 flex items-center justify-center text-slate-300 group-hover/item:text-primary-600 group-hover/item:scale-110 transition-all shadow-sm">
+                      <Video size={22} />
                     </div>
                   </div>
-                  <button className="w-full py-2 bg-white border border-slate-200 rounded-xl text-xs font-bold text-slate-700 hover:bg-primary-600 hover:text-white hover:border-primary-600 transition-all active:scale-95 shadow-sm">
-                    Join Meeting
+                  <button 
+                    onClick={() => handleJoinMeeting(interview.link)}
+                    className="w-full py-4 bg-slate-900 text-white rounded-2xl text-[10px] font-black uppercase tracking-[0.3em] hover:bg-black transition-all active:scale-95 shadow-xl shadow-slate-200"
+                  >
+                    Engage Session
                   </button>
                 </div>
-              ))}
+              )) : (
+                <div className="py-12 border-2 border-dashed border-slate-50 rounded-[2.5rem] text-center flex flex-col items-center">
+                   <Clock size={32} className="text-slate-200 mb-4 animate-pulse" />
+                   <p className="text-[10px] font-black text-slate-300 uppercase tracking-widest">No Active Sessions</p>
+                </div>
+              )}
             </div>
-            <button className="w-full mt-6 py-2 text-sm font-bold text-slate-400 hover:text-slate-600">
-               View Schedule
+            <button 
+               onClick={() => navigate('/candidate/interviews')}
+               className="w-full mt-8 py-3 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] hover:text-slate-900 transition-colors"
+            >
+               Browse Full Schedule
             </button>
           </div>
 
-          {/* Quick Actions */}
-          <div className="card">
-            <h3 className="text-lg font-bold text-slate-900 mb-6 flex items-center gap-2">
-              <Plus className="text-primary-600" size={20} />
-              Quick Actions
-            </h3>
-            <div className="grid grid-cols-1 gap-3">
+          {/* Strategic Actions */}
+          <div className="card p-8 border-none bg-white shadow-soft text-left">
+            <h3 className="text-xl font-black text-slate-900 italic tracking-tight mb-8 leading-none">Force Multipliers</h3>
+            <div className="grid grid-cols-1 gap-4">
               {[
-                { label: 'Update Resume', icon: FileText, color: 'text-blue-600', bg: 'bg-blue-50' },
-                { label: 'Complete Profile', icon: CheckCircle2, color: 'text-emerald-600', bg: 'bg-emerald-50' },
-                { label: 'Job Preferences', icon: Search, color: 'text-purple-600', bg: 'bg-purple-50' },
+                { label: 'Optimize Resume', icon: FileText, color: 'text-blue-600', bg: 'bg-blue-50', path: '/candidate/resume' },
+                { label: 'Finalize Profile', icon: CheckCircle2, color: 'text-emerald-600', bg: 'bg-emerald-50', path: '/candidate/settings' },
+                { label: 'Strategic Search', icon: Search, color: 'text-purple-600', bg: 'bg-purple-50', path: '/candidate/jobs' },
               ].map((action, idx) => (
-                <button key={idx} className="flex items-center gap-3 p-3.5 rounded-xl border border-slate-100 hover:border-primary-200 hover:bg-primary-50/30 transition-all group w-full text-left text-sm font-bold text-slate-600">
-                  <div className={cn("p-2 rounded-lg", action.bg, action.color)}>
-                    <action.icon size={16} />
+                <button 
+                  key={idx} 
+                  onClick={() => navigate(action.path)}
+                  className="flex items-center gap-4 p-5 rounded-2xl border border-slate-50 hover:border-transparent hover:bg-white hover:shadow-xl transition-all group w-full text-left bg-slate-50/50"
+                >
+                  <div className={cn("p-3 rounded-xl transition-transform group-hover:rotate-12", action.bg, action.color)}>
+                    <action.icon size={18} />
                   </div>
-                  <span>{action.label}</span>
-                  <ChevronRight size={14} className="ml-auto text-slate-300 group-hover:text-primary-500 group-hover:translate-x-1 transition-all" />
+                  <span className="text-[11px] font-black uppercase tracking-widest text-slate-600 group-hover:text-slate-900 transition-colors">{action.label}</span>
+                  <ChevronRight size={16} className="ml-auto text-slate-300 group-hover:text-primary-500 group-hover:translate-x-1 transition-all" />
                 </button>
               ))}
             </div>
           </div>
           
           {/* Notifications Placeholder */}
-          <div className="card bg-slate-50 border-dashed border-2 flex flex-col items-center justify-center py-8">
-            <div className="w-12 h-12 rounded-full bg-slate-100 flex items-center justify-center text-slate-400 mb-4">
-              <Clock size={24} />
+          <div className="card bg-gradient-to-br from-primary-50 to-indigo-50 border-none shadow-soft flex flex-col items-center justify-center py-12 px-6">
+            <div className="w-16 h-16 rounded-[1.5rem] bg-white flex items-center justify-center text-primary-500 mb-6 shadow-xl relative animate-bounce">
+              <Zap size={32} />
+              <div className="absolute -top-1 -right-1 w-4 h-4 bg-primary-600 rounded-full border-4 border-white"></div>
             </div>
-            <p className="text-sm font-bold text-slate-900">Stay Tuned!</p>
-            <p className="text-xs text-slate-500 font-medium mt-1">AI-powered job alerts coming soon.</p>
+            <p className="text-lg font-black text-slate-900 italic tracking-tight">AI Insights Peak</p>
+            <p className="text-[10px] font-bold text-primary-600 uppercase tracking-widest mt-2 text-center leading-relaxed">Predictive job matching engine activating in next cycle.</p>
           </div>
         </div>
       </div>
+
+      {/* Application Detail Modal */}
+      <CenterModal isOpen={!!selectedApp} onClose={() => setSelectedApp(null)} title="Application Strategic Log">
+         {selectedApp && (
+            <div className="p-10 space-y-10 text-left">
+               <div className="flex items-center justify-between pb-8 border-b border-slate-50">
+                  <div className="flex items-center gap-6">
+                     <div className="w-16 h-16 bg-slate-900 rounded-[1.5rem] flex items-center justify-center text-white text-xl font-black italic shadow-2xl">
+                        {selectedApp.company.charAt(0)}
+                     </div>
+                     <div>
+                        <h2 className="text-2xl font-black text-slate-900 tracking-tight italic leading-none">{selectedApp.role}</h2>
+                        <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mt-2">{selectedApp.company} • Applied {selectedApp.date}</p>
+                     </div>
+                  </div>
+                  <span className={cn(
+                    "px-5 py-2 rounded-2xl text-[10px] font-black uppercase tracking-[0.2em] border italic",
+                    selectedApp.status === 'Shortlisted' ? "bg-emerald-50 text-emerald-600 border-emerald-100" : "bg-primary-50 text-primary-600 border-primary-100"
+                  )}>{selectedApp.status}</span>
+               </div>
+
+               <div className="space-y-6">
+                  <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.4em] mb-4 leading-none">Process Timeline</h4>
+                  <div className="relative space-y-10 pl-10 border-l-2 border-slate-100 ml-4">
+                     {selectedApp.timeline.map((step, i) => (
+                        <div key={i} className="relative">
+                           <div className={cn(
+                              "absolute -left-[50px] top-1/2 -translate-y-1/2 w-6 h-6 rounded-full border-4 border-white shadow-lg",
+                              i === selectedApp.timeline.length - 1 ? "bg-primary-600 scale-125" : "bg-slate-200"
+                           )} />
+                           <div>
+                              <p className="text-sm font-black text-slate-900 italic tracking-tight">{step.status}</p>
+                              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">Registry Log Entry: {step.date}</p>
+                           </div>
+                        </div>
+                     ))}
+                  </div>
+               </div>
+
+               <div className="p-8 bg-slate-50 rounded-[2.5rem] border border-slate-100">
+                  <div className="flex items-center justify-between mb-6">
+                     <div className="flex items-center gap-3">
+                        <Info size={18} className="text-primary-600" />
+                        <span className="text-[10px] font-black text-slate-900 uppercase tracking-widest leading-none">Recruiter Memo</span>
+                     </div>
+                     <span className="text-[9px] font-black text-slate-300 uppercase tracking-widest">Internal Lock</span>
+                  </div>
+                  <p className="text-sm font-bold text-slate-500 italic leading-relaxed">"Candidate matches core visual architecture competencies. Strong system design evidence. Progress to next audit cycle."</p>
+               </div>
+
+               <div className="pt-4 flex gap-4">
+                  <button onClick={() => setSelectedApp(null)} className="flex-1 py-4 bg-slate-100 text-slate-600 rounded-[1.5rem] font-black uppercase tracking-widest text-[10px]">Close Log</button>
+                  <button onClick={() => { showToast('Request for status update sent', 'info'); setSelectedApp(null); }} className="flex-2 py-4 bg-slate-900 text-white rounded-[1.5rem] font-black uppercase tracking-widest text-[10px] shadow-xl shadow-slate-200">Request Audit Refresh</button>
+               </div>
+            </div>
+         )}
+      </CenterModal>
     </div>
   );
 };
