@@ -56,8 +56,9 @@ const Navbar = ({ toggleMobileSidebar }) => {
   };
 
   return (
-    <header className="sticky top-0 z-20 h-16 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border-b border-slate-200 dark:border-slate-800 transition-colors duration-300">
-      <div className="flex items-center justify-between h-full px-4 sm:px-8">
+    <>
+      <header className="sticky top-0 z-20 h-16 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border-b border-slate-200 dark:border-slate-800 transition-colors duration-300">
+        <div className="flex items-center justify-between h-full px-4 sm:px-8">
         
         {/* Left Section */}
         <div className="flex items-center gap-4">
@@ -140,6 +141,7 @@ const Navbar = ({ toggleMobileSidebar }) => {
           </div>
         </div>
       </div>
+      </header>
 
       {/* Logout Confirmation Modal */}
       <AnimatePresence>
@@ -163,7 +165,7 @@ const Navbar = ({ toggleMobileSidebar }) => {
             </div>
          )}
       </AnimatePresence>
-    </header>
+    </>
   );
 };
 
